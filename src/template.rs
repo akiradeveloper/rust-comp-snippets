@@ -1,7 +1,5 @@
 #![snippet = "template"]
 
-/// https://github.com/hatoo/competitive-rust-snippets
-
 #[allow(unused_imports)]
 use std::cmp::{max, min, Ordering};
 #[allow(unused_imports)]
@@ -11,92 +9,66 @@ use std::io::{stdin, stdout, BufWriter, Write};
 #[allow(unused_imports)]
 use std::iter::FromIterator;
 
-mod util {
-    use std::fmt::Debug;
-    use std::io::{stdin, stdout, BufWriter, StdoutLock};
-    use std::str::FromStr;
-
-    #[allow(dead_code)]
-    pub fn line() -> String {
-        let mut line: String = String::new();
-        stdin().read_line(&mut line).unwrap();
-        line.trim().to_string()
-    }
-
-    #[allow(dead_code)]
-    pub fn chars() -> Vec<char> {
-        line().chars().collect()
-    }
-
-    #[allow(dead_code)]
-    pub fn gets<T: FromStr>() -> Vec<T>
-    where
-        <T as FromStr>::Err: Debug,
-    {
-        let mut line: String = String::new();
-        stdin().read_line(&mut line).unwrap();
-        line.split_whitespace()
-            .map(|t| t.parse().unwrap())
-            .collect()
-    }
-
-    #[allow(dead_code)]
-    pub fn with_bufwriter<F: FnOnce(BufWriter<StdoutLock>) -> ()>(f: F) {
-        let out = stdout();
-        let writer = BufWriter::new(out.lock());
-        f(writer)
-    }
+#[allow(unused_macros)]
+macro_rules! input {
+    (source = $s:expr, $($r:tt)*) => {
+        let mut iter = $s.split_whitespace();
+        input_inner!{iter, $($r)*}
+    };
+    ($($r:tt)*) => {
+        let mut s = {
+            use std::io::Read;
+            let mut s = String::new();
+            std::io::stdin().read_to_string(&mut s).unwrap();
+            s
+        };
+        let mut iter = s.split_whitespace();
+        input_inner!{iter, $($r)*}
+    };
 }
 
 #[allow(unused_macros)]
-macro_rules! get {
-      ([$t:ty]) => {
-          {
-              let mut line: String = String::new();
-              stdin().read_line(&mut line).unwrap();
-              line.split_whitespace()
-                  .map(|t| t.parse::<$t>().unwrap())
-                  .collect::<Vec<_>>()
-          }
-      };
-      ([$t:ty]; $n:expr) => {
-          (0..$n).map(|_| get!([$t])).collect::<Vec<_>>()
-      };
-      ($t:ty) => {
-          {
-              let mut line: String = String::new();
-              stdin().read_line(&mut line).unwrap();
-              line.trim().parse::<$t>().unwrap()
-          }
-      };
-      ($($t:ty),*) => {
-          {
-              let mut line: String = String::new();
-              stdin().read_line(&mut line).unwrap();
-              let mut iter = line.split_whitespace();
-              (
-                  $(iter.next().unwrap().parse::<$t>().unwrap(),)*
-              )
-          }
-      };
-      ($t:ty; $n:expr) => {
-          (0..$n).map(|_|
-              get!($t)
-          ).collect::<Vec<_>>()
-      };
-      ($($t:ty),*; $n:expr) => {
-          (0..$n).map(|_|
-              get!($($t),*)
-          ).collect::<Vec<_>>()
-      };
-  }
+macro_rules! input_inner {
+    ($iter:expr) => {};
+    ($iter:expr, ) => {};
+
+    ($iter:expr, $var:ident : $t:tt $($r:tt)*) => {
+        let $var = read_value!($iter, $t);
+        input_inner!{$iter $($r)*}
+    };
+}
+
+#[allow(unused_macros)]
+macro_rules! read_value {
+    ($iter:expr, ( $($t:tt),* )) => {
+        ( $(read_value!($iter, $t)),* )
+    };
+
+    ($iter:expr, [ $t:tt ; $len:expr ]) => {
+        (0..$len).map(|_| read_value!($iter, $t)).collect::<Vec<_>>()
+    };
+
+    ($iter:expr, chars) => {
+        read_value!($iter, String).chars().collect::<Vec<char>>()
+    };
+
+    ($iter:expr, usize1) => {
+        read_value!($iter, usize) - 1
+    };
+
+    ($iter:expr, $t:ty) => {
+        $iter.next().unwrap().parse::<$t>().expect("Parse error")
+    };
+}
 
 #[allow(unused_macros)]
 macro_rules! debug {
-      ($($a:expr),*) => {
-          eprintln!(concat!($(stringify!($a), " = {:?}, "),*), $($a),*);
-      }
-  }
+    ($($a:expr),*) => {
+        eprintln!(concat!($(stringify!($a), " = {:?}, "),*), $($a),*);
+    }
+}
+
+/// https://github.com/hatoo/competitive-rust-snippets
 
 const BIG_STACK_SIZE: bool = true;
 

@@ -6,3 +6,4 @@ edition = "2018"
 
 [dependencies]
 cargo-snippet = "0.2"
+rand = "0.4"
