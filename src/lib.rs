@@ -10,6 +10,8 @@ extern crate test;
 
 pub mod binary_search;
 pub mod bitset;
+pub mod fenwick;
 pub mod rev;
 pub mod template;
 pub mod total;
+pub mod union_find;
