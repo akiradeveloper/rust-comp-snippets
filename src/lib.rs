@@ -8,9 +8,10 @@
 extern crate rand;
 extern crate test;
 
+pub mod bellman_ford;
+pub mod dijkstra;
 pub mod binary_search;
 pub mod bitset;
-pub mod fenwick;
 pub mod rev;
 pub mod template;
 pub mod total;

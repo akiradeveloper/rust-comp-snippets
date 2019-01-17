@@ -1,10 +1,8 @@
-#[snippet = "DisjointSet"]
 struct DisjointSet {
     parent: Vec<usize>,
     rank: Vec<usize>
 }
 
-#[snippet = "DisjointSet"]
 impl DisjointSet {
     fn new(n: usize) -> DisjointSet {
         let mut x = DisjointSet {
@@ -53,5 +51,4 @@ fn test_disjoint_set() {
     s.unite(1,4);
     s.unite(2,3);
     assert_eq!(s.same(1,2), false);
-    // TODO
 }
