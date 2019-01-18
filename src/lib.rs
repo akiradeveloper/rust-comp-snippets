@@ -8,6 +8,9 @@
 extern crate rand;
 extern crate test;
 
+pub mod prim;
+pub mod kraskal;
+pub mod warshal_froid;
 pub mod bellman_ford;
 pub mod dijkstra;
 pub mod binary_search;

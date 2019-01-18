@@ -1,10 +1,10 @@
-struct DisjointSet {
+pub struct DisjointSet {
     parent: Vec<usize>,
     rank: Vec<usize>
 }
 
 impl DisjointSet {
-    fn new(n: usize) -> DisjointSet {
+    pub fn new(n: usize) -> DisjointSet {
         let mut x = DisjointSet {
             parent: vec![0; n],
             rank: vec![0; n]
@@ -16,18 +16,18 @@ impl DisjointSet {
         x
     }
 
-    fn same(&mut self, x: usize, y: usize) -> bool {
+    pub fn same(&mut self, x: usize, y: usize) -> bool {
         self.find_set(x) == self.find_set(y)
     }
     
-    fn find_set(&mut self, x: usize) -> usize {
+    pub fn find_set(&mut self, x: usize) -> usize {
         if x != self.parent[x] {
             self.parent[x] = self.find_set(self.parent[x]);
         }
         self.parent[x]
     }
 
-    fn unite(&mut self, x: usize, y: usize) {
+    pub fn unite(&mut self, x: usize, y: usize) {
         let a = self.find_set(x);
         let b = self.find_set(y);
         self.link_set(a, b);

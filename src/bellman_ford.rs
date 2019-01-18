@@ -4,9 +4,9 @@ struct Edge {
     cost: i32,
 }
 
-fn bellman_ford(V: usize, es: Vec<Edge>, source: usize) -> Vec<i32> {
-    let INF = 2_000_000_001;
-    let mut d = vec![INF; V];
+fn bellman_ford(n: usize, es: Vec<Edge>, source: usize) -> Vec<i32> {
+    const INF: i32 = 2_000_000_001;
+    let mut d = vec![INF; n];
     d[source] = 0;
     loop {
         let mut update = false;
@@ -16,18 +16,23 @@ fn bellman_ford(V: usize, es: Vec<Edge>, source: usize) -> Vec<i32> {
                 update = true;
             }
         }
-        if !update { break; }
+        if !update {
+            break;
+        }
     }
     d
 }
 
-fn find_negative_loop(V: usize, es: Vec<Edge>) -> bool {
-    let mut d = vec![0; V];
-    for i in 0 .. V {
+#[test]
+fn test_bellman_ford() {}
+
+fn find_negative_loop(n: usize, es: Vec<Edge>) -> bool {
+    let mut d = vec![0; n];
+    for i in 0..n {
         for e in &es {
-            if d[e.to] > d[e.from] + e.cost { 
+            if d[e.to] > d[e.from] + e.cost {
                 d[e.to] = d[e.from] + e.cost;
-                if (i == V-1) {
+                if i == n - 1 {
                     return true;
                 }
             }
@@ -35,3 +40,6 @@ fn find_negative_loop(V: usize, es: Vec<Edge>) -> bool {
     }
     false
 }
+
+#[test]
+fn test_find_negative_loop() {}
