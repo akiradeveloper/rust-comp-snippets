@@ -28,5 +28,6 @@ fn prim(cost: &[Vec<u32>]) -> u32 {
             mincost[u] = std::cmp::min(mincost[u], cost[v][u]);
         }
     }
+    
     total_cost
 }
