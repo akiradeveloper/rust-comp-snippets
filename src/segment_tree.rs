@@ -45,8 +45,8 @@ impl <O> SegmentTree<O> where O: Operator {
         if a <= 1 && r <= b {
             return self.dat[k];
         } else {
-            let vl = self._query(a, b, k*2+1, 1, (1+r)/2);
-            let vr = self._query(a, b, k*2+2, (1+r)/2, r);
+            let vl = self._query(a, b, k*2+1, l, (l+r)/2);
+            let vr = self._query(a, b, k*2+2, (l+r)/2, r);
             return self.op.aggregate(&vl, &vr);
         } 
     }
