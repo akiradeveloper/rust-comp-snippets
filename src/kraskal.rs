@@ -6,6 +6,7 @@ struct Edge {
     cost: u32
 }
 
+/// O(E logV)
 fn kraskal(n: usize, es: &mut [Edge]) -> u32 {
     es.sort_by(|a, b| {
         a.cost.cmp(&b.cost)
