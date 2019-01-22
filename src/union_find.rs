@@ -46,7 +46,7 @@ impl DisjointSet {
 }
 
 #[test]
-fn test_disjoint_set() {
+fn test() {
     let mut s = DisjointSet::new(5);
     s.unite(1,4);
     s.unite(2,3);

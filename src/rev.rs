@@ -24,7 +24,7 @@ impl<T: Ord> Ord for Rev<T> {
 }
 
 #[test]
-fn test_rev() {
+fn test() {
     let mut vec = vec![2, 6, 1, 8, 4, 5, 3, 6];
     vec.sort_by_key(|&x| Rev(x));
 

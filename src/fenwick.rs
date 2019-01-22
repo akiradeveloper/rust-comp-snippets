@@ -37,3 +37,8 @@ impl BIT {
         }
     }
 }
+
+#[test]
+fn test() {
+
+}

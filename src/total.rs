@@ -19,7 +19,7 @@ impl<T: PartialOrd> Ord for Total<T> {
 }
 
 #[test]
-fn test_total() {
+fn test() {
     let mut vec = vec![9.4, 4.3, 2.3, 6.7, 3.2, 1.0, 0.0];
     vec.sort_by_key(|&f| Total(f));
 

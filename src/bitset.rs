@@ -220,7 +220,7 @@ fn test_bitset_set_read() {
 }
 
 #[test]
-fn test_bitset_shl() {
+fn test_shl() {
     let do_test = |size, shift| {
         use rand::{Rng, SeedableRng, StdRng};
         let mut set = BitSet::new(size);
@@ -259,7 +259,7 @@ fn test_bitset_shl() {
 }
 
 #[test]
-fn test_bitset_shr() {
+fn test_shr() {
     let do_test = |size, shift| {
         use rand::{Rng, SeedableRng, StdRng};
         let mut set = BitSet::new(size);
@@ -303,7 +303,7 @@ fn test_bitset_shr() {
 }
 
 #[test]
-fn test_bitset_chomp() {
+fn test_chomp() {
     let mut set1 = BitSet::new(4);
     let mut set2 = BitSet::new(8);
 
@@ -327,7 +327,7 @@ fn test_bitset_chomp() {
 use test::Bencher;
 
 #[bench]
-fn bench_bitset_dp(b: &mut Bencher) {
+fn bench_dp(b: &mut Bencher) {
     use rand::{Rng, SeedableRng, StdRng};
     let size = 1000;
     let mut v = Vec::new();
