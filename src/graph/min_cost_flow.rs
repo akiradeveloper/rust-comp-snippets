@@ -85,5 +85,9 @@ mod bellman_ford {
             }
             return res;
         }
+
+      
     }
+    #[test]
+    fn test() {}
 }
