@@ -49,10 +49,7 @@ mod ford_fulkerson {
                 if !self.used[e.to] && e.cap > 0 {
                     let d = self.dfs(e.to, t, std::cmp::min(f, e.cap));
                     if d > 0 {
-                        {
-                            let e = &mut self.g[v][i];
-                            e.cap -= d;
-                        }
+                        self.g[v][i].cap -= d;
                         self.g[e.to][e.rev].cap += d;
                         return d;
                     }

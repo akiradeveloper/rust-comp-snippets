@@ -1,4 +1,5 @@
 mod bellman_ford {
+    #[derive(Clone)]
     struct Edge {
         to: usize,
         cap: u32,
@@ -11,6 +12,12 @@ mod bellman_ford {
     }
 
     impl Network {
+        fn new(n: usize) -> Network {
+            Network {
+                g: vec![vec![]; n],
+            }
+        }
+        /// allows negative costs
         fn add_edge(&mut self, from: usize, to: usize, cap: u32, cost: i32) {
             let from_rev = self.g[to].len();
             let to_rev = self.g[from].len();
@@ -32,7 +39,7 @@ mod bellman_ford {
             self.g.len()
         }
 
-        fn min_cost_flow(&mut self, s: usize, t: usize, f: u32) -> i32 {
+        fn min_cost_flow(&mut self, s: usize, t: usize, f: u32) -> Option<i32> {
             let mut res: i32 = 0;
             let mut prevv = vec![0; self.n()];
             let mut preve = vec![0; self.n()];
@@ -62,32 +69,156 @@ mod bellman_ford {
                 }
 
                 if dist[t] == INF {
-                    return -1;
+                    return None;
                 }
 
                 let mut actual_flow = f;
 
+                let mut u = t;
+                while u != s {
+                    actual_flow = std::cmp::min(actual_flow, self.g[prevv[u]][preve[u]].cap);
+                    u = prevv[u];
+                }
+
+                f -= actual_flow;
+                res += actual_flow as i32 * dist[t];
+
+                let mut u = t;
+                while u != s {
+                    let e = &mut self.g[prevv[u]][preve[u]];
+                    e.cap -= actual_flow;
+                    u = prevv[u];
+                }
+            }
+            
+            Some(res)
+        }
+    }
+    #[test]
+    fn test() {}
+}
+
+mod dijkstra {
+    #[derive(Copy, Clone, Eq, PartialEq)]
+    struct State {
+        cost: u32,
+        v: usize,
+    }
+
+    impl Ord for State {
+        fn cmp(&self, other: &State) -> std::cmp::Ordering {
+            other
+                .cost
+                .cmp(&self.cost)
+                .then_with(|| self.v.cmp(&other.v))
+        }
+    }
+
+    impl PartialOrd for State {
+        fn partial_cmp(&self, other: &State) -> Option<std::cmp::Ordering> {
+            Some(self.cmp(other))
+        }
+    }
+    
+    #[derive(Clone)]
+    struct Edge {
+        to: usize,
+        cap: u32,
+        cost: i32,
+        rev: usize,
+    }
+
+    struct Network {
+        g: Vec<Vec<Edge>>,
+    }
+
+    impl Network {
+        fn new(n: usize) -> Network {
+            Network {
+                g: vec![vec![]; n],
+            }
+        }
+
+        fn add_edge(&mut self, from: usize, to: usize, cap: u32, cost: u32) {
+            let from_rev = self.g[to].len();
+            let to_rev = self.g[from].len();
+            self.g[from].push(Edge {
+                to: to,
+                cap: cap,
+                cost: cost as i32,
+                rev: from_rev,
+            });
+            self.g[to].push(Edge {
+                to: from,
+                cap: 0,
+                cost: -1 * cost as i32,
+                rev: to_rev,
+            });
+        } 
+
+        fn n(&self) -> usize {
+            self.g.len()
+        }
+
+        fn min_cost_flow(&mut self, s: usize, t: usize, f: u32) -> Option<u32> {
+            let mut res = 0;
+            let mut total_flow = f;
+            let mut prevv = vec![0; self.n()];
+            let mut preve = vec![0; self.n()];
+
+            let mut h = vec![0u32; self.n()];
+
+            while total_flow > 0 {
+                let INF: u32 = 2_000_000_001;
+                let mut queue = std::collections::BinaryHeap::new();
+                let mut dist = vec![INF; self.n()]; // for all >= 0
+                dist[s] = 0;
+                queue.push( State { cost: 0, v: s } );
+
+                while let Some(State{ cost, v }) = queue.pop() {
+                    if dist[v] < cost { continue; }
+                    for i in 0 .. self.g[v].len() {
+                        let e = &self.g[v][i];
+                        let new_dist = (dist[v] as i32 + e.cost + h[v] as i32 - h[e.to] as i32) as u32;
+                        assert!(new_dist >= 0);
+                        if e.cap > 0 && dist[e.to] > new_dist {
+                            dist[e.to] = new_dist;
+                            prevv[e.to] = v;
+                            preve[e.to] = i;
+                            queue.push( State { cost: dist[e.to], v: e.to } );
+                        }
+                    }
+                }
+                if dist[t] == INF {
+                    return None;
+                }
+                for v in 0 .. self.n() {
+                    h[v] += dist[v];
+                }
+                
+                let mut actual_flow = f;
                 let mut v = t;
                 while v != s {
                     actual_flow = std::cmp::min(actual_flow, self.g[prevv[v]][preve[v]].cap);
                     v = prevv[v];
                 }
 
-                f -= actual_flow;
-                res += actual_flow as i32 * dist[t];
-
+                total_flow -= actual_flow;
+                res += actual_flow * h[t];
                 let mut v = t;
                 while v != s {
-                    let e = &mut self.g[prevv[v]][preve[v]];
-                    e.cap -= actual_flow;
+                    let e = self.g[prevv[v]][preve[v]].clone();
+                    self.g[prevv[v]][preve[v]].cap -= actual_flow;
+                    self.g[v][e.rev].cap += actual_flow;
                     v = prevv[v];
                 }
             }
-            return res;
-        }
 
-      
+            Some(res)
+        }
     }
     #[test]
-    fn test() {}
+    fn test() {
+
+    }
 }
