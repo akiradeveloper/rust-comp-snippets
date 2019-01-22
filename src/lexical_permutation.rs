@@ -1,6 +1,5 @@
-/// https://github.com/hatoo/competitive-rust-snippets
+/// [bluss/permutohedron](https://github.com/bluss/permutohedron)
 
-/// Ported from [bluss/permutohedron](https://github.com/bluss/permutohedron)
 #[snippet = "LexicalPermutation"]
 pub trait LexicalPermutation {
     /// Return \`true\` if the slice was permuted, \`false\` if it is already

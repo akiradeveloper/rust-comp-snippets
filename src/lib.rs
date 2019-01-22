@@ -8,11 +8,6 @@
 extern crate rand;
 extern crate test;
 
-pub mod prim;
-pub mod kraskal;
-pub mod warshal_froid;
-pub mod bellman_ford;
-pub mod dijkstra;
 pub mod binary_search;
 pub mod bitset;
 pub mod rev;
@@ -21,4 +16,5 @@ pub mod total;
 pub mod union_find;
 pub mod segment_tree;
 pub mod fenwick;
-pub mod ford_fulkerson;
+
+pub mod graph;

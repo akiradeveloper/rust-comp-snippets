@@ -1,5 +1,7 @@
 #![snippet = "template"]
 
+/// https://github.com/hatoo/competitive-rust-snippets
+
 #[allow(unused_imports)]
 use std::cmp::{max, min, Ordering};
 #[allow(unused_imports)]
@@ -67,8 +69,6 @@ macro_rules! debug {
         eprintln!(concat!($(stringify!($a), " = {:?}, "),*), $($a),*);
     }
 }
-
-/// https://github.com/hatoo/competitive-rust-snippets
 
 const BIG_STACK_SIZE: bool = true;
 

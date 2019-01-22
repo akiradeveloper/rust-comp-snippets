@@ -2,7 +2,8 @@
 struct Edge {
     to: usize,
     cap: u32,
-    rev: usize, }
+    rev: usize,
+}
 
 struct Network {
     g: Vec<Vec<Edge>>,

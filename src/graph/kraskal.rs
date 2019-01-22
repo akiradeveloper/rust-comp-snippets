@@ -1,4 +1,4 @@
-use super::union_find;
+use crate::union_find;
 
 struct Edge {
     u: usize,
