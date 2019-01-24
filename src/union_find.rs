@@ -1,54 +1,140 @@
-pub struct DisjointSet {
-    parent: Vec<usize>,
-    rank: Vec<usize>
-}
+pub struct UnionFind {
+    par: Vec<usize>,
+    rank: Vec<usize> }
 
-impl DisjointSet {
-    pub fn new(n: usize) -> DisjointSet {
-        let mut x = DisjointSet {
-            parent: vec![0; n],
-            rank: vec![0; n]
-        };
-        for i in 0 .. n {
-            x.parent[i] = i;
-            x.rank[i] = 0;
+impl UnionFind {
+    pub fn new(n: usize) -> UnionFind {
+        UnionFind {
+            par: (0..n).collect::<Vec<usize>>(),
+            rank: vec![0; n],
         }
-        x
     }
 
     pub fn same(&mut self, x: usize, y: usize) -> bool {
-        self.find_set(x) == self.find_set(y)
+        self.root(x) == self.root(y)
     }
     
-    pub fn find_set(&mut self, x: usize) -> usize {
-        if x != self.parent[x] {
-            self.parent[x] = self.find_set(self.parent[x]);
-        }
-        self.parent[x]
-    }
-
-    pub fn unite(&mut self, x: usize, y: usize) {
-        let a = self.find_set(x);
-        let b = self.find_set(y);
-        self.link_set(a, b);
-    }
-
-    fn link_set(&mut self, a: usize, b: usize) {
-        if self.rank[a] > self.rank[b] {
-            self.parent[b] = a;
+    pub fn root(&mut self, x: usize) -> usize {
+        if self.par[x] == x {
+            return x;
         } else {
-            self.parent[a] = b;
-            if self.rank[a] == self.rank[b] {
-                self.rank[b] += 1;
-            }
+            let y = self.par[x];
+            let z = self.root(y);
+            self.par[x] = z;
+            return z;
         }
+    }
+
+    pub fn merge(&mut self, x: usize, y: usize) -> bool {
+        let mut a = self.root(x);
+        let mut b = self.root(y);
+        if a == b { return false; }
+
+        if self.rank[a] < self.rank[b] {
+            std::mem::swap(&mut a, &mut b);
+        }
+        assert!(self.rank[a] >= self.rank[b]);
+
+        if self.rank[a] == self.rank[b] {
+            self.rank[a] += 1;
+        }
+
+        self.par[b] = a;
+        return true
     }
 }
 
 #[test]
-fn test() {
-    let mut s = DisjointSet::new(5);
-    s.unite(1,4);
-    s.unite(2,3);
+fn test_union_find() {
+    let mut s = UnionFind::new(5);
+    s.merge(1,4);
+    s.merge(2,3);
     assert_eq!(s.same(1,2), false);
+    assert_eq!(s.same(3,4), false);
+    assert_eq!(s.same(1,4), true);
+    assert_eq!(s.same(3,2), true);
+
+    s.merge(1,3);
+    assert_eq!(s.same(2,4), true);
+    assert_eq!(s.same(3,0), false);
+
+    s.merge(0,4);
+    assert_eq!(s.same(0,2), true);
+    assert_eq!(s.same(3,0), true);
+}
+
+struct WeightedUnionFind {
+    par: Vec<usize>,
+    rank: Vec<usize>,
+    diff_weight: Vec<i32>,
+}
+
+impl WeightedUnionFind {
+    fn new(n: usize) -> WeightedUnionFind {
+        WeightedUnionFind {
+            par: (0..n).collect::<Vec<usize>>(),
+            rank: vec![0; n],
+            diff_weight: vec![0; n],
+        }
+    }
+
+    fn root(&mut self, x: usize) -> usize {
+        if (self.par[x] == x) {
+             return x;
+        } else {
+            let y = self.par[x];
+            let z = self.root(y);
+            self.diff_weight[x] += self.diff_weight[y];
+            self.par[x] = z;
+            return z;
+        }
+    }
+
+    fn weight(&mut self, x: usize) -> i32 {
+        self.root(x);
+        self.diff_weight[x]
+    }
+
+    fn same(&mut self, x: usize, y: usize) -> bool {
+        self.root(x) == self.root(y)
+    }
+
+    fn merge(&mut self, x: usize, y: usize, w: i32) -> bool {
+        let mut w = w;
+        w += self.weight(x);
+        w -= self.weight(y);
+
+        let mut a = self.root(x);
+        let mut b = self.root(y);
+
+        if a == b {
+            return false;
+        }
+
+        if self.rank[a] < self.rank[b] {
+            std::mem::swap(&mut a, &mut b);
+            w = -w;
+        }
+        assert!(self.rank[a] >= self.rank[b]);
+
+        if self.rank[a] == self.rank[b] {
+            self.rank[a] += 1;
+        }
+
+        self.par[b] = a;
+        self.diff_weight[b] = w;
+
+        return true
+    }
+}
+
+#[test]
+fn test_weighted_union_find() {
+    let mut wuf = WeightedUnionFind::new(5);
+    wuf.merge(0,2,5);
+    wuf.merge(1,2,3);
+    assert_eq!(wuf.weight(1) - wuf.weight(0), 2);
+    assert!(wuf.root(3) != wuf.root(1));
+    wuf.merge(1,4,8);
+    assert_eq!(wuf.weight(4) - wuf.weight(0), 10);
 }
