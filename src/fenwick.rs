@@ -14,9 +14,14 @@ impl BIT {
         let i = i as isize;
         (i & -i) as usize
     }
+    /// i: 0-origin
     fn sum(&self, i: usize) -> i32 {
         self._sum(i+1)
     }
+    fn add(&mut self, i: usize, x: i32) {
+        self._add(i+1, x)
+    }
+    /// i: 1-origin
     fn _sum(&self, i: usize) -> i32 {
         let mut i = i;
         let mut s = 0;
@@ -25,9 +30,6 @@ impl BIT {
             i -= self.last_bit(i);
         }
         s
-    }
-    fn add(&mut self, i: usize, x: i32) {
-        self._add(i+1, x)
     }
     fn _add(&mut self, i: usize, x: i32) {
         let mut i = i;

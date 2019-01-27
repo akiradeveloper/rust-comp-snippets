@@ -16,5 +16,5 @@ pub mod total;
 pub mod union_find;
 pub mod segment_tree;
 pub mod fenwick;
-
+pub mod math;
 pub mod graph;

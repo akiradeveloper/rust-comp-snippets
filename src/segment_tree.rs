@@ -11,22 +11,26 @@ struct SegmentTree<O> where O: Operator {
 
 impl <O> SegmentTree<O> where O: Operator {
     fn new(n: usize, op: O) -> SegmentTree<O> {
-        let mut m = 1; while m < n { m *= 2; }
+        let mut m = 1;
+        while m < n { m *= 2; }
         
         SegmentTree {
             n: m,
-            dat: vec![op.init(); m * 2 - 1],
+            dat: vec![op.init(); m * 2 - 1], //j
             op: op
         }
     }
 
+    /// k: 0-origin
     fn update(&mut self, k: usize, x: i32) {
-        let mut k = k + self.n - 1;
-        self.dat[k] = x;
+        let mut k = k + self.n - 1; // n-1: number of branches
+        self.dat[k] = x; // update the leaf
 
         while k > 0 {
+            // parent node
             k = (k-1) / 2;
-            self.dat[k] = self.op.aggregate(&self.dat[k * 2 + 1], &self.dat[k * 2 + 2]);
+            // k*2+1 and k*2+2 are the children
+            self.dat[k] = self.op.aggregate(&self.dat[k*2+1], &self.dat[k*2+2]);
         }
     }
 
