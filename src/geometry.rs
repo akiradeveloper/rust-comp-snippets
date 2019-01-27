@@ -1,3 +1,5 @@
+/// https://github.com/hatoo/competitive-rust-snippets
+
 use std;
 
 #[snippet = "Vector2D"]

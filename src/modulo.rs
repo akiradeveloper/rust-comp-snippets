@@ -1,3 +1,5 @@
+/// https://github.com/hatoo/competitive-rust-snippets
+
 #[snippet = "mod"]
 #[allow(dead_code)]
 pub fn gcd(a: u64, b: u64) -> u64 {
