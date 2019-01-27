@@ -79,7 +79,7 @@ impl WeightedUnionFind {
     }
 
     fn root(&mut self, x: usize) -> usize {
-        if (self.par[x] == x) {
+        if self.par[x] == x {
              return x;
         } else {
             let y = self.par[x];
