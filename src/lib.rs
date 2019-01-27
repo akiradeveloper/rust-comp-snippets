@@ -17,6 +17,8 @@ pub mod union_find;
 pub mod seg;
 pub mod seg_lazy;
 pub mod fenwick;
+pub mod modulo;
 pub mod math;
+pub mod geometry;
 pub mod graph;
 pub mod util;
