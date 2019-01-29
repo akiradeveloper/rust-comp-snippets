@@ -45,6 +45,17 @@ pub fn mod_pow(x: u64, n: u64, m: u64) -> u64 {
     res
 }
 
+#[test]
+fn test_mod_pow() {
+    let m = 1_000_000_007;
+    let x = 1234;
+    let mut t = 1;
+    for i in 0..1000 {
+        assert_eq!(mod_pow(x, i, m), t);
+        t = t * x % m;
+    }
+}
+
 #[snippet = "mod"]
 #[allow(dead_code)]
 pub fn mod_inverse(a: u64, m: u64) -> u64 {
@@ -80,6 +91,19 @@ pub fn fact_inv_table(size: usize, m: u64) -> (Vec<u64>, Vec<u64>) {
 
     (fact, fact_inv)
 }
+
+#[test]
+fn test_fact_inv_table() {
+    let m = 1_000_000_007;
+    let size = 1000;
+    let (fact, fact_inv) = fact_inv_table(1000, m);
+
+    for i in 0..size {
+        assert_eq!(fact[i] * fact_inv[i] % m, 1);
+    }
+}
+
+
 
 #[snippet = "mod"]
 #[allow(dead_code)]
@@ -125,6 +149,18 @@ pub fn mod_comb_repetition(n: u64, k: u64, p: u64, fact: &[u64]) -> u64 {
     mod_comb(n - 1 + k, n - 1, p, fact)
 }
 
+#[test]
+fn test_mod_comb_repetition() {
+    let m = 1_000_000_007;
+    let fact = fact_table(200000, m);
+
+    assert_eq!(mod_comb_repetition(10, 2, m, &fact), 55);
+    assert_eq!(mod_comb_repetition(10, 3, m, &fact), 220);
+    assert_eq!(mod_comb_repetition(10, 4, m, &fact), 715);
+    assert_eq!(mod_comb_repetition(400, 296, m, &fact), 546898535);
+    assert_eq!(mod_comb_repetition(100000, 100000, m, &fact), 939733670);
+}
+
 #[snippet]
 #[snippet = "fib"]
 #[allow(dead_code)]
@@ -166,40 +202,6 @@ fn pow_mat(m: &[u64; 4], n: u64, p: u64) -> [u64; 4] {
 fn fib(i: u64, p: u64) -> u64 {
     let m = pow_mat(&[1, 1, 1, 0], i, p);
     m[1]
-}
-
-#[test]
-fn test_mod_comb_repetition() {
-    let m = 1_000_000_007;
-    let fact = fact_table(200000, m);
-
-    assert_eq!(mod_comb_repetition(10, 2, m, &fact), 55);
-    assert_eq!(mod_comb_repetition(10, 3, m, &fact), 220);
-    assert_eq!(mod_comb_repetition(10, 4, m, &fact), 715);
-    assert_eq!(mod_comb_repetition(400, 296, m, &fact), 546898535);
-    assert_eq!(mod_comb_repetition(100000, 100000, m, &fact), 939733670);
-}
-
-#[test]
-fn test_fact_inv_table() {
-    let m = 1_000_000_007;
-    let size = 1000;
-    let (fact, fact_inv) = fact_inv_table(1000, m);
-
-    for i in 0..size {
-        assert_eq!(fact[i] * fact_inv[i] % m, 1);
-    }
-}
-
-#[test]
-fn test_mod_pow() {
-    let m = 1_000_000_007;
-    let x = 1234;
-    let mut t = 1;
-    for i in 0..1000 {
-        assert_eq!(mod_pow(x, i, m), t);
-        t = t * x % m;
-    }
 }
 
 #[test]

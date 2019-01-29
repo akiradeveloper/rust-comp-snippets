@@ -12,66 +12,139 @@ use std::io::{stdin, stdout, BufWriter, Write};
 use std::iter::FromIterator;
 
 #[allow(unused_macros)]
-macro_rules! input {
-    (source = $s:expr, $($r:tt)*) => {
-        let mut iter = $s.split_whitespace();
-        input_inner!{iter, $($r)*}
-    };
-    ($($r:tt)*) => {
-        let mut s = {
-            use std::io::Read;
-            let mut s = String::new();
-            std::io::stdin().read_to_string(&mut s).unwrap();
-            s
-        };
-        let mut iter = s.split_whitespace();
-        input_inner!{iter, $($r)*}
-    };
-}
-
-#[allow(unused_macros)]
-macro_rules! input_inner {
-    ($iter:expr) => {};
-    ($iter:expr, ) => {};
-
-    ($iter:expr, $var:ident : $t:tt $($r:tt)*) => {
-        let $var = read_value!($iter, $t);
-        input_inner!{$iter $($r)*}
-    };
-}
-
-#[allow(unused_macros)]
-macro_rules! read_value {
-    ($iter:expr, ( $($t:tt),* )) => {
-        ( $(read_value!($iter, $t)),* )
-    };
-
-    ($iter:expr, [ $t:tt ; $len:expr ]) => {
-        (0..$len).map(|_| read_value!($iter, $t)).collect::<Vec<_>>()
-    };
-
-    ($iter:expr, chars) => {
-        read_value!($iter, String).chars().collect::<Vec<char>>()
-    };
-
-    ($iter:expr, usize1) => {
-        read_value!($iter, usize) - 1
-    };
-
-    ($iter:expr, $t:ty) => {
-        $iter.next().unwrap().parse::<$t>().expect("Parse error")
-    };
-}
-
-#[allow(unused_macros)]
 macro_rules! debug {
     ($($a:expr),*) => {
         eprintln!(concat!($(stringify!($a), " = {:?}, "),*), $($a),*);
     }
 }
 
-const BIG_STACK_SIZE: bool = true;
+// ref: tanakh <https://qiita.com/tanakh/items/0ba42c7ca36cd29d0ac8>
+// diff: using Parser
+#[macro_export]
+macro_rules! input {
+    (source = $s:expr, $($r:tt)*) => {
+        let mut parser = Parser::from_str($s);
+        input_inner!{parser, $($r)*}
+    };
+    (parser = $parser:ident, $($r:tt)*) => {
+        input_inner!{$parser, $($r)*}
+    };
+    (new_stdin_parser = $parser:ident, $($r:tt)*) => {
+        let stdin = std::io::stdin();
+        let reader = std::io::BufReader::new(stdin.lock());
+        let mut $parser = Parser::new(reader);
+        input_inner!{$parser, $($r)*}
+    };
+    ($($r:tt)*) => {
+        input!{new_stdin_parser = parser, $($r)*}
+    };
+}
 
+#[macro_export]
+macro_rules! input_inner {
+    ($parser:ident) => {};
+    ($parser:ident, ) => {};
+    ($parser:ident, $var:ident : $t:tt $($r:tt)*) => {
+        let $var = read_value!($parser, $t);
+        input_inner!{$parser $($r)*}
+    };
+}
+
+#[macro_export]
+macro_rules! read_value {
+    ($parser:ident, ( $($t:tt),* )) => {
+        ( $(read_value!($parser, $t)),* )
+    };
+    ($parser:ident, [ $t:tt ; $len:expr ]) => {
+        (0..$len).map(|_| read_value!($parser, $t)).collect::<Vec<_>>()
+    };
+    ($parser:ident, chars) => {
+        read_value!($parser, String).chars().collect::<Vec<char>>()
+    };
+    ($parser:ident, usize1) => {
+        read_value!($parser, usize) - 1
+    };
+    ($parser:ident, $t:ty) => {
+        $parser.next::<$t>().expect("Parse error")
+    };
+}
+
+use std::io::BufRead;
+use std::io;
+use std::str;
+
+// ref: tatsuya6502 <https://qiita.com/tatsuya6502/items/cd448486f7ef7b5b8c7e>
+// ref: wariuni <https://qiita.com/tatsuya6502/items/cd448486f7ef7b5b8c7e#comment-7040a5ae96305e884eb9>
+// diff: using std::io::BufRead::fill_buf()
+pub struct Parser<R> {
+    reader: R,
+    buf: Vec<u8>,
+    pos: usize,
+}
+
+impl Parser<io::Empty> {
+    pub fn from_str(s: &str) -> Parser<io::Empty> {
+        Parser {
+            reader: io::empty(),
+            buf: s.as_bytes().to_vec(),
+            pos: 0,
+        }
+    }
+}
+
+impl<R:BufRead> Parser<R> {
+    pub fn new(reader: R) -> Parser<R> {
+        Parser {
+            reader: reader,
+            buf: vec![],
+            pos: 0,
+        }
+    }
+    pub fn update_buf(&mut self) {
+        self.buf.clear();
+        self.pos = 0;
+        loop {
+            let (len,complete) = {
+                let buf2 = self.reader.fill_buf().unwrap();
+                self.buf.extend_from_slice(buf2);
+                let len = buf2.len();
+                // diff: care when there is no empty space or line at the end
+                if len == 0 {
+                     break;
+                }
+                (len, buf2[len-1] <= 0x20)
+            };
+            self.reader.consume(len);
+            if complete {
+                break;
+            }
+        }
+    }
+    pub fn next<T:str::FromStr>(&mut self) -> Result<T, T::Err> {
+        loop {
+            let mut begin = self.pos;
+            while begin < self.buf.len() && (self.buf[begin] <= 0x20) {
+                begin += 1;
+            }
+            let mut end = begin;
+            while end < self.buf.len() && (self.buf[end] > 0x20) {
+                end += 1;
+            }
+            if begin != self.buf.len() {
+                self.pos = end;
+                return str::from_utf8(&self.buf[begin..end]).unwrap().parse::<T>();
+            }
+            else {
+                self.update_buf();
+            }
+        }
+    }
+}
+
+#[allow(unused_macros)]
+macro_rules ! debug { ( $ ( $ a : expr ) ,* ) => { eprintln ! ( concat ! ( $ ( stringify ! ( $ a ) , " = {:?}, " ) ,* ) , $ ( $ a ) ,* ) ; } }
+#[doc = " https://github.com/hatoo/competitive-rust-snippets"]
+const BIG_STACK_SIZE: bool = true;
 #[allow(dead_code)]
 fn main() {
     use std::thread;

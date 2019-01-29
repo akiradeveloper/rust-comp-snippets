@@ -1,3 +1,5 @@
+/// https://github.com/hatoo/competitive-rust-snippets
+
 #[snippet]
 #[allow(dead_code)]
 /// v[n][k] = nCk / 2^n
@@ -39,6 +41,15 @@ pub fn partition_dp(n: usize, m: usize, p: u64) -> Vec<Vec<u64>> {
     dp
 }
 
+#[test]
+fn test_partition_dp() {
+    const M: u64 = 1000000007;
+    let dp = partition_dp(100, 50, M);
+
+    assert_eq!(dp[4][3], 4);
+    assert_eq!(dp[5][4], 6);
+}
+
 #[snippet = "convex_hull_check"]
 #[allow(dead_code)]
 /// A check function for convex hull trick
@@ -64,6 +75,15 @@ pub fn factor_table(max_n: usize) -> Vec<usize> {
     }
 
     res
+}
+
+#[test]
+fn test_factor_table() {
+    let n = 1000;
+    let table = factor_table(n);
+    for i in 2..n + 1 {
+        assert_eq!(i % table[i], 0);
+    }
 }
 
 #[snippet = "XorShift"]
@@ -128,7 +148,7 @@ fn test_xorshift_randf() {
 use test::Bencher;
 
 #[bench]
-fn bench_xor_shift_next(b: &mut Bencher) {
+fn bench_xorshift_next(b: &mut Bencher) {
     let mut rng = Xorshift::new();
     b.iter(|| {
         for _ in 0..1_000_000 {
@@ -138,7 +158,7 @@ fn bench_xor_shift_next(b: &mut Bencher) {
 }
 
 #[bench]
-fn bench_xor_shift_rand(b: &mut Bencher) {
+fn bench_xorshift_rand(b: &mut Bencher) {
     let mut rng = Xorshift::new();
     b.iter(|| {
         for _ in 0..1_000_000 {
@@ -148,29 +168,11 @@ fn bench_xor_shift_rand(b: &mut Bencher) {
 }
 
 #[bench]
-fn bench_xor_shift_randf(b: &mut Bencher) {
+fn bench_xorshift_randf(b: &mut Bencher) {
     let mut rng = Xorshift::new();
     b.iter(|| {
         for _ in 0..1_000_000 {
             rng.randf();
         }
     });
-}
-
-#[test]
-fn test_partition_dp() {
-    const M: u64 = 1000000007;
-    let dp = partition_dp(100, 50, M);
-
-    assert_eq!(dp[4][3], 4);
-    assert_eq!(dp[5][4], 6);
-}
-
-#[test]
-fn test_factor_table() {
-    let n = 1000;
-    let table = factor_table(n);
-    for i in 2..n + 1 {
-        assert_eq!(i % table[i], 0);
-    }
 }
