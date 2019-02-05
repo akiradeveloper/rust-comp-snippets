@@ -1,7 +1,9 @@
+#[snippet = "UnionFind"]
 pub struct UnionFind {
     par: Vec<usize>,
     rank: Vec<usize> }
 
+#[snippet = "UnionFind"]
 impl UnionFind {
     pub fn new(n: usize) -> UnionFind {
         UnionFind {
@@ -63,12 +65,14 @@ fn test_union_find() {
     assert_eq!(s.same(3,0), true);
 }
 
+#[snippet = "WeighedUnionFind"]
 struct WeightedUnionFind {
     par: Vec<usize>,
     rank: Vec<usize>,
     diff_weight: Vec<i32>,
 }
 
+#[snippet = "WeighedUnionFind"]
 impl WeightedUnionFind {
     fn new(n: usize) -> WeightedUnionFind {
         WeightedUnionFind {

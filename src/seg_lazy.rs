@@ -1,17 +1,20 @@
+#[snippet = "SEG_LAZY"]
 trait SEGImpl {
     type Elem: Clone;
     fn up(l: usize, r: usize, e: Self::Elem) -> Self::Elem;
     /// current value, lazy value -> new value, child's lazy value
-    fn down(cur: Self::Elem, lazy_val: Self::Elem) -> (Self::Elem, Self::Elem);
-    fn id() -> Self::Elem;
+    fn down(cur: Self::Elem, lazy_val: Self::Elem) -> (Self::Elem, Self::Elem); fn id() -> Self::Elem;
     fn op(x: &Self::Elem, y: &Self::Elem) -> Self::Elem;
 }
 
+#[snippet = "SEG_LAZY"]
 struct SEG<T: SEGImpl> {
     n: usize,
     node: Vec<T::Elem>,
     lazy: Vec<Option<T::Elem>>,
 }
+
+#[snippet = "SEG_LAZY"]
 impl <T: SEGImpl> SEG<T> {
     fn new(n: usize) -> SEG<T> {
         let mut m = 1;
@@ -62,7 +65,8 @@ impl <T: SEGImpl> SEG<T> {
         }
     }
     fn update(&mut self, a: usize, b: usize, x: T::Elem) {
-        self.do_update(a,b,x,0,0,self.n)
+        let n = self.n;
+        self.do_update(a,b,x,0,0,n)
     }
     fn do_query(&mut self, a: usize, b: usize, k: usize, l: usize, r: usize) -> T::Elem {
         if r <= a || b <= l {
@@ -80,7 +84,8 @@ impl <T: SEGImpl> SEG<T> {
         }
     }
     fn query(&mut self, a: usize, b: usize) -> T::Elem {
-        self.do_query(a,b,0,0,self.n)
+        let n = self.n;
+        self.do_query(a,b,0,0,n)
     }
 }
 
@@ -91,6 +96,7 @@ impl SEGImpl for RangeUpdate {
         0
     }
     fn op(x: &Self::Elem, y: &Self::Elem) -> Self::Elem {
+        // we need this comparison so the id value loses
         std::cmp::max(x.clone(), y.clone())
     }
     fn up(l: usize, r: usize, e: Self::Elem) -> Self::Elem {
