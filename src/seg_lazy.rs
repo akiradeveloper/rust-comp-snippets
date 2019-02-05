@@ -1,10 +1,15 @@
 #[snippet = "SEG_LAZY"]
 trait SEGImpl {
     type Elem: Clone;
+    fn id() -> Self::Elem;
+    /// node value 0, node value 1 -> node value
+    fn op(x: &Self::Elem, y: &Self::Elem) -> Self::Elem;
+    /// propagate lazy value upward
     fn up(l: usize, r: usize, e: Self::Elem) -> Self::Elem;
     /// current value, lazy value -> new value, child's lazy value
-    fn down(cur: Self::Elem, lazy_val: Self::Elem) -> (Self::Elem, Self::Elem); fn id() -> Self::Elem;
-    fn op(x: &Self::Elem, y: &Self::Elem) -> Self::Elem;
+    fn down(cur: Self::Elem, lazy_val: Self::Elem) -> (Self::Elem, Self::Elem);
+    /// current lazy value, propagated lazy value -> new lazy value
+    fn lazy_op(cur: &Self::Elem, propagated: &Self::Elem) -> Self::Elem;
 }
 
 #[snippet = "SEG_LAZY"]
@@ -30,13 +35,14 @@ impl <T: SEGImpl> SEG<T> {
             let cur_val = self.node[k].clone();
             let (new_val, child_lzv) = T::down(cur_val, lzv);
             self.node[k] = new_val;
+            // propagate the lazy value to its children
             if r - l > 1 {
                 self.lazy[k*2+1] = match self.lazy[k*2+1].clone() {
-                    Some(x) => Some(T::op(&x, &child_lzv)),
+                    Some(x) => Some(T::lazy_op(&x, &child_lzv)),
                     None => Some(child_lzv.clone()),
                 };
                 self.lazy[k*2+2] = match self.lazy[k*2+2].clone() {
-                    Some(x) => Some(T::op(&x, &child_lzv)),
+                    Some(x) => Some(T::lazy_op(&x, &child_lzv)),
                     None => Some(child_lzv.clone()),
                 };
             }
@@ -52,7 +58,7 @@ impl <T: SEGImpl> SEG<T> {
 
         if a <= l && r <= b {
             self.lazy[k] = match self.lazy[k].clone() {
-                Some(a) => Some(T::op(&a, &T::up(l,r,x))),
+                Some(a) => Some(T::lazy_op(&a, &T::up(l,r,x))),
                 None => Some(T::up(l,r,x)),
             };
             self.eval(k,l,r);
@@ -96,7 +102,6 @@ impl SEGImpl for RangeUpdate {
         0
     }
     fn op(x: &Self::Elem, y: &Self::Elem) -> Self::Elem {
-        // we need this comparison so the id value loses
         std::cmp::max(x.clone(), y.clone())
     }
     fn up(l: usize, r: usize, e: Self::Elem) -> Self::Elem {
@@ -104,6 +109,9 @@ impl SEGImpl for RangeUpdate {
     }
     fn down(cur: Self::Elem, lazy_val: Self::Elem) -> (Self::Elem, Self::Elem) {
         (lazy_val, lazy_val)
+    }
+    fn lazy_op(x: &Self::Elem, y: &Self::Elem) -> Self::Elem {
+        y.clone()
     }
 }
 #[test]
@@ -116,6 +124,40 @@ fn test_range_update() {
     seg.update(1, 5, 20);
     assert_eq!(seg.query(0, 3), 20);
     assert_eq!(seg.query(0, 1), 10);
+}
+
+struct RangeUpdate_2;
+impl SEGImpl for RangeUpdate_2 {
+    type Elem = i64;
+    fn id() -> Self::Elem {
+        (1<<31)-1
+    }
+    fn op(x: &Self::Elem, y: &Self::Elem) -> Self::Elem {
+        std::cmp::min(x.clone(), y.clone())
+    }
+    fn up(l: usize, r: usize, e: Self::Elem) -> Self::Elem {
+        e
+    }
+    fn down(cur: Self::Elem, lazy_val: Self::Elem) -> (Self::Elem, Self::Elem) {
+        (lazy_val, lazy_val)
+    }
+    fn lazy_op(x: &Self::Elem, y: &Self::Elem) -> Self::Elem {
+        y.clone()
+    }
+}
+#[test]
+fn test_range_update_2() { // DSL_2_D
+    let mut seg: SEG<RangeUpdate_2> = SEG::new(8);
+    seg.update(1,7,5);
+    seg.update(2,8,2);
+    seg.update(2,6,7);
+    assert_eq!(seg.query(3, 4),7);
+    seg.update(4,7,6);
+    assert_eq!(seg.query(0, 1),2147483647);
+    seg.update(0,8,9);
+    assert_eq!(seg.query(2, 3),9);
+    assert_eq!(seg.query(3, 4),9);
+    seg.update(1,8,2);
 }
 
 struct RangeAdd;
@@ -132,6 +174,9 @@ impl SEGImpl for RangeAdd {
     }
     fn down(cur: Self::Elem, lazy_val: Self::Elem) -> (Self::Elem, Self::Elem) {
         (cur+lazy_val, lazy_val/2)
+    }
+    fn lazy_op(x: &Self::Elem, y: &Self::Elem) -> Self::Elem {
+        x.clone() + y.clone()
     }
 }
 #[test]
