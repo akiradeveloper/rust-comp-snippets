@@ -1,22 +1,21 @@
+/// https://ei1333.github.io/luzhiled/snippets/structure/segment-tree.html
+
 #[snippet = "SEG_LAZY"]
 trait SEGImpl {
-    type Elem: Clone;
-    fn id() -> Self::Elem;
-    /// node value 0, node value 1 -> node value
-    fn op(x: &Self::Elem, y: &Self::Elem) -> Self::Elem;
-    /// propagate lazy value upward
-    fn up(l: usize, r: usize, e: Self::Elem) -> Self::Elem;
-    /// current value, lazy value -> new value, child's lazy value
-    fn down(cur: Self::Elem, lazy_val: Self::Elem) -> (Self::Elem, Self::Elem);
-    /// current lazy value, propagated lazy value -> new lazy value
-    fn lazy_op(cur: &Self::Elem, propagated: &Self::Elem) -> Self::Elem;
+    type Monoid: Copy;
+    type OperatorMonoid: Copy + PartialEq;
+    fn m0() -> Self::Monoid;
+    fn om0() -> Self::OperatorMonoid;
+    fn f(x: Self::Monoid, y: Self::Monoid) -> Self::Monoid;
+    fn g(x: Self::Monoid, y: Self::OperatorMonoid, len: usize) -> Self::Monoid;
+    fn h(x: Self::OperatorMonoid, y: Self::OperatorMonoid) -> Self::OperatorMonoid;
 }
 
 #[snippet = "SEG_LAZY"]
 struct SEG<T: SEGImpl> {
     n: usize,
-    node: Vec<T::Elem>,
-    lazy: Vec<Option<T::Elem>>,
+    data: Vec<T::Monoid>,
+    lazy: Vec<T::OperatorMonoid>,
 }
 
 #[snippet = "SEG_LAZY"]
@@ -26,95 +25,77 @@ impl <T: SEGImpl> SEG<T> {
         while m < n { m *= 2; }
         SEG {
             n: m,
-            node: vec![T::id(); m*2-1],
-            lazy: vec![None; m*2-1],
+            data: vec![T::m0(); m*2],
+            lazy: vec![T::om0(); m*2],
         }
     }
-    fn eval(&mut self, k: usize, l: usize, r: usize) {
-        if let Some(lzv) = self.lazy[k].clone() {
-            let cur_val = self.node[k].clone();
-            let (new_val, child_lzv) = T::down(cur_val, lzv);
-            self.node[k] = new_val;
-            // propagate the lazy value to its children
-            if r - l > 1 {
-                self.lazy[k*2+1] = match self.lazy[k*2+1].clone() {
-                    Some(x) => Some(T::lazy_op(&x, &child_lzv)),
-                    None => Some(child_lzv.clone()),
-                };
-                self.lazy[k*2+2] = match self.lazy[k*2+2].clone() {
-                    Some(x) => Some(T::lazy_op(&x, &child_lzv)),
-                    None => Some(child_lzv.clone()),
-                };
+    fn propagate(&mut self, k: usize, len: usize) {
+        if self.lazy[k] != T::om0() {
+            if k < self.n {
+                self.lazy[2*k+0] = T::h(self.lazy[2*k+0], self.lazy[k]);
+                self.lazy[2*k+1] = T::h(self.lazy[2*k+1], self.lazy[k]);
             }
-            self.lazy[k] = None;
+            self.data[k] = T::g(self.data[k], self.lazy[k], len);
+            self.lazy[k] = T::om0();
         }
     }
-    fn do_update(&mut self, a: usize, b: usize, x: T::Elem, k: usize, l: usize, r: usize) {
-        self.eval(k,l,r);
-
-        if b <= l || r <= a {
-            return;
-        }
-
-        if a <= l && r <= b {
-            self.lazy[k] = match self.lazy[k].clone() {
-                Some(a) => Some(T::lazy_op(&a, &T::up(l,r,x))),
-                None => Some(T::up(l,r,x)),
-            };
-            self.eval(k,l,r);
-        }
-
-        else {
-            self.do_update(a,b,x.clone(),2*k+1,l,(l+r)/2);
-            self.do_update(a,b,x.clone(),2*k+2,(l+r)/2,r);
-            self.node[k] = T::op(&self.node[2*k+1],&self.node[2*k+2]);
-        }
-    }
-    fn update(&mut self, a: usize, b: usize, x: T::Elem) {
-        let n = self.n;
-        self.do_update(a,b,x,0,0,n)
-    }
-    fn do_query(&mut self, a: usize, b: usize, k: usize, l: usize, r: usize) -> T::Elem {
+    fn do_update(&mut self, a: usize, b: usize, x: T::OperatorMonoid, k: usize, l: usize, r: usize) -> T::Monoid {
+        self.propagate(k, r-l);
         if r <= a || b <= l {
-            return T::id();
-        }
-
-        self.eval(k,l,r);
-
-        if a <= l && r <= b {
-            return self.node[k].clone();
+            self.data[k]
+        } else if a <= l && r <= b {
+            self.lazy[k] = T::h(self.lazy[k], x);
+            self.propagate(k, r-l);
+            self.data[k]
         } else {
-            let vl = self.do_query(a,b,k*2+1,l,(l+r)/2);
-            let vr = self.do_query(a,b,k*2+2,(l+r)/2,r);
-            return T::op(&vl,&vr);
+            self.data[k] = T::f(
+                self.do_update(a, b, x, 2*k+0, l, (l+r)>>1),
+                self.do_update(a, b, x, 2*k+1, (l+r)>>1, r)
+            );
+            self.data[k]
         }
     }
-    fn query(&mut self, a: usize, b: usize) -> T::Elem {
+    fn update(&mut self, a: usize, b: usize, x: T::OperatorMonoid) -> T::Monoid {
         let n = self.n;
-        self.do_query(a,b,0,0,n)
+        self.do_update(a, b, x, 1, 0, n)
     }
-    fn to_vec(&mut self, a: usize, b: usize) -> Vec<T::Elem> {
-        (a..b).map(|i| self.query(i,i+1)).collect()
+    fn do_query(&mut self, a: usize, b: usize, k: usize, l: usize, r: usize) -> T::Monoid {
+        self.propagate(k, r-l);
+        if r <= a || b <= l {
+            T::m0()
+        } else if a <= l && r <= b {
+            self.data[k]
+        } else {
+            T::f(
+                self.do_query(a, b, 2*k+0, l, (l+r)>>1),
+                self.do_query(a, b, 2*k+1, (l+r)>>1, r)
+            )
+        }
+    }
+    fn query(&mut self, a: usize, b: usize) -> T::Monoid {
+        let n = self.n;
+        self.do_query(a, b, 1, 0, n)
     }
 }
 
 struct RUQ;
 impl SEGImpl for RUQ {
-    type Elem = i64;
-    fn id() -> Self::Elem {
+    type Monoid = i64;
+    type OperatorMonoid = i64;
+    fn m0() -> Self::Monoid {
         0
     }
-    fn op(x: &Self::Elem, y: &Self::Elem) -> Self::Elem {
-        std::cmp::max(x.clone(), y.clone())
+    fn om0() -> Self::OperatorMonoid {
+        0
     }
-    fn up(l: usize, r: usize, e: Self::Elem) -> Self::Elem {
-        e
+    fn f(x: Self::Monoid, y: Self::Monoid) -> Self::Monoid {
+        std::cmp::max(x, y)
     }
-    fn down(cur: Self::Elem, lazy_val: Self::Elem) -> (Self::Elem, Self::Elem) {
-        (lazy_val, lazy_val)
+    fn g(x: Self::Monoid, y: Self::OperatorMonoid, len: usize) -> Self::Monoid {
+        y
     }
-    fn lazy_op(x: &Self::Elem, y: &Self::Elem) -> Self::Elem {
-        y.clone()
+    fn h(x: Self::OperatorMonoid, y: Self::OperatorMonoid) -> Self::OperatorMonoid {
+        y
     }
 }
 #[test]
@@ -131,21 +112,22 @@ fn test_ruq() {
 
 struct RUQ2;
 impl SEGImpl for RUQ2 {
-    type Elem = i64;
-    fn id() -> Self::Elem {
+    type Monoid = i64;
+    type OperatorMonoid = i64;
+    fn m0() -> Self::Monoid {
         (1<<31)-1
     }
-    fn op(x: &Self::Elem, y: &Self::Elem) -> Self::Elem {
-        std::cmp::min(x.clone(), y.clone())
+    fn om0() -> Self::OperatorMonoid {
+        0
     }
-    fn up(l: usize, r: usize, e: Self::Elem) -> Self::Elem {
-        e
+    fn f(x: Self::Monoid, y: Self::Monoid) -> Self::Monoid {
+        std::cmp::min(x, y)
     }
-    fn down(cur: Self::Elem, lazy_val: Self::Elem) -> (Self::Elem, Self::Elem) {
-        (lazy_val, lazy_val)
+    fn g(x: Self::Monoid, y: Self::OperatorMonoid, len: usize) -> Self::Monoid {
+        y
     }
-    fn lazy_op(x: &Self::Elem, y: &Self::Elem) -> Self::Elem {
-        y.clone()
+    fn h(x: Self::OperatorMonoid, y: Self::OperatorMonoid) -> Self::OperatorMonoid {
+        y
     }
 }
 #[test]
@@ -165,21 +147,22 @@ fn test_ruq_2() { // DSL_2_D
 
 struct RAQ_RSQ;
 impl SEGImpl for RAQ_RSQ {
-    type Elem = i64;
-    fn id() -> Self::Elem {
+    type Monoid = i64;
+    type OperatorMonoid = i64;
+    fn m0() -> Self::Monoid {
         0
     }
-    fn op(x: &Self::Elem, y: &Self::Elem) -> Self::Elem {
-        x.clone() + y.clone()
+    fn om0() -> Self::OperatorMonoid {
+        0
     }
-    fn up(l: usize, r: usize, e: Self::Elem) -> Self::Elem {
-        e * (r - l) as Self::Elem
+    fn f(x: Self::Monoid, y: Self::Monoid) -> Self::Monoid {
+        x + y
     }
-    fn down(cur: Self::Elem, lazy_val: Self::Elem) -> (Self::Elem, Self::Elem) {
-        (cur+lazy_val, lazy_val/2)
+    fn g(x: Self::Monoid, y: Self::OperatorMonoid, len: usize) -> Self::Monoid {
+        x + (len as i64) * y
     }
-    fn lazy_op(x: &Self::Elem, y: &Self::Elem) -> Self::Elem {
-        x.clone() + y.clone()
+    fn h(x: Self::OperatorMonoid, y: Self::OperatorMonoid) -> Self::OperatorMonoid {
+        x + y
     }
 }
 #[test]
@@ -199,31 +182,29 @@ fn test_raq_rsq() {
 
 struct RAQ_RMQ;
 impl SEGImpl for RAQ_RMQ { 
-    type Elem = i64;
-    fn id() -> Self::Elem {
+    type Monoid = i64;
+    type OperatorMonoid = i64;
+    fn m0() -> Self::Monoid {
+        (1<<31)-1
+    }
+    fn om0() -> Self::OperatorMonoid {
         0
     }
-    fn op(x: &Self::Elem, y: &Self::Elem) -> Self::Elem {
-        std::cmp::min(x.clone(), y.clone())
+    fn f(x: Self::Monoid, y: Self::Monoid) -> Self::Monoid {
+        std::cmp::min(x, y)
     }
-    fn up(l: usize, r: usize, e: Self::Elem) -> Self::Elem {
-        e * (r - l) as Self::Elem
+    fn g(x: Self::Monoid, y: Self::OperatorMonoid, len: usize) -> Self::Monoid {
+        x + y
     }
-    fn down(cur: Self::Elem, lazy_val: Self::Elem) -> (Self::Elem, Self::Elem) {
-        (cur+lazy_val, lazy_val/2)
-    }
-    fn lazy_op(x: &Self::Elem, y: &Self::Elem) -> Self::Elem {
-        x.clone() + y.clone()
+    fn h(x: Self::OperatorMonoid, y: Self::OperatorMonoid) -> Self::OperatorMonoid {
+        x + y
     }
 }
 #[test]
-fn test_raq_rmq() {
+fn test_raq_rmq() { // DSL_2_H
     let mut seg: SEG<RAQ_RMQ> = SEG::new(6);
+    seg.update(0, 6, -RAQ_RMQ::m0()); // this is the key
     seg.update(1,4,1);
-    dbg!(&seg.lazy);
-    seg.query(0, 6);
-    dbg!(&seg.lazy);
-    dbg!(&seg.node);
     seg.update(2,5,-2);
     assert_eq!(seg.query(0,6),-2);
     assert_eq!(seg.query(0,2),0);
