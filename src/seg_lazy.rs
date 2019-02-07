@@ -20,12 +20,12 @@ struct SEG<T: SEGImpl> {
 
 #[snippet = "SEG_LAZY"]
 impl <T: SEGImpl> SEG<T> {
-    fn new(n: usize) -> SEG<T> {
+    fn new(init: T::Monoid, n: usize) -> SEG<T> {
         let mut m = 1;
         while m < n { m *= 2; }
         SEG {
             n: m,
-            data: vec![T::m0(); m*2],
+            data: vec![init; m*2],
             lazy: vec![T::om0(); m*2],
         }
     }
@@ -100,7 +100,7 @@ impl SEGImpl for RUQ {
 }
 #[test]
 fn test_ruq() {
-    let mut seg: SEG<RUQ> = SEG::new(10);
+    let mut seg: SEG<RUQ> = SEG::new(RUQ::m0(), 10);
     assert_eq!(seg.query(0, 3), 0);
     seg.update(0, 2, 10);
     assert_eq!(seg.query(0, 3), 10);
@@ -132,7 +132,7 @@ impl SEGImpl for RUQ2 {
 }
 #[test]
 fn test_ruq_2() { // DSL_2_D
-    let mut seg: SEG<RUQ2> = SEG::new(8);
+    let mut seg: SEG<RUQ2> = SEG::new(RUQ2::m0(), 8);
     seg.update(1,7,5);
     seg.update(2,8,2);
     seg.update(2,6,7);
@@ -167,7 +167,7 @@ impl SEGImpl for RAQ_RSQ {
 }
 #[test]
 fn test_raq_rsq() {
-    let mut seg: SEG<RAQ_RSQ> = SEG::new(10);
+    let mut seg: SEG<RAQ_RSQ> = SEG::new(RAQ_RSQ::m0(), 10);
     assert_eq!(seg.query(0, 3), 0);
     seg.update(0,5,10);
     assert_eq!(seg.query(0, 1), 10);
@@ -194,7 +194,7 @@ impl SEGImpl for RAQ_RMQ {
         std::cmp::min(x, y)
     }
     fn g(x: Self::Monoid, y: Self::OperatorMonoid, len: usize) -> Self::Monoid {
-        x + y
+        x + (len as i64) * y
     }
     fn h(x: Self::OperatorMonoid, y: Self::OperatorMonoid) -> Self::OperatorMonoid {
         x + y
@@ -202,8 +202,7 @@ impl SEGImpl for RAQ_RMQ {
 }
 #[test]
 fn test_raq_rmq() { // DSL_2_H
-    let mut seg: SEG<RAQ_RMQ> = SEG::new(6);
-    seg.update(0, 6, -RAQ_RMQ::m0()); // this is the key
+    let mut seg: SEG<RAQ_RMQ> = SEG::new(0, 6);
     seg.update(1,4,1);
     seg.update(2,5,-2);
     assert_eq!(seg.query(0,6),-2);
