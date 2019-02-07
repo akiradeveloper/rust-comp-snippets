@@ -93,11 +93,14 @@ impl <T: SEGImpl> SEG<T> {
         let n = self.n;
         self.do_query(a,b,0,0,n)
     }
+    fn to_vec(&mut self, a: usize, b: usize) -> Vec<T::Elem> {
+        (a..b).map(|i| self.query(i,i+1)).collect()
+    }
 }
 
-struct RangeUpdate;
-impl SEGImpl for RangeUpdate {
-    type Elem = i32;
+struct RUQ;
+impl SEGImpl for RUQ {
+    type Elem = i64;
     fn id() -> Self::Elem {
         0
     }
@@ -115,8 +118,8 @@ impl SEGImpl for RangeUpdate {
     }
 }
 #[test]
-fn test_range_update() {
-    let mut seg: SEG<RangeUpdate> = SEG::new(10);
+fn test_ruq() {
+    let mut seg: SEG<RUQ> = SEG::new(10);
     assert_eq!(seg.query(0, 3), 0);
     seg.update(0, 2, 10);
     assert_eq!(seg.query(0, 3), 10);
@@ -126,8 +129,8 @@ fn test_range_update() {
     assert_eq!(seg.query(0, 1), 10);
 }
 
-struct RangeUpdate_2;
-impl SEGImpl for RangeUpdate_2 {
+struct RUQ2;
+impl SEGImpl for RUQ2 {
     type Elem = i64;
     fn id() -> Self::Elem {
         (1<<31)-1
@@ -146,8 +149,8 @@ impl SEGImpl for RangeUpdate_2 {
     }
 }
 #[test]
-fn test_range_update_2() { // DSL_2_D
-    let mut seg: SEG<RangeUpdate_2> = SEG::new(8);
+fn test_ruq_2() { // DSL_2_D
+    let mut seg: SEG<RUQ2> = SEG::new(8);
     seg.update(1,7,5);
     seg.update(2,8,2);
     seg.update(2,6,7);
@@ -160,9 +163,9 @@ fn test_range_update_2() { // DSL_2_D
     seg.update(1,8,2);
 }
 
-struct RangeAdd;
-impl SEGImpl for RangeAdd {
-    type Elem = i32;
+struct RAQ_RSQ;
+impl SEGImpl for RAQ_RSQ {
+    type Elem = i64;
     fn id() -> Self::Elem {
         0
     }
@@ -170,7 +173,7 @@ impl SEGImpl for RangeAdd {
         x.clone() + y.clone()
     }
     fn up(l: usize, r: usize, e: Self::Elem) -> Self::Elem {
-        e * (r - l) as i32
+        e * (r - l) as Self::Elem
     }
     fn down(cur: Self::Elem, lazy_val: Self::Elem) -> (Self::Elem, Self::Elem) {
         (cur+lazy_val, lazy_val/2)
@@ -180,8 +183,8 @@ impl SEGImpl for RangeAdd {
     }
 }
 #[test]
-fn test_range_add() {
-    let mut seg: SEG<RangeAdd> = SEG::new(10);
+fn test_raq_rsq() {
+    let mut seg: SEG<RAQ_RSQ> = SEG::new(10);
     assert_eq!(seg.query(0, 3), 0);
     seg.update(0,5,10);
     assert_eq!(seg.query(0, 1), 10);
@@ -192,4 +195,39 @@ fn test_range_add() {
     assert_eq!(seg.query(0, 5), 60);
     assert_eq!(seg.query(0, 6), 65);
     assert_eq!(seg.query(4, 7), 20);
+}
+
+struct RAQ_RMQ;
+impl SEGImpl for RAQ_RMQ { 
+    type Elem = i64;
+    fn id() -> Self::Elem {
+        0
+    }
+    fn op(x: &Self::Elem, y: &Self::Elem) -> Self::Elem {
+        std::cmp::min(x.clone(), y.clone())
+    }
+    fn up(l: usize, r: usize, e: Self::Elem) -> Self::Elem {
+        e * (r - l) as Self::Elem
+    }
+    fn down(cur: Self::Elem, lazy_val: Self::Elem) -> (Self::Elem, Self::Elem) {
+        (cur+lazy_val, lazy_val/2)
+    }
+    fn lazy_op(x: &Self::Elem, y: &Self::Elem) -> Self::Elem {
+        x.clone() + y.clone()
+    }
+}
+#[test]
+fn test_raq_rmq() {
+    let mut seg: SEG<RAQ_RMQ> = SEG::new(6);
+    seg.update(1,4,1);
+    dbg!(&seg.lazy);
+    seg.query(0, 6);
+    dbg!(&seg.lazy);
+    dbg!(&seg.node);
+    seg.update(2,5,-2);
+    assert_eq!(seg.query(0,6),-2);
+    assert_eq!(seg.query(0,2),0);
+    seg.update(3,6,3);
+    assert_eq!(seg.query(3,5),1);
+    assert_eq!(seg.query(0,6),-1);
 }

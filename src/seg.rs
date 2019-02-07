@@ -1,5 +1,3 @@
-/// https://github.com/hatoo/competitive-rust-snippets
-
 #[snippet = "SEG"]
 #[allow(dead_code)]
 pub trait Monoid {
@@ -63,10 +61,8 @@ impl<M: Monoid> SEG<M> {
     }
 }
 
-#[snippet = "Monoid-SUM"]
 #[allow(dead_code)]
 struct SUM;
-#[snippet = "Monoid-SUM"]
 impl Monoid for SUM {
     type T = u64;
     fn id() -> Self::T {
@@ -77,10 +73,8 @@ impl Monoid for SUM {
     }
 }
 
-#[snippet = "Monoid-MIN"]
 #[allow(dead_code)]
 struct MIN;
-#[snippet = "Monoid-MIN"]
 impl Monoid for MIN {
     type T = usize;
     fn id() -> Self::T {
