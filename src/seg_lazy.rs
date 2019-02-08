@@ -110,8 +110,8 @@ fn test_ruq() {
     assert_eq!(seg.query(0, 1), 10);
 }
 
-struct RUQ2;
-impl SEGImpl for RUQ2 {
+struct RUQ_INF;
+impl SEGImpl for RUQ_INF {
     type Monoid = i64;
     type OperatorMonoid = i64;
     fn m0() -> Self::Monoid {
@@ -131,8 +131,8 @@ impl SEGImpl for RUQ2 {
     }
 }
 #[test]
-fn test_ruq_2() { // DSL_2_D
-    let mut seg: SEG<RUQ2> = SEG::new(RUQ2::m0(), 8);
+fn test_ruq_inf() { // DSL_2_D
+    let mut seg: SEG<RUQ_INF> = SEG::new(RUQ_INF::m0(), 8);
     seg.update(1,7,5);
     seg.update(2,8,2);
     seg.update(2,6,7);
@@ -145,8 +145,8 @@ fn test_ruq_2() { // DSL_2_D
     seg.update(1,8,2);
 }
 
-struct RAQ_RSQ;
-impl SEGImpl for RAQ_RSQ {
+struct RSQ_RAQ;
+impl SEGImpl for RSQ_RAQ {
     type Monoid = i64;
     type OperatorMonoid = i64;
     fn m0() -> Self::Monoid {
@@ -166,8 +166,8 @@ impl SEGImpl for RAQ_RSQ {
     }
 }
 #[test]
-fn test_raq_rsq() {
-    let mut seg: SEG<RAQ_RSQ> = SEG::new(RAQ_RSQ::m0(), 10);
+fn test_rsq_raq() {
+    let mut seg: SEG<RSQ_RAQ> = SEG::new(RSQ_RAQ::m0(), 10);
     assert_eq!(seg.query(0, 3), 0);
     seg.update(0,5,10);
     assert_eq!(seg.query(0, 1), 10);
@@ -180,8 +180,8 @@ fn test_raq_rsq() {
     assert_eq!(seg.query(4, 7), 20);
 }
 
-struct RAQ_RMQ;
-impl SEGImpl for RAQ_RMQ { 
+struct RMQ_RAQ;
+impl SEGImpl for RMQ_RAQ { 
     type Monoid = i64;
     type OperatorMonoid = i64;
     fn m0() -> Self::Monoid {
@@ -201,8 +201,8 @@ impl SEGImpl for RAQ_RMQ {
     }
 }
 #[test]
-fn test_raq_rmq() { // DSL_2_H
-    let mut seg: SEG<RAQ_RMQ> = SEG::new(0, 6);
+fn test_rmq_raq() { // DSL_2_H
+    let mut seg: SEG<RMQ_RAQ> = SEG::new(0, 6);
     seg.update(1,4,1);
     seg.update(2,5,-2);
     assert_eq!(seg.query(0,6),-2);
@@ -210,4 +210,40 @@ fn test_raq_rmq() { // DSL_2_H
     seg.update(3,6,3);
     assert_eq!(seg.query(3,5),1);
     assert_eq!(seg.query(0,6),-1);
+}
+
+struct RSQ_RUQ;
+impl SEGImpl for RSQ_RUQ { 
+    type Monoid = i64;
+    type OperatorMonoid = i64;
+    fn m0() -> Self::Monoid {
+        0
+    }
+    fn om0() -> Self::OperatorMonoid {
+        1<<40
+    }
+    fn f(x: Self::Monoid, y: Self::Monoid) -> Self::Monoid {
+        x + y
+    }
+    fn g(x: Self::Monoid, y: Self::OperatorMonoid, len: usize) -> Self::Monoid {
+        len as i64 * y
+    }
+    fn h(x: Self::OperatorMonoid, y: Self::OperatorMonoid) -> Self::OperatorMonoid {
+        y
+    }
+}
+
+#[test]
+fn test_rsq_ruq() { // DSL_1_I
+    let mut seg: SEG<RSQ_RUQ> = SEG::new(0, 8);
+    seg.update(1,7,-5);
+    seg.update(2,5,-9);
+    assert_eq!(seg.query(2,4),-18);
+    seg.update(3,7,0);
+    assert_eq!(seg.query(0,4),-14);
+    assert_eq!(seg.query(5,8),0);
+    assert_eq!(seg.query(2,7),-9);
+    seg.update(3,8,9);
+    assert_eq!(seg.query(2,6),18);
+    seg.update(0,2,1);
 }
