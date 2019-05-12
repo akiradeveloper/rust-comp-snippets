@@ -184,6 +184,9 @@ struct RMQ_RAQ;
 impl SEGImpl for RMQ_RAQ { 
     type Monoid = i64;
     type OperatorMonoid = i64;
+    // this is the value taken when the node value has not ever been computed.
+    // since our goal is to compute the min of the computed values,
+    // it is reasonable to set very large data here.
     fn m0() -> Self::Monoid {
         (1<<31)-1
     }
@@ -219,6 +222,10 @@ impl SEGImpl for RSQ_RUQ {
     fn m0() -> Self::Monoid {
         0
     }
+    // we assing om0 as very large number
+    // to tell updating by 0 and not having done anything.
+    // if we set 0 here, the line marked as 'this' fails as the result is -23
+    // which is -5 + -9 + -9 + -9
     fn om0() -> Self::OperatorMonoid {
         1<<40
     }
@@ -240,7 +247,7 @@ fn test_rsq_ruq() { // DSL_1_I
     seg.update(2,5,-9);
     assert_eq!(seg.query(2,4),-18);
     seg.update(3,7,0);
-    assert_eq!(seg.query(0,4),-14);
+    assert_eq!(seg.query(0,4),-14); // this
     assert_eq!(seg.query(5,8),0);
     assert_eq!(seg.query(2,7),-9);
     seg.update(3,8,9);
