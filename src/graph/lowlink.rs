@@ -1,3 +1,11 @@
+fn minmax(p: (usize, usize)) -> (usize, usize) {
+    if p.0 <= p.1 {
+        p
+    } else {
+        (p.1, p.0)
+    }
+}
+
 struct LowLink<'a> {
     g: &'a [Vec<usize>],
     used: Vec<bool>,
@@ -26,24 +34,27 @@ impl <'a> LowLink<'a> {
     }
     fn build(&mut self) {
         self.do_build(0, 0, None);
+        self.articulation.sort();
+        self.bridge.sort();
     }
     fn do_build(&mut self, u: usize, k: usize, par: Option<usize>) -> usize {
-        let k = k + 1;
+        let mut k = k;
         self.used[u] = true;
         self.ord[u] = k;
+        k += 1;
         self.low[u] = self.ord[u];
         let mut is_articulation = false;
         let mut cnt = 0;
         for &v in &self.g[u] {
-            if self.used[v] == false {
+            if !self.used[v] {
                cnt += 1; 
-               let k = self.do_build(v, k, Some(u));
+               k = self.do_build(v, k, Some(u));
                self.low[u] = std::cmp::min(self.low[u], self.low[v]);
                is_articulation |= par.is_some() && self.low[v] >= self.ord[u];
                if self.ord[u] < self.low[v] {
-                   self.bridge.push((u, v));
+                   self.bridge.push(minmax((u, v)));
                }
-            } else if Some(v) == par {
+            } else if Some(v) != par {
                 self.low[u] = std::cmp::min(self.low[u], self.ord[v]);
             } else {}
         }
@@ -53,4 +64,22 @@ impl <'a> LowLink<'a> {
         }
         k
     }
+}
+
+#[test]
+fn test_lowlink() {
+    let g = vec![
+        vec![1,2],
+        vec![0,2,3],
+        vec![0,1,3],
+        vec![1,2,6],
+        vec![6],
+        vec![6,7],
+        vec![3,4,5,7],
+        vec![5,6],
+    ];
+    let mut lowlink = LowLink::new(&g);
+    lowlink.build();
+    assert_eq!(lowlink.articulation, [3,6]);
+    assert_eq!(lowlink.bridge, [(3,6),(4,6)]);
 }
