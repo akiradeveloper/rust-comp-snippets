@@ -1,7 +1,7 @@
 use std::collections::VecDeque;
 
 struct TopologicalSort<'a> {
-    conn_list: &'a [Vec<usize>],
+    g: &'a [Vec<usize>],
     colors: Vec<bool>,
     indeg: Vec<u32>,
     Q: VecDeque<usize>,
@@ -9,18 +9,18 @@ struct TopologicalSort<'a> {
 }
 
 impl <'a> TopologicalSort<'a> {
-    fn new(conn_list: &'a [Vec<usize>]) -> Self {
-        let n = conn_list.len();
+    fn new(g: &'a [Vec<usize>]) -> Self {
+        let n = g.len();
         let mut colors = vec![false; n];
         let mut indeg = vec![0; n];
         for u in 0..n {
-            let conn = &conn_list[u];
+            let conn = &g[u];
             for &next in conn {
                 indeg[next] += 1;
             }
         }
         Self {
-            conn_list,
+            g,
             Q: VecDeque::new(),
             colors,
             indeg,
@@ -33,7 +33,7 @@ impl <'a> TopologicalSort<'a> {
         while !self.Q.is_empty() {
             let u = self.Q.pop_front().unwrap();
             self.out.push(u);
-            for &v in &self.conn_list[u] {
+            for &v in &self.g[u] {
                 self.indeg[v] -= 1;
                 if self.indeg[v] == 0 && self.colors[v] == false {
                     self.colors[v] = true;
@@ -44,7 +44,7 @@ impl <'a> TopologicalSort<'a> {
         }
     }
     fn tsort(&mut self) {
-        let n = self.conn_list.len();
+        let n = self.g.len();
         for u in 0..n {
             if self.indeg[u] == 0 && self.colors[u] == false {
                 self.bfs(u)
