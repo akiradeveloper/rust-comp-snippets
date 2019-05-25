@@ -5,3 +5,4 @@ pub mod min_cost_flow;
 pub mod tsort;
 pub mod lowlink;
 pub mod scc;
+pub mod lca;
