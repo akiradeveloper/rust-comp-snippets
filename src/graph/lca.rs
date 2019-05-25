@@ -49,6 +49,7 @@ impl <'a> LCA<'a> {
         };
         assert!(self.depth[v1] >= self.depth[v0]);
 
+        // move v1 up until depth of v0 and v1 gets equal.
         for k in 0 .. self.parent.len() {
             if (self.depth[v1] - self.depth[v0]) >> k & 1 > 0 {
                 v1 = self.parent[k][v1].unwrap();
@@ -58,6 +59,7 @@ impl <'a> LCA<'a> {
             return v0;
         }
         for k in (0..self.parent.len()).rev() {
+            // LCA's parent is LCA
             if self.parent[k][v0] != self.parent[k][v1] {
                 v0 = self.parent[k][v0].unwrap();
                 v1 = self.parent[k][v1].unwrap();
