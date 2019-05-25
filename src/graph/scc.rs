@@ -1,15 +1,15 @@
 use std::collections::VecDeque;
 
-struct SCC<'a> {
+pub struct SCC<'a> {
     g: &'a [Vec<usize>],
     r_g: Vec<Vec<usize>>,
     post_order: VecDeque<usize>,
     used: Vec<bool>,
-    order: Vec<usize>,
+    pub order: Vec<usize>,
 }
 
 impl <'a> SCC<'a> {
-    fn new(g: &'a [Vec<usize>]) -> Self {
+    pub fn new(g: &'a [Vec<usize>]) -> Self {
         let n = g.len();
         let mut r_g = vec![vec![]; n];
         for u in 0..n {
@@ -46,7 +46,7 @@ impl <'a> SCC<'a> {
             }
         }
     }
-    fn build(&mut self) {
+    pub fn build(&mut self) {
         for v in 0 .. self.g.len() {
             if !self.used[v] {
                 self.dfs(v);
@@ -61,20 +61,6 @@ impl <'a> SCC<'a> {
                 self.rdfs(v, k);
                 k += 1;
             }
-        }
-
-        // assign ordered group number
-        let tmp = self.order.clone();
-        self.order.clear();
-        let mut cur = 0;
-        let mut head = tmp[0];
-        for cmp in tmp {
-            if head == cmp {
-            } else {
-                head = cmp;
-                cur += 1;
-            }
-            self.order.push(cur);
         }
     }
 }
@@ -98,5 +84,5 @@ fn test_scc() {
     let mut scc = SCC::new(&g);
     scc.build();
 
-    assert_eq!(scc.order, [0,1,2,2,2,3,3,3,4,5,5,6]);
+    assert_eq!(scc.order, [0,1,2,2,2,3,3,3,4,6,6,5]);
 }

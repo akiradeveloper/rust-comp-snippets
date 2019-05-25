@@ -6,3 +6,4 @@ pub mod tsort;
 pub mod lowlink;
 pub mod scc;
 pub mod lca;
+pub mod mst;
