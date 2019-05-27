@@ -89,7 +89,7 @@ mod chu_liu_edmonds {
     }
     static NULL_EDGE: &'static Edge = &Edge(1<<40, 0);
     fn chu_liu_edmonds(in_g: &[Vec<Edge>], root: usize) -> u64 {
-        dbg!(&in_g);
+        // dbg!(&in_g);
         let mut min_in_g: Vec<&Edge> = vec![];
         let mut min_out_g: Vec<Vec<usize>> = vec![vec![]; in_g.len()];
         for to in 0..in_g.len() {
@@ -105,9 +105,9 @@ mod chu_liu_edmonds {
         let mut scc = scc::SCC::new(&min_out_g);
         scc.build();
 
-        dbg!(&min_in_g);
-        dbg!(&min_out_g);
-        dbg!(&scc.order);
+        // dbg!(&min_in_g);
+        // dbg!(&min_out_g);
+        // dbg!(&scc.order);
 
         let mut max_cmp = 0;
         for &cmp in &scc.order {
@@ -122,7 +122,7 @@ mod chu_liu_edmonds {
             for e in &min_in_g {
                 res += e.1;
             }
-            dbg!(res);
+            // dbg!(res);
             return res;
         }
 
@@ -131,7 +131,7 @@ mod chu_liu_edmonds {
             let cmp = scc.order[v];
             groups[cmp].push(v);
         }
-        dbg!(&groups);
+        // dbg!(&groups);
 
         let mut contracted_cost = 0;
         let mut new_in_g = vec![vec![]; max_cmp+1];
@@ -147,7 +147,7 @@ mod chu_liu_edmonds {
                         let in_group = group.contains(&e.0);
                         if !in_group {
                             let cmp_from = scc.order[e.0];
-                            dbg!((v, e.1, cur_e.1));
+                            // dbg!((v, e.1, cur_e.1));
                             let diff_cost = e.1 - cur_e.1;
                             new_in_g[cmp_to].push(Edge(cmp_from, diff_cost));
                         }
