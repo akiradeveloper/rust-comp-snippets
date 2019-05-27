@@ -87,13 +87,14 @@ mod chu_liu_edmonds {
         }
         r
     }
+    static NULL_EDGE: &'static Edge = &Edge(1<<40, 0);
     fn chu_liu_edmonds(in_g: &[Vec<Edge>], root: usize) -> u64 {
         dbg!(&in_g);
         let mut min_in_g: Vec<&Edge> = vec![];
         let mut min_out_g: Vec<Vec<usize>> = vec![vec![]; in_g.len()];
         for to in 0..in_g.len() {
             if to == root {
-                min_in_g.push(&Edge(1<<40, 0)); // null value
+                min_in_g.push(NULL_EDGE);
                 continue;
             }
             let e = min_edge(&in_g[to]);
