@@ -8,7 +8,11 @@ struct LCA <'a> {
 impl <'a> LCA<'a> {
     fn new(root: usize, tree: &'a [Vec<usize>]) -> Self {
         let n = tree.len();
-        let log_n = (n as f64).log2().ceil() as usize;
+        let mut log_n = (n as f64).log2().ceil() as usize;
+        if log_n == 0 {
+            log_n = 1;
+        }
+        assert!(log_n > 0);
         Self {
             root,
             tree,
@@ -28,15 +32,15 @@ impl <'a> LCA<'a> {
         }
     }
     fn build(&mut self) {
-        self.dfs(self.root, None, 0);
+        let root = self.root;
+        self.dfs(root, None, 0);
+
         let mut k = 0;
         while k+1 < self.parent.len() {
             for u in 0 .. self.tree.len() {
-                self.parent[k+1][u] = if self.parent[k][u].is_some() {
-                    self.parent[k][self.parent[k][u].unwrap()]
-                } else {
-                    None
-                }
+                if self.parent[k][u].is_some() {
+                    self.parent[k+1][u] = self.parent[k][self.parent[k][u].unwrap()]
+                } 
             }
             k += 1;
         }
@@ -51,16 +55,21 @@ impl <'a> LCA<'a> {
 
         // move v1 up until depth of v0 and v1 gets equal.
         for k in 0 .. self.parent.len() {
-            if (self.depth[v1] - self.depth[v0]) >> k & 1 > 0 {
+            if (((self.depth[v1] - self.depth[v0]) >> k) & 1) > 0 {
+                assert!(self.parent[k][v1].is_some());
                 v1 = self.parent[k][v1].unwrap();
             }
         }
+        assert!(self.depth[v1] >= self.depth[v0]);
+        assert!(self.depth[v1] == self.depth[v0]);
         if (v0 == v1) {
             return v0;
         }
         for k in (0..self.parent.len()).rev() {
             // LCA's parent is LCA
             if self.parent[k][v0] != self.parent[k][v1] {
+                assert!(self.parent[k][v0].is_some());
+                assert!(self.parent[k][v1].is_some());
                 v0 = self.parent[k][v0].unwrap();
                 v1 = self.parent[k][v1].unwrap();
             }
