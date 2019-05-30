@@ -16,6 +16,7 @@ pub mod total;
 pub mod union_find;
 pub mod seg;
 pub mod seg_lazy;
+pub mod sparse_table;
 pub mod fenwick;
 pub mod modulo;
 pub mod math;
