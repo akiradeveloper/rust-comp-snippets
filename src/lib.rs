@@ -23,3 +23,4 @@ pub mod math;
 pub mod geometry;
 pub mod graph;
 pub mod util;
+pub mod sequence;

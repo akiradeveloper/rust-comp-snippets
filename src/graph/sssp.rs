@@ -1,7 +1,15 @@
+mod bfs01 {
+    fn bfs01(cost: &[Vec<u32>], s: usize, inf: u32) -> Vec<u64> {
+        vec![]
+    }
+}
+
 mod dijkstra {
     fn dijkstra(n: usize, cost: &[Vec<u32>], s: usize) -> Vec<u32> {
         const INF: u32 = 2_000_000_001;
         let mut d = vec![INF; n];
+
+        d[s] = 0;
         let mut used = vec![false; n];
         loop {
             let mut v = None;
@@ -87,7 +95,7 @@ mod bellman_ford {
     struct Edge {
         from: usize,
         to: usize,
-        cost: i32,
+        cost: i32, // can be negative
     }
 
     fn bellman_ford(n: usize, es: Vec<Edge>, source: usize) -> Vec<i32> {
