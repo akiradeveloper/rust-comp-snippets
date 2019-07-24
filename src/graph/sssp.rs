@@ -1,6 +1,74 @@
 mod bfs01 {
-    fn bfs01(cost: &[Vec<u32>], s: usize, inf: u32) -> Vec<u64> {
-        vec![]
+    // connected[i][i] == false
+    fn bfs01(g: &[Vec<u32>], s: usize, inf: u32) -> Vec<u32> {
+        use std::collections::VecDeque;
+        let n = g.len();
+        let mut dp = vec![inf; n];
+        let mut deque = VecDeque::new();
+        dp[s] = 0;
+        deque.push_back(s);
+        while !deque.is_empty() {
+            let i = deque.pop_front().unwrap();
+            let cur_min_cost = dp[i];
+            for j in 0..n {
+                if g[i][j] < inf {
+                    if g[i][j] == 1 {
+                        let new_cost = cur_min_cost + 1;
+                        if new_cost < dp[j] {
+                            dp[j] = new_cost;
+                            deque.push_back(j);
+                        }
+                    } else {
+                        let new_cost = cur_min_cost;
+                        if new_cost < dp[j] {
+                            dp[j] = new_cost;
+                            deque.push_front(j);
+                        }
+
+                    }
+                }
+            }
+        }
+        dp
+    }
+    #[test]
+    fn test_bfs01() {
+        let map = [
+            ['.','.','.'],
+            ['.','#','.'],
+            ['.','.','.'],
+        ];
+        let mut g = vec![vec![1<<30; 9]; 9];
+        let pos = |i, j| {
+            i*3 + j
+        };
+        for i in 0..3 {
+            for j in 0..3 {
+                let u = pos(i, j);
+                if map[i][j] == '#' {
+                    continue;
+                }
+                if i>0 && map[i-1][j] == '.' {
+                    let v = pos(i-1, j);
+                    g[u][v] = 1;
+                }
+                if i<3-1 && map[i+1][j] == '.' {
+                    let v = pos(i+1, j);
+                    g[u][v] = 1;
+                }
+                if j>0 && map[i][j-1] == '.' {
+                    let v = pos(i, j-1);
+                    g[u][v] = 1;
+                }
+                if j<3-1 && map[i][j+1] == '.' {
+                    let v = pos(i, j+1);
+                    g[u][v] = 1;
+                }
+            }
+        }
+        dbg!(&g);
+        let dp = bfs01(&g, 0, 1<<30); 
+        dbg!(&dp);
     }
 }
 
