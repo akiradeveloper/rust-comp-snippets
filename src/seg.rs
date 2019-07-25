@@ -73,6 +73,22 @@ impl Monoid for SUM {
     }
 }
 
+#[test]
+fn test_seg_sum() {
+    let mut seg: SEG<SUM> = SEG::new(4);
+    seg.update(0,1);
+    seg.update(1,2);
+    seg.update(2,3);
+    seg.update(3,4);
+    assert_eq!(seg.query(0, 1), 1);
+    assert_eq!(seg.query(0, 2), 3);
+    assert_eq!(seg.query(0, 3), 6);
+    assert_eq!(seg.query(0, 4), 10);
+
+    assert_eq!(seg.query(1, 3), 5);
+    assert_eq!(seg.query(2, 4), 7);
+}
+
 #[allow(dead_code)]
 struct MIN;
 impl Monoid for MIN {

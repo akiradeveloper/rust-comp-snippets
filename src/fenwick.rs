@@ -40,6 +40,28 @@ impl<T: Clone, F: Fn(&mut T, &T) -> ()> BIT<T, F> {
             i += i & -i;
         }
     }
+
+    pub fn add_0_orig(&mut self, i: usize, x: &T) {
+        self.add(i+1, x)
+    }
+
+    pub fn sum_excl(&self, i: usize) -> T {
+        self.sum(i)
+    }
+}
+
+#[test]
+fn test_fenwick() {
+    let mut bit = BIT::new(4, &0, |a: &mut usize, b: &usize| *a += b);
+    bit.add_0_orig(0, &1);
+    bit.add_0_orig(1, &2);
+    bit.add_0_orig(2, &3);
+    bit.add_0_orig(3, &4);
+    dbg!(&bit.buf);
+    assert_eq!(bit.sum_excl(1), 1);
+    assert_eq!(bit.sum_excl(2), 3);
+    assert_eq!(bit.sum_excl(3), 6);
+    assert_eq!(bit.sum_excl(4), 10);
 }
 
 #[test]
