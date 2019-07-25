@@ -1,4 +1,5 @@
 use super::binary_search::BinarySearch;
+use super::fenwick::BIT;
 use std::cmp::{min, max};
 
 fn lis<T: Ord + Clone>(xs: &[T], inf: T) -> Vec<T> {
@@ -64,4 +65,26 @@ fn test_lcs() {
     let ys = vec![1,2,2,4,5,3,3,3,2,4];
     let dp = lcs(&xs, &ys);
     dbg!(dp);
+}
+
+fn inversion(xs: &[usize]) -> Vec<usize> {
+    let mut max_v = 0;
+    for &x in xs {
+        max_v = max(max_v, x);
+    }
+    let mut res = vec![];
+    let mut bit = BIT::new(max_v+1, &0, |a: &mut usize, b: &usize| *a += b);
+    for i in 0..xs.len() {
+        let x = xs[i];
+        let cnt = bit.sum_excl(x+1); // cnt of <= x
+        res.push(i-cnt);
+        bit.add_0_orig(x, &1);
+    }
+    res
+}
+
+#[test]
+fn test_inversion() {
+    let xs = vec![1,3,2,4,2,1];
+    assert_eq!(inversion(&xs), [0,0,1,0,2,4]);
 }
