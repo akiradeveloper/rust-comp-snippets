@@ -44,16 +44,16 @@ mod bellman_ford {
             let mut prevv = vec![0; self.n()];
             let mut preve = vec![0; self.n()];
             let mut f = f;
-            const INF: i32 = 2_000_000_001;
+            let inf = 2_000_000_001;
 
             while f > 0 {
-                let mut dist = vec![INF; self.n()];
+                let mut dist = vec![inf; self.n()];
                 dist[s] = 0;
                 let mut update = true;
                 while update {
                     update = false;
                     for v in 0..self.n() {
-                        if dist[v] == INF {
+                        if dist[v] == inf {
                             continue;
                         }
                         for i in 0..self.g[v].len() {
@@ -68,14 +68,12 @@ mod bellman_ford {
                     }
                 }
 
-                if dist[t] == INF {
+                if dist[t] == inf {
                     return None;
                 }
 
                 let mut actual_flow = f;
 
-                // FIXME this does not include s
-                // should be for (u=t; u!=s; u=prevv[u])
                 let mut u = t;
                 loop {
                     if u == s {
@@ -88,7 +86,6 @@ mod bellman_ford {
                 f -= actual_flow;
                 res += actual_flow as i32 * dist[t];
 
-                // FIXME
                 let mut u = t;
                 loop {
                     if u == s {
@@ -121,7 +118,7 @@ mod bellman_ford {
 mod dijkstra {
     #[derive(Copy, Clone, Eq, PartialEq)]
     struct State {
-        cost: u32,
+        cost: i32,
         v: usize,
     }
 
@@ -143,7 +140,7 @@ mod dijkstra {
     #[derive(Clone)]
     struct Edge {
         to: usize,
-        cap: u32,
+        cap: i32,
         cost: i32,
         rev: usize,
     }
@@ -158,8 +155,8 @@ mod dijkstra {
                 g: vec![vec![]; n],
             }
         }
-
-        fn add_edge(&mut self, from: usize, to: usize, cap: u32, cost: u32) {
+    
+        fn add_edge(&mut self, from: usize, to: usize, cap: i32, cost: i32) {
             let from_rev = self.g[to].len();
             let to_rev = self.g[from].len();
             self.g[from].push(Edge {
@@ -180,18 +177,18 @@ mod dijkstra {
             self.g.len()
         }
 
-        fn min_cost_flow(&mut self, s: usize, t: usize, f: u32) -> Option<u32> {
+        fn min_cost_flow(&mut self, s: usize, t: usize, f: i32) -> Option<i32> {
             let mut res = 0;
             let mut total_flow = f;
             let mut prevv = vec![0; self.n()];
             let mut preve = vec![0; self.n()];
 
-            let mut h = vec![0u32; self.n()];
+            let mut h = vec![0; self.n()];
 
             while total_flow > 0 {
-                let INF: u32 = 2_000_000_001;
+                let inf = 2_000_000_001;
                 let mut queue = std::collections::BinaryHeap::new();
-                let mut dist = vec![INF; self.n()]; // for all >= 0
+                let mut dist = vec![inf; self.n()]; // for all >= 0
                 dist[s] = 0;
                 queue.push( State { cost: 0, v: s } );
 
@@ -199,8 +196,7 @@ mod dijkstra {
                     if dist[v] < cost { continue; }
                     for i in 0 .. self.g[v].len() {
                         let e = &self.g[v][i];
-                        let new_dist = (dist[v] as i32 + e.cost + h[v] as i32 - h[e.to] as i32) as u32;
-                        assert!(new_dist >= 0);
+                        let new_dist = dist[v] + e.cost + h[v] - h[e.to];
                         if e.cap > 0 && dist[e.to] > new_dist {
                             dist[e.to] = new_dist;
                             prevv[e.to] = v;
@@ -209,7 +205,7 @@ mod dijkstra {
                         }
                     }
                 }
-                if dist[t] == INF {
+                if dist[t] == inf {
                     return None;
                 }
                 for v in 0 .. self.n() {
@@ -217,18 +213,18 @@ mod dijkstra {
                 }
                 
                 let mut actual_flow = f;
-                // FIXME
                 let mut v = t;
-                while v != s {
+                loop {
+                    if v == s { break; }
                     actual_flow = std::cmp::min(actual_flow, self.g[prevv[v]][preve[v]].cap);
                     v = prevv[v];
                 }
 
                 total_flow -= actual_flow;
                 res += actual_flow * h[t];
-                // FIXME
                 let mut v = t;
-                while v != s {
+                loop {
+                    if v == s { break; }
                     let e = self.g[prevv[v]][preve[v]].clone();
                     self.g[prevv[v]][preve[v]].cap -= actual_flow;
                     self.g[v][e.rev].cap += actual_flow;
