@@ -2,7 +2,7 @@ mod bellman_ford {
     #[derive(Clone)]
     struct Edge {
         to: usize,
-        cap: u32,
+        cap: i32,
         cost: i32,
         rev: usize,
     }
@@ -18,7 +18,7 @@ mod bellman_ford {
             }
         }
         /// allows negative costs
-        fn add_edge(&mut self, from: usize, to: usize, cap: u32, cost: i32) {
+        fn add_edge(&mut self, from: usize, to: usize, cap: i32, cost: i32) {
             let from_rev = self.g[to].len();
             let to_rev = self.g[from].len();
             self.g[from].push(Edge {
@@ -39,7 +39,7 @@ mod bellman_ford {
             self.g.len()
         }
 
-        fn min_cost_flow(&mut self, s: usize, t: usize, f: u32) -> Option<i32> {
+        fn min_cost_flow(&mut self, s: usize, t: usize, f: i32) -> Option<i32> {
             let mut res: i32 = 0;
             let mut prevv = vec![0; self.n()];
             let mut preve = vec![0; self.n()];
@@ -77,9 +77,12 @@ mod bellman_ford {
                 // FIXME this does not include s
                 // should be for (u=t; u!=s; u=prevv[u])
                 let mut u = t;
-                while u != s {
-                    actual_flow = std::cmp::min(actual_flow, self.g[prevv[u]][preve[u]].cap);
+                loop {
+                    if u == s {
+                        break;
+                    }
                     u = prevv[u];
+                    actual_flow = std::cmp::min(actual_flow, self.g[prevv[u]][preve[u]].cap);
                 }
 
                 f -= actual_flow;
@@ -87,11 +90,14 @@ mod bellman_ford {
 
                 // FIXME
                 let mut u = t;
-                while u != s {
+                loop {
+                    if u == s {
+                        break;
+                    }
+                    u = prevv[u];
                     let e = self.g[prevv[u]][preve[u]].clone();
                     self.g[prevv[u]][preve[u]].cap -= actual_flow;
                     self.g[u][e.rev].cap += actual_flow;
-                    u = prevv[u];
                 }
             }
             
