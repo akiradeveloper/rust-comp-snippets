@@ -59,12 +59,13 @@ fn test_modpow() {
 struct ModComb {
     po: Vec<u64>,
     inv: Vec<u64>,
-    max_n: u64,
+    n: u64,
     p: u64,
 }
 impl ModComb {
+    // O(N)
     fn initialize(ft: &mut Self) {
-        let n = ft.max_n as usize;
+        let n = ft.n as usize;
 
         ft.po[0] = 1;
         for i in 1..n {
@@ -76,10 +77,12 @@ impl ModComb {
         }
     }
     fn new(max_n: u64, p: u64) -> Self {
+        // nHk needs twice the length of the max_n.
+        // since it doesn't affect the computational order, we always double the number for convenience.
         let mut ft = Self {
-            po: vec![0; max_n as usize],
-            inv: vec![0; max_n as usize],
-            max_n: max_n,
+            po: vec![0; 2 * max_n as usize],
+            inv: vec![0; 2 * max_n as usize],
+            n: 2 * max_n,
             p: p,
         };
         Self::initialize(&mut ft);

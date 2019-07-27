@@ -59,6 +59,8 @@ pub fn convex_hull_check((a1, b1): (i64, i64), (a2, b2): (i64, i64), (a3, b3): (
         >= (b2 as f64 - b1 as f64) * (a3 as f64 - a2 as f64)
 }
 
+// compute the maximum factor for each number
+// e.g 5 for 60 (2x2x3x5)
 #[snippet = "factor_table"]
 #[allow(dead_code)]
 pub fn factor_table(max_n: usize) -> Vec<usize> {
