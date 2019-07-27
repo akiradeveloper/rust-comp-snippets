@@ -74,6 +74,8 @@ mod bellman_ford {
 
                 let mut actual_flow = f;
 
+                // FIXME this does not include s
+                // should be for (u=t; u!=s; u=prevv[u])
                 let mut u = t;
                 while u != s {
                     actual_flow = std::cmp::min(actual_flow, self.g[prevv[u]][preve[u]].cap);
@@ -83,10 +85,12 @@ mod bellman_ford {
                 f -= actual_flow;
                 res += actual_flow as i32 * dist[t];
 
+                // FIXME
                 let mut u = t;
                 while u != s {
-                    let e = &mut self.g[prevv[u]][preve[u]];
-                    e.cap -= actual_flow;
+                    let e = self.g[prevv[u]][preve[u]].clone();
+                    self.g[prevv[u]][preve[u]].cap -= actual_flow;
+                    self.g[u][e.rev].cap += actual_flow;
                     u = prevv[u];
                 }
             }
@@ -95,7 +99,17 @@ mod bellman_ford {
         }
     }
     #[test]
-    fn test() {}
+    fn test_bellman_ford_min_cost_flow() {
+        let mut g = Network::new(5);
+        g.add_edge(0, 1, 10, 2);
+        g.add_edge(1, 3, 6, 2);
+        g.add_edge(1, 2, 6, 6);
+        g.add_edge(0, 2, 2, 4);
+        g.add_edge(3, 2, 3, 3);
+        g.add_edge(2, 4, 5, 2);
+        g.add_edge(3, 4, 8, 6);
+        println!("{}", g.min_cost_flow(0, 4, 9).unwrap());
+    }
 }
 
 mod dijkstra {
@@ -197,6 +211,7 @@ mod dijkstra {
                 }
                 
                 let mut actual_flow = f;
+                // FIXME
                 let mut v = t;
                 while v != s {
                     actual_flow = std::cmp::min(actual_flow, self.g[prevv[v]][preve[v]].cap);
@@ -205,6 +220,7 @@ mod dijkstra {
 
                 total_flow -= actual_flow;
                 res += actual_flow * h[t];
+                // FIXME
                 let mut v = t;
                 while v != s {
                     let e = self.g[prevv[v]][preve[v]].clone();
@@ -218,7 +234,15 @@ mod dijkstra {
         }
     }
     #[test]
-    fn test() {
-
+    fn test_dijkstra_min_cost_flow() {
+        let mut g = Network::new(5);
+        g.add_edge(0, 1, 10, 2);
+        g.add_edge(1, 3, 6, 2);
+        g.add_edge(1, 2, 6, 6);
+        g.add_edge(0, 2, 2, 4);
+        g.add_edge(3, 2, 3, 3);
+        g.add_edge(2, 4, 5, 2);
+        g.add_edge(3, 4, 8, 6);
+        println!("{}", g.min_cost_flow(0, 4, 9).unwrap());
     }
 }
