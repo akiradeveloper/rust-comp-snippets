@@ -73,9 +73,11 @@ mod bfs01 {
 }
 
 mod dijkstra {
-    fn dijkstra(n: usize, cost: &[Vec<u32>], s: usize) -> Vec<u32> {
-        const INF: u32 = 2_000_000_001;
-        let mut d = vec![INF; n];
+    // self = 0
+    // not connected = inf;
+    fn dijkstra(g: &[Vec<u32>], s: usize, inf: u32) -> Vec<u32> {
+        let n = g.len();
+        let mut d = vec![inf; n];
 
         d[s] = 0;
         let mut used = vec![false; n];
@@ -93,7 +95,7 @@ mod dijkstra {
             used[v] = true;
 
             for u in 0..n {
-                d[u] = std::cmp::min(d[u], d[v] + cost[v][u])
+                d[u] = std::cmp::min(d[u], d[v] + g[v][u])
             }
         }
         d
@@ -103,51 +105,30 @@ mod dijkstra {
 }
 
 mod djikstra_heap {
-    #[derive(Copy, Clone, Eq, PartialEq)]
-    struct State {
-        cost: u32,
-        v: usize,
-    }
-
-    impl Ord for State {
-        fn cmp(&self, other: &State) -> std::cmp::Ordering {
-            other
-                .cost
-                .cmp(&self.cost)
-                .then_with(|| self.v.cmp(&other.v))
-        }
-    }
-
-    impl PartialOrd for State {
-        fn partial_cmp(&self, other: &State) -> Option<std::cmp::Ordering> {
-            Some(self.cmp(other))
-        }
-    }
-
     struct Edge {
         to: usize,
-        cost: u32,
+        cost: i64,
     }
 
-    fn dijkstra_heap(n: usize, g: &[Vec<Edge>], s: usize) -> Vec<u32> {
-        let INF = 2_000_000_001;
-        let mut queue = std::collections::BinaryHeap::new();
-        let mut d = vec![INF; n];
+    fn dijkstra_heap(g: &[Vec<Edge>], s: usize, inf: i64) -> Vec<i64> {
+        let n = g.len();
+        let mut queue = std::collections::BinaryHeap::new(); // max-heap
+        let mut d = vec![inf; n];
 
         d[s] = 0;
-        queue.push(State { cost: 0, v: s });
+        queue.push((0, s));
 
-        while let Some(State { cost, v }) = queue.pop() {
+        while let Some((cost, v)) = queue.pop() {
+            let cost = -cost;
+
             if d[v] < cost {
                 continue;
             }
             for e in &g[v] {
-                if d[e.to] > d[v] + e.cost {
-                    d[e.to] = d[v] + e.cost;
-                    queue.push(State {
-                        cost: e.cost,
-                        v: e.to,
-                    });
+                let new_cost = cost + e.cost;
+                if d[e.to] > new_cost {
+                    d[e.to] = new_cost;
+                    queue.push((-new_cost, e.to));
                 }
             }
         }
