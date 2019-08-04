@@ -88,3 +88,51 @@ fn test_inversion() {
     let xs = vec![1,3,2,4,2,1];
     assert_eq!(inversion(&xs), [0,0,1,0,2,4]);
 }
+
+struct FTSearch {
+    orig: Vec<bool>,
+    f_search: Vec<Option<usize>>,
+    t_search: Vec<usize>,
+}
+impl FTSearch {
+    fn new(xs: Vec<bool>) -> Self {
+        let N = xs.len();
+        let mut f_search = vec![None; N];
+        let mut f_i = None;
+        for i in 0..N {
+            if xs[i] == false {
+                f_i = Some(i);
+            }
+            f_search[i] = f_i;
+        }
+        let mut t_search = vec![N; N];
+        let mut t_i = N;
+        for i in (0..N).rev() {
+            if xs[i] == true {
+                t_i = i;
+            }
+            t_search[i] = t_i;
+        }
+        Self {
+            orig: xs,
+            f_search,
+            t_search,
+        }
+    }
+    fn f_search(&self, i: usize) -> Option<usize> {
+        self.f_search[i]
+    }
+    fn t_search(&self, i: usize) -> usize {
+        self.t_search[i]
+    }
+}
+#[test]
+fn test_ft_search() {
+    let xs = vec![true,false,false,true,false];
+    let ft = FTSearch::new(xs);
+    assert_eq!(ft.f_search(0), None); assert_eq!(ft.t_search(0), 0);
+    assert_eq!(ft.f_search(1), Some(1)); assert_eq!(ft.t_search(1), 3);
+    assert_eq!(ft.f_search(2), Some(2)); assert_eq!(ft.t_search(2), 3);
+    assert_eq!(ft.f_search(3), Some(2)); assert_eq!(ft.t_search(3), 3);
+    assert_eq!(ft.f_search(4), Some(4)); assert_eq!(ft.t_search(4), 5);
+}
