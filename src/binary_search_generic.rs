@@ -6,22 +6,25 @@ struct BinarySearch<F> {
 
 impl <F: Fn(usize) -> bool> BinarySearch<F> {
     fn search(&self) -> (Option<usize>, usize) {
-        let mut lb = self.lower;
-        let mut ub = self.upper+2;
+        let lower = self.lower as i32;
+        let upper = self.upper as i32;
+
+        let mut lb = lower - 1; 
+        let mut ub = upper + 1;
         while ub - lb > 1 {
             let mid = (lb+ub)/2;
-            if (self.p)(mid-1) {
+            if (self.p)(mid as usize) {
                 ub = mid;
             } else {
                 lb = mid;
             }
         }
-        let former = if lb == self.lower {
+        let former = if lb < 0 {
             None
         } else {
-            Some(lb-1)
+            Some(lb as usize)
         };
-        let latter = ub-1;
+        let latter = ub as usize;
         (former, latter)
     }
 }
