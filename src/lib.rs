@@ -8,8 +8,7 @@
 extern crate rand;
 extern crate test;
 
-pub mod binary_search;
-pub mod binary_search_generic;
+pub mod binary_search_cpp;
 pub mod bitset;
 pub mod rev;
 pub mod template;
@@ -25,3 +24,4 @@ pub mod geometry;
 pub mod graph;
 pub mod util;
 pub mod sequence;
+pub mod sequence01;

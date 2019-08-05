@@ -3,7 +3,6 @@ struct BinarySearch<F> {
     lower: usize,
     upper: usize,
 }
-
 impl <F: Fn(usize) -> bool> BinarySearch<F> {
     fn search(&self) -> (Option<usize>, usize) {
         let lower = self.lower as i32;
@@ -83,3 +82,58 @@ fn test_binary_search_generic_array_ref() {
     };
     dbg!(bs3.search());
 }
+
+struct FTSearch<F> {
+    f_search: Vec<Option<usize>>,
+    t_search: Vec<usize>,
+    p: F,
+    lower: usize,
+}
+impl <F: Fn(usize) -> bool> FTSearch<F> {
+    fn new(p: F, lower: usize, upper: usize) -> FTSearch<F> {
+        let N = upper+1 - lower;
+        let mut f_search = vec![None; N];
+        let mut f_i = None;
+        for i in 0..N {
+            if p(i+lower) == false {
+                f_i = Some(i);
+            }
+            f_search[i] = f_i;
+        }
+        let mut t_search = vec![N; N];
+        let mut t_i = N;
+        for i in (0..N).rev() {
+            if p(i+lower) == true {
+                t_i = i;
+            }
+            t_search[i] = t_i;
+        }
+        Self {
+            p: p,
+            f_search: f_search,
+            t_search: t_search,
+            lower: lower,
+        }
+    }
+    fn f_search(&self, i: usize) -> Option<usize> {
+        self.f_search[i-self.lower].map(|x| x+self.lower)
+    }
+    fn t_search(&self, i: usize) -> usize {
+        self.t_search[i-self.lower] + self.lower
+    }
+}
+#[test]
+fn test_ft_search() {
+    let xs = vec![true,false,false,true,false];
+    let ft = FTSearch::new(
+        |i: usize| { xs[i] },
+        0,
+        4,
+    );
+    assert_eq!(ft.f_search(0), None); assert_eq!(ft.t_search(0), 0);
+    assert_eq!(ft.f_search(1), Some(1)); assert_eq!(ft.t_search(1), 3);
+    assert_eq!(ft.f_search(2), Some(2)); assert_eq!(ft.t_search(2), 3);
+    assert_eq!(ft.f_search(3), Some(2)); assert_eq!(ft.t_search(3), 3);
+    assert_eq!(ft.f_search(4), Some(4)); assert_eq!(ft.t_search(4), 5);
+}
+
