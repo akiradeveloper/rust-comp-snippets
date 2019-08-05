@@ -120,3 +120,83 @@ fn bench_bit_add_sum_100k(b: &mut Bencher) {
         }
     });
 }
+
+#[snippet = "BITSimple"]
+#[allow(dead_code)]
+/// Binary Indexed Tree of usize
+pub struct BITSimple {
+    buf: Vec<usize>,
+}
+
+#[snippet = "BITSimple"]
+#[allow(dead_code)]
+impl BITSimple {
+    pub fn new(n: usize) -> BITSimple {
+        BITSimple {
+            buf: vec![0; n + 1],
+        }
+    }
+
+    pub fn sum(&self, i: usize) -> usize {
+        let mut i = i;
+        let mut s = 0;
+        while i > 0 {
+            s += self.buf[i];
+            i &= i - 1;
+        }
+        s
+    }
+
+    pub fn add(&mut self, i: usize, x: usize) {
+        let mut i = i as i64;
+        while i < self.buf.len() as i64 {
+            self.buf[i as usize] += x;
+            i += i & -i;
+        }
+    }
+
+    pub fn add_0_orig(&mut self, i: usize, x: usize) {
+        self.add(i+1, x)
+    }
+
+    pub fn sum_excl(&self, i: usize) -> usize {
+        self.sum(i)
+    }
+}
+
+#[test]
+fn test_bit_simple_vs_cumsum() {
+    use rand::{Rng, SeedableRng, StdRng};
+    let size = 1000;
+    let mut cum_sum = vec![0; size + 1];
+    let mut bit = BITSimple::new(size);
+
+    let mut rng = StdRng::from_seed(&[1, 2, 3]);
+
+    let mut sum = 0;
+    for i in 1..size + 1 {
+        let x = rng.next_u32() as usize / (2 * size);
+        sum += x;
+        cum_sum[i] = sum;
+        bit.add(i, x);
+    }
+
+    for _ in 0..1000 {
+        let i = rng.next_u32() as usize % size + 1;
+        assert_eq!(bit.sum(i), cum_sum[i]);
+    }
+}
+
+#[test]
+fn test_bit_simple() {
+    let mut bit = BITSimple::new(4);
+    bit.add_0_orig(0, 1);
+    bit.add_0_orig(1, 2);
+    bit.add_0_orig(2, 3);
+    bit.add_0_orig(3, 4);
+    dbg!(&bit.buf);
+    assert_eq!(bit.sum_excl(1), 1);
+    assert_eq!(bit.sum_excl(2), 3);
+    assert_eq!(bit.sum_excl(3), 6);
+    assert_eq!(bit.sum_excl(4), 10);
+}
