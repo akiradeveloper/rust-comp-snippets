@@ -25,3 +25,4 @@ pub mod graph;
 pub mod util;
 pub mod sequence;
 pub mod sequence01;
+pub mod sqrt_decomposition;
