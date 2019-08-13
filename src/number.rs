@@ -49,7 +49,7 @@ pub fn mod_inverse(a: i64, m: i64) -> i64 {
 #[snippet = "mod"]
 #[allow(dead_code)]
 /// x ^ n % m
-pub fn modpow(x: u64, n: u64, m: u64) -> u64 {
+pub fn modpow(x: usize, n: usize, m: usize) -> usize {
     let mut res = 1;
     let mut x = x % m;
     let mut n = n;
@@ -74,11 +74,34 @@ fn test_modpow() {
     }
 }
 
+fn factorial(a: usize) -> usize {
+    if a == 0 {
+        return 1
+    }
+    let mut n = 1;
+    let mut a = a;
+    while a > 1 {
+        n *= a;
+        a -= 1;
+    }
+    n
+}
+fn nPk(a: usize, b: usize) -> usize {
+    assert!(a>=b);
+    factorial(a) / factorial(a-b)
+}
+fn nCk(a: usize, b: usize) -> usize {
+    factorial(a) / factorial(a-b) / factorial(b)
+}
+fn nHk(a: usize, b: usize) -> usize {
+    nCk(a+b-1, b)
+}
+
 struct ModComb {
-    po: Vec<u64>,
-    inv: Vec<u64>,
-    n: u64,
-    p: u64,
+    po: Vec<usize>,
+    inv: Vec<usize>,
+    n: usize,
+    p: usize,
 }
 impl ModComb {
     // O(N)
@@ -87,34 +110,34 @@ impl ModComb {
 
         ft.po[0] = 1;
         for i in 1..n {
-            ft.po[i] = (ft.po[i-1] * i as u64) % ft.p;
+            ft.po[i] = (ft.po[i-1] * i) % ft.p;
         }
         ft.inv[n-1] = modpow(ft.po[n-1], ft.p-2, ft.p);
         for i in (0..n-1).rev() {
-            ft.inv[i] = (ft.inv[i+1] * (i as u64 +1)) % ft.p;
+            ft.inv[i] = (ft.inv[i+1] * (i+1)) % ft.p;
         }
     }
-    fn new(max_n: u64, p: u64) -> Self {
+    fn new(max_n: usize, p: usize) -> ModComb {
         // nHk needs twice the length of the max_n.
         // since it doesn't affect the computational order, we always double the number for convenience.
-        let mut ft = Self {
-            po: vec![0; 2 * max_n as usize],
-            inv: vec![0; 2 * max_n as usize],
-            n: 2 * max_n,
+        let mut ft = ModComb {
+            po: vec![0; max_n+1 as usize],
+            inv: vec![0; max_n+1 as usize],
+            n: max_n+1,
             p: p,
         };
         Self::initialize(&mut ft);
         ft
     }
-    fn nCk(&self, n: u64, k: u64) -> u64 {
+    fn nCk(&self, n: usize, k: usize) -> usize {
         if n < k { return 0; }
         (self.nPk(n,k) * self.inv[k as usize]) % self.p 
     }
-    fn nPk(&self, n: u64, k: u64) -> u64 {
+    fn nPk(&self, n: usize, k: usize) -> usize {
         if n < k { return 0; }
         self.po[n as usize] * self.inv[(n-k) as usize] % self.p
     }
-    fn nHk(&self, n: u64, k: u64) -> u64 {
+    fn nHk(&self, n: usize, k: usize) -> usize {
         if n==0 && k==0 { return 1 }
         self.nCk(n+k-1,k)
     }
@@ -132,14 +155,15 @@ fn test_modcomb() {
     assert_eq!(com.nHk(100000, 100000), 939733670);
 }
 
-pub fn factors(n: usize) -> Vec<(usize, usize)> {
-    vec![]
+#[should_panic]
+#[test]
+fn test_mc() {
+    let p = 11;
+    let modcomb = ModComb::new(8, p);
+    assert_eq!(modcomb.nPk(9, 3), 9);
 }
 
-pub fn eratosthenes(max_n: usize) -> Vec<usize> {
-    vec![]
-}
-
+// O(n log log n)
 // compute the maximum factor for each number
 // e.g 5 for 60 (2x2x3x5)
 #[snippet = "factor_table"]
@@ -159,7 +183,6 @@ pub fn factor_table(max_n: usize) -> Vec<usize> {
 
     res
 }
-
 #[test]
 fn test_factor_table() {
     let n = 1000;
@@ -167,4 +190,78 @@ fn test_factor_table() {
     for i in 2..n + 1 {
         assert_eq!(i % table[i], 0);
     }
+}
+
+// O(n log log n)
+fn eratosthenes(n_max: usize) -> Vec<usize> {
+    let mut res = vec![];
+    let mut v = vec![0; n_max+1];
+    for i in 2..n_max+1 {
+        if v[i] == 0 {
+            res.push(i);
+            let mut j = i;
+            while j <= n_max {
+                v[j] = i;
+                j += i;
+            }
+        }
+    }
+    res
+}
+
+// O(root(n))
+fn is_prime(n: usize) -> bool {
+    let mut d = 1;
+    // O(root(n))
+    while d * d <= n {
+        d += 1;
+    }
+    // O(root(n))
+    let mut res = true;
+    for i in 2..d {
+        if n % i == 0 {
+            res = false;
+            break;
+        }
+    }
+    res
+}
+
+// O(root(n))
+fn root_int(n: usize) -> usize {
+    let mut d = 1;
+    while d * d <= n {
+        d += 1;
+    }
+    d - 1
+}
+#[test]
+fn test_root_int() {
+    assert_eq!(root_int(35), 5);
+    assert_eq!(root_int(36), 6);
+    assert_eq!(root_int(37), 6);
+}
+
+fn prime_factors(n: usize) -> std::collections::HashMap<usize,usize> {
+    let mut n = n;
+    let mut m = std::collections::HashMap::new();
+    for i in 2..root_int(n)+1 {
+        while n % i == 0 {
+            if !m.contains_key(&i) {
+                m.insert(i, 0 as usize);
+            }
+            *m.get_mut(&i).unwrap() += 1;
+            n /= i;
+        }
+    }
+    if n != 1 {
+        m.insert(n, 1);
+    }
+    m
+}
+#[test]
+fn test_prime_factors() {
+    dbg!(prime_factors(6));
+    dbg!(prime_factors(12));
+    dbg!(prime_factors(15));
 }
