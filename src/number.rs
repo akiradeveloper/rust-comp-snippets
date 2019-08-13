@@ -18,7 +18,8 @@ pub fn lcm(a: u64, b: u64) -> u64 {
 
 #[snippet = "mod"]
 #[allow(dead_code)]
-/// (gcd, x, y)
+/// solve ax+by=gcd(a,b)
+/// returns (gcd, x, y)
 pub fn extgcd(a: i64, b: i64) -> (i64, i64, i64) {
     if b == 0 {
         (a, 1, 0)
@@ -26,6 +27,23 @@ pub fn extgcd(a: i64, b: i64) -> (i64, i64, i64) {
         let (gcd, x, y) = extgcd(b, a % b);
         (gcd, y, x - (a / b) * y)
     }
+}
+
+#[test]
+fn test_extgcg() {
+    let (gcd, x, y) = extgcd(4, 11);
+    assert_eq!(x, 3);
+    assert_eq!(y, -1);
+    assert_eq!(gcd, 1);
+    // dbg!(gcd, x, y);
+}
+
+/// ax=b(mod m)
+/// ay=1 (mod m) -> y=a^{-1}
+/// x=yb (mod m)
+pub fn mod_inverse(a: i64, m: i64) -> i64 {
+    let (_, x, _) = extgcd(a, m);
+    (m + x % m) % m
 }
 
 #[snippet = "mod"]
@@ -112,4 +130,41 @@ fn test_modcomb() {
     assert_eq!(com.nHk(10, 4), 715);
     assert_eq!(com.nHk(400, 296), 546898535);
     assert_eq!(com.nHk(100000, 100000), 939733670);
+}
+
+pub fn factors(n: usize) -> Vec<(usize, usize)> {
+    vec![]
+}
+
+pub fn eratosthenes(max_n: usize) -> Vec<usize> {
+    vec![]
+}
+
+// compute the maximum factor for each number
+// e.g 5 for 60 (2x2x3x5)
+#[snippet = "factor_table"]
+#[allow(dead_code)]
+pub fn factor_table(max_n: usize) -> Vec<usize> {
+    let mut res = vec![0; max_n + 1];
+    // res[1] = 1;
+    for i in 2..max_n + 1 {
+        if res[i] == 0 {
+            let mut j = i;
+            while j <= max_n {
+                res[j] = i;
+                j += i;
+            }
+        }
+    }
+
+    res
+}
+
+#[test]
+fn test_factor_table() {
+    let n = 1000;
+    let table = factor_table(n);
+    for i in 2..n + 1 {
+        assert_eq!(i % table[i], 0);
+    }
 }
