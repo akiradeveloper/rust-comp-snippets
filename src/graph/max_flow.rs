@@ -2,7 +2,7 @@ mod ford_fulkerson {
     #[derive(Clone)]
     struct Edge {
         to: usize,
-        cap: u32,
+        cap: usize,
         rev: usize,
     }
 
@@ -23,7 +23,7 @@ mod ford_fulkerson {
             self.g.len()
         }
 
-        fn add_edge(&mut self, from: usize, to: usize, cap: u32) {
+        fn add_edge(&mut self, from: usize, to: usize, cap: usize) {
             let from_rev = self.g[to].len();
             let to_rev = self.g[from].len();
 
@@ -39,7 +39,7 @@ mod ford_fulkerson {
             });
         }
 
-        fn dfs(&mut self, v: usize, t: usize, f: u32) -> u32 {
+        fn dfs(&mut self, v: usize, t: usize, f: usize) -> usize {
             if v == t {
                 return f;
             }
@@ -58,8 +58,8 @@ mod ford_fulkerson {
             return 0;
         }
 
-        fn max_flow(&mut self, s: usize, t: usize) -> u32 {
-            let mut flow: u32 = 0;
+        fn max_flow(&mut self, s: usize, t: usize) -> usize {
+            let mut flow = 0;
             loop {
                 self.used = vec![false; self.n()];
                 let f = self.dfs(s, t, 2_000_000_001);

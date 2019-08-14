@@ -2,7 +2,7 @@
 
 #[snippet = "mod"]
 #[allow(dead_code)]
-pub fn gcd(a: u64, b: u64) -> u64 {
+pub fn gcd(a: usize, b: usize) -> usize {
     if b == 0 {
         a
     } else {
@@ -12,12 +12,13 @@ pub fn gcd(a: u64, b: u64) -> u64 {
 
 #[snippet = "mod"]
 #[allow(dead_code)]
-pub fn lcm(a: u64, b: u64) -> u64 {
+pub fn lcm(a: usize, b: usize) -> usize {
     a / gcd(a, b) * b
 }
 
 #[snippet = "mod"]
 #[allow(dead_code)]
+/// O(log n)
 /// solve ax+by=gcd(a,b)
 /// returns (gcd, x, y)
 pub fn extgcd(a: i64, b: i64) -> (i64, i64, i64) {
@@ -118,8 +119,6 @@ impl ModComb {
         }
     }
     fn new(max_n: usize, p: usize) -> ModComb {
-        // nHk needs twice the length of the max_n.
-        // since it doesn't affect the computational order, we always double the number for convenience.
         let mut ft = ModComb {
             po: vec![0; max_n+1 as usize],
             inv: vec![0; max_n+1 as usize],
@@ -157,7 +156,7 @@ fn test_modcomb() {
 
 #[should_panic]
 #[test]
-fn test_mc() {
+fn test_modcomb_segv() {
     let p = 11;
     let modcomb = ModComb::new(8, p);
     assert_eq!(modcomb.nPk(9, 3), 9);

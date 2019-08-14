@@ -1,6 +1,6 @@
 mod warshal_froid {
     // dist could be negative as well as bellman ford
-    fn warshal_froid(d: &mut [Vec<i32>]) {
+    fn warshal_froid(d: &mut [Vec<i64>]) {
         let n = d.len();
         for k in 0..n {
             for i in 0..n {

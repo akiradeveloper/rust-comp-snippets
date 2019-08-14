@@ -2,7 +2,7 @@ struct LCA <'a> {
     root: usize,
     tree: &'a [Vec<usize>],
     parent: Vec<Vec<Option<usize>>>,
-    depth: Vec<u32>,
+    depth: Vec<usize>,
 }
 
 impl <'a> LCA<'a> {
@@ -21,7 +21,7 @@ impl <'a> LCA<'a> {
         }
     }
     // store direct parent and depth
-    fn dfs(&mut self, u: usize, parent: Option<usize>, depth: u32) {
+    fn dfs(&mut self, u: usize, parent: Option<usize>, depth: usize) {
         self.parent[0][u] = parent;
         self.depth[u] = depth;
         for i in 0 .. self.tree[u].len() {
