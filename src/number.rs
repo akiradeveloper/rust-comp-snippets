@@ -99,8 +99,8 @@ fn nHk(a: usize, b: usize) -> usize {
 }
 
 struct ModComb {
-    po: Vec<usize>,
-    inv: Vec<usize>,
+    fact: Vec<usize>,
+    fact_inv: Vec<usize>,
     n: usize,
     p: usize,
 }
@@ -109,41 +109,70 @@ impl ModComb {
     fn initialize(ft: &mut Self) {
         let n = ft.n as usize;
 
-        ft.po[0] = 1;
+        ft.fact[0] = 1;
         for i in 1..n {
-            ft.po[i] = (ft.po[i-1] * i) % ft.p;
+            ft.fact[i] = (ft.fact[i-1] * i) % ft.p;
         }
-        ft.inv[n-1] = modpow(ft.po[n-1], ft.p-2, ft.p);
+        ft.fact_inv[n-1] = modpow(ft.fact[n-1], ft.p-2, ft.p);
         for i in (0..n-1).rev() {
-            ft.inv[i] = (ft.inv[i+1] * (i+1)) % ft.p;
+            ft.fact_inv[i] = (ft.fact_inv[i+1] * (i+1)) % ft.p;
         }
     }
     fn new(max_n: usize, p: usize) -> ModComb {
         let mut ft = ModComb {
-            po: vec![0; max_n+1 as usize],
-            inv: vec![0; max_n+1 as usize],
+            fact: vec![0; max_n+1 as usize],
+            fact_inv: vec![0; max_n+1 as usize],
             n: max_n+1,
             p: p,
         };
         Self::initialize(&mut ft);
         ft
     }
+    fn fact(&self, n: usize) -> usize {
+        self.fact[n]
+    }
     fn nCk(&self, n: usize, k: usize) -> usize {
         if n < k { return 0; }
-        (self.nPk(n,k) * self.inv[k as usize]) % self.p 
+        (self.nPk(n,k) * self.fact_inv[k]) % self.p 
     }
     fn nPk(&self, n: usize, k: usize) -> usize {
         if n < k { return 0; }
-        self.po[n as usize] * self.inv[(n-k) as usize] % self.p
+        self.fact[n] * self.fact_inv[n-k] % self.p
     }
     fn nHk(&self, n: usize, k: usize) -> usize {
         if n==0 && k==0 { return 1 }
         self.nCk(n+k-1,k)
     }
+    // 区別できるnを区別出来ないkに分割
+    fn nSk(&self, n: usize, k: usize) -> usize {
+        if n < k { return 0; }
+        let mut res = 0;
+        for i in 0..k+1 {
+            let v = self.nCk(k, i) * modpow(i, n, self.p) % self.p;
+            dbg!(v);
+            if (k - i) % 2 == 1 { // odd
+                res = (res + self.p - v) % self.p;
+            } else { // 
+                res = (res + v) % self.p;
+            }
+        }
+        return res * self.fact_inv[k] % self.p;
+    }
+    fn nBk(&self, n: usize, k: usize) -> usize {
+        0
+    }
 }
 
 #[test]
-fn test_modcomb() {
+fn test_modcomb_fact() {
+    let p = 1_000_000_007;
+    let com = ModComb::new(200000, p);
+    assert_eq!(com.fact(3), 6);
+    assert_eq!(com.fact(5), 120);
+}
+
+#[test]
+fn test_modcomb_nHk() {
     let p = 1_000_000_007;
     let com = ModComb::new(200000, p);
 
@@ -154,9 +183,18 @@ fn test_modcomb() {
     assert_eq!(com.nHk(100000, 100000), 939733670);
 }
 
+#[test]
+fn test_modcomb_nSk() {
+    let p = 1_000_000_007;
+    let com = ModComb::new(200000, p);
+    assert_eq!(com.nSk(4, 3) * com.fact(3) % p, 36);
+    assert_eq!(com.nSk(10, 3) * com.fact(3) % p, 55980);
+    assert_eq!(com.nSk(100, 100) * com.fact(100) % p, 437918130);
+}
+
 #[should_panic]
 #[test]
-fn test_modcomb_segv() {
+fn test_modcomb_mem_bound() {
     let p = 11;
     let modcomb = ModComb::new(8, p);
     assert_eq!(modcomb.nPk(9, 3), 9);
