@@ -27,3 +27,4 @@ pub mod sequence;
 pub mod sequence01;
 pub mod sqrt_decomposition;
 pub mod number;
+pub mod rolling_hash;
