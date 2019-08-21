@@ -302,3 +302,27 @@ fn test_prime_factors() {
     dbg!(prime_factors(12));
     dbg!(prime_factors(15));
 }
+
+fn bin_digits(n: usize) -> Vec<bool> {
+    let logN = (n as f64).log2().floor() as usize;
+    // dbg!(logN);
+    let mut res = vec![false; logN+1];
+    let mut n = n;
+    for k in (0..logN+1).rev() {
+        // dbg!(n, 1<<k);
+        if n >= 1<<k {
+            // dbg!(k);
+            res[k] = true;
+            n -= (1<<k);
+        }
+    }
+    res
+}
+#[test]
+fn test_bin_digits() {
+    assert_eq!(bin_digits(3), [true,true]);
+    assert_eq!(bin_digits(7), [true,true,true]);
+    assert_eq!(bin_digits(6), [false,true,true]);
+    assert_eq!(bin_digits(10), [false,true,false,true]);
+    assert_eq!(bin_digits(16), [false,false,false,false,true]);
+}
