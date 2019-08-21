@@ -9,7 +9,8 @@ extern crate rand;
 extern crate test;
 
 pub mod binary_heap;
-pub mod binary_search_cpp;
+pub mod lower_bound;
+pub mod binary_search;
 pub mod bitset;
 pub mod rev;
 pub mod template;

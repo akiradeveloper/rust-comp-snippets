@@ -83,6 +83,7 @@ fn test_binary_search_generic_array_ref() {
     dbg!(bs3.search());
 }
 
+
 struct FTSearch<F> {
     f_search: Vec<Option<usize>>,
     t_search: Vec<usize>,
