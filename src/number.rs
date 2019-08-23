@@ -75,7 +75,7 @@ fn test_modpow() {
     }
 }
 
-fn factorial(a: usize) -> usize {
+fn factorial(a: usize, p: usize) -> usize {
     if a == 0 {
         return 1
     }
@@ -83,19 +83,51 @@ fn factorial(a: usize) -> usize {
     let mut a = a;
     while a > 1 {
         n *= a;
+        n %= p;
         a -= 1;
     }
     n
 }
-fn nPk(a: usize, b: usize) -> usize {
-    assert!(a>=b);
-    factorial(a) / factorial(a-b)
-}
+// Knuth's algorithm
 fn nCk(a: usize, b: usize) -> usize {
-    factorial(a) / factorial(a-b) / factorial(b)
+    let mut a = a;
+    let mut r = 1;
+    for d in 1..b+1 {
+        r *= a;
+        a -= 1;
+        r /= d;
+    }
+    r
 }
-fn nHk(a: usize, b: usize) -> usize {
-    nCk(a+b-1, b)
+#[test]
+fn test_knuth_nCk() {
+    assert_eq!(nCk(5,0), 1);
+    assert_eq!(nCk(5,1), 5);
+    assert_eq!(nCk(5,2), 10);
+    assert_eq!(nCk(5,5), 1);
+}
+
+// O(N^2)
+fn comb_table(n_max: usize) -> Vec<Vec<usize>> {
+    let mut dp = vec![vec![0; n_max+1]; n_max+1];
+    for i in 0..n_max {
+        for j in 0..i+1 {
+            if j==0 || j==i {
+                dp[i][j] = 1;
+            } else {
+                dp[i][j] = dp[i-1][j-1] + dp[i-1][j];
+            }
+        }
+    }
+    dp
+}
+#[test]
+fn test_comb_table() {
+    let nCk = comb_table(50);
+    assert_eq!(nCk[5][0], 1);
+    assert_eq!(nCk[5][1], 5);
+    assert_eq!(nCk[5][2], 10);
+    assert_eq!(nCk[5][5], 1);
 }
 
 struct ModComb {
