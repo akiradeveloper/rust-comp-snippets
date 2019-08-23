@@ -141,19 +141,20 @@ mod djikstra_heap {
 }
 
 mod bellman_ford {
+    #[derive(Clone)]
     struct Edge {
         from: usize,
         to: usize,
-        cost: i32, // can be negative
+        cost: i64, // can be negative
     }
 
-    fn bellman_ford(n: usize, es: Vec<Edge>, source: usize) -> Vec<i32> {
-        const INF: i32 = 2_000_000_001;
+    fn bellman_ford(n: usize, es: &[Edge], source: usize) -> Vec<i64> {
+        const INF: i64 = 1<<60;
         let mut d = vec![INF; n];
         d[source] = 0;
         loop {
             let mut update = false;
-            for e in &es {
+            for e in es {
                 if d[e.from] != INF && d[e.to] > d[e.from] + e.cost {
                     d[e.to] = d[e.from] + e.cost;
                     update = true;
@@ -166,13 +167,10 @@ mod bellman_ford {
         d
     }
 
-    #[test]
-    fn test() {}
-
-    fn find_negative_loop(n: usize, es: Vec<Edge>) -> bool {
+    fn find_negative_loop(n: usize, es: &[Edge]) -> bool {
         let mut d = vec![0; n];
         for i in 0..n {
-            for e in &es {
+            for e in es {
                 if d[e.to] > d[e.from] + e.cost {
                     d[e.to] = d[e.from] + e.cost;
                     if i == n - 1 {
@@ -183,7 +181,4 @@ mod bellman_ford {
         }
         false
     }
-
-    #[test]
-    fn test_find_negative_loop() {}
 }
