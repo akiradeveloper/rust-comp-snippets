@@ -2,8 +2,8 @@ mod bellman_ford {
     #[derive(Clone)]
     struct Edge {
         to: usize,
-        cap: i32,
-        cost: i32,
+        cap: i64,
+        cost: i64,
         rev: usize,
     }
 
@@ -18,7 +18,7 @@ mod bellman_ford {
             }
         }
         /// allows negative costs
-        fn add_edge(&mut self, from: usize, to: usize, cap: i32, cost: i32) {
+        fn add_edge(&mut self, from: usize, to: usize, cap: i64, cost: i64) {
             let from_rev = self.g[to].len();
             let to_rev = self.g[from].len();
             self.g[from].push(Edge {
@@ -39,8 +39,8 @@ mod bellman_ford {
             self.g.len()
         }
 
-        fn min_cost_flow(&mut self, s: usize, t: usize, f: i32) -> Option<i32> {
-            let mut res: i32 = 0;
+        fn min_cost_flow(&mut self, s: usize, t: usize, f: i64) -> Option<i64> {
+            let mut res = 0;
             let mut prevv = vec![0; self.n()];
             let mut preve = vec![0; self.n()];
             let mut f = f;
@@ -84,7 +84,7 @@ mod bellman_ford {
                 }
 
                 f -= actual_flow;
-                res += actual_flow as i32 * dist[t];
+                res += actual_flow * dist[t];
 
                 let mut u = t;
                 loop {
@@ -118,7 +118,7 @@ mod bellman_ford {
 mod dijkstra {
     #[derive(Copy, Clone, Eq, PartialEq)]
     struct State {
-        cost: i32,
+        cost: i64,
         v: usize,
     }
 
@@ -140,8 +140,8 @@ mod dijkstra {
     #[derive(Clone)]
     struct Edge {
         to: usize,
-        cap: i32,
-        cost: i32,
+        cap: i64,
+        cost: i64,
         rev: usize,
     }
 
@@ -156,19 +156,19 @@ mod dijkstra {
             }
         }
     
-        fn add_edge(&mut self, from: usize, to: usize, cap: i32, cost: i32) {
+        fn add_edge(&mut self, from: usize, to: usize, cap: i64, cost: i64) {
             let from_rev = self.g[to].len();
             let to_rev = self.g[from].len();
             self.g[from].push(Edge {
                 to: to,
                 cap: cap,
-                cost: cost as i32,
+                cost: cost,
                 rev: from_rev,
             });
             self.g[to].push(Edge {
                 to: from,
                 cap: 0,
-                cost: -1 * cost as i32,
+                cost: -1 * cost,
                 rev: to_rev,
             });
         } 
@@ -177,7 +177,7 @@ mod dijkstra {
             self.g.len()
         }
 
-        fn min_cost_flow(&mut self, s: usize, t: usize, f: i32) -> Option<i32> {
+        fn min_cost_flow(&mut self, s: usize, t: usize, f: i64) -> Option<i64> {
             let mut res = 0;
             let mut total_flow = f;
             let mut prevv = vec![0; self.n()];

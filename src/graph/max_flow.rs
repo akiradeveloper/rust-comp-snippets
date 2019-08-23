@@ -2,7 +2,7 @@ mod ford_fulkerson {
     #[derive(Clone)]
     struct Edge {
         to: usize,
-        cap: usize,
+        cap: u64,
         rev: usize,
     }
 
@@ -23,7 +23,7 @@ mod ford_fulkerson {
             self.g.len()
         }
 
-        fn add_edge(&mut self, from: usize, to: usize, cap: usize) {
+        fn add_edge(&mut self, from: usize, to: usize, cap: u64) {
             let from_rev = self.g[to].len();
             let to_rev = self.g[from].len();
 
@@ -39,7 +39,7 @@ mod ford_fulkerson {
             });
         }
 
-        fn dfs(&mut self, v: usize, t: usize, f: usize) -> usize {
+        fn dfs(&mut self, v: usize, t: usize, f: u64) -> u64 {
             if v == t {
                 return f;
             }
@@ -58,7 +58,7 @@ mod ford_fulkerson {
             return 0;
         }
 
-        fn max_flow(&mut self, s: usize, t: usize) -> usize {
+        fn max_flow(&mut self, s: usize, t: usize) -> u64 {
             let mut flow = 0;
             loop {
                 self.used = vec![false; self.n()];
@@ -96,12 +96,12 @@ mod dinic {
     #[derive(Clone)]
     struct Edge {
         to: usize,
-        cap: u32,
+        cap: u64,
         rev: usize,
     }
     struct Network {
         g: Vec<Vec<Edge>>,
-        level: Vec<Option<u32>>,
+        level: Vec<Option<usize>>,
         iter: Vec<usize>,
     }
     impl Network {
@@ -112,7 +112,7 @@ mod dinic {
                 iter: vec![0; n],
             }
         }
-        fn add_edge(&mut self, from: usize, to: usize, cap: u32) {
+        fn add_edge(&mut self, from: usize, to: usize, cap: u64) {
             let from_rev = self.g[to].len();
             let to_rev = self.g[from].len();
             self.g[from].push( Edge { to: to, cap: cap, rev: from_rev } );
@@ -135,7 +135,7 @@ mod dinic {
                 }
             }
         }
-        fn dfs(&mut self, v: usize, t: usize, f: u32) -> u32 {
+        fn dfs(&mut self, v: usize, t: usize, f: u64) -> u64 {
             if v == t {
                 return f;
             }
@@ -154,7 +154,7 @@ mod dinic {
             }
             return 0;
         }
-        fn max_flow(&mut self, s: usize, t: usize) -> u32 {
+        fn max_flow(&mut self, s: usize, t: usize) -> u64 {
             let mut flow = 0;
             loop {
                 self.bfs(s);

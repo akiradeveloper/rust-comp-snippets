@@ -1,6 +1,6 @@
 mod bfs01 {
     // connected[i][i] == false
-    fn bfs01(g: &[Vec<u32>], s: usize, inf: u32) -> Vec<u32> {
+    fn bfs01(g: &[Vec<u64>], s: usize, inf: u64) -> Vec<u64> {
         use std::collections::VecDeque;
         let n = g.len();
         let mut dp = vec![inf; n];
@@ -75,7 +75,7 @@ mod bfs01 {
 mod dijkstra {
     // self = 0
     // not connected = inf;
-    fn dijkstra(g: &[Vec<u32>], s: usize, inf: u32) -> Vec<u32> {
+    fn dijkstra(g: &[Vec<u64>], s: usize, inf: u64) -> Vec<u64> {
         let n = g.len();
         let mut d = vec![inf; n];
 
@@ -105,6 +105,7 @@ mod dijkstra {
 }
 
 mod djikstra_heap {
+    #[derive(Clone,Copy)]
     struct Edge {
         to: usize,
         cost: i64,

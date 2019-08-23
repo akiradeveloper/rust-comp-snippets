@@ -2,10 +2,10 @@
 
 mod prim {
     /// O(V^2)
-    fn prim(cost: &[Vec<u32>]) -> u32 {
+    fn prim(cost: &[Vec<u64>]) -> u64 {
         let n = cost.len();
-        const INF: u32 = 2_000_000_1;
-        let mut mincost = vec![INF; n];
+        let inf = 1<<60;
+        let mut mincost = vec![inf; n];
         let mut used = vec![false; n];
 
         mincost[0] = 0;
@@ -47,11 +47,11 @@ mod kraskal {
     struct Edge {
         u: usize,
         v: usize,
-        cost: u32
+        cost: u64
     }
 
     /// O(E logV)
-    fn kraskal(n: usize, es: &mut [Edge]) -> u32 {
+    fn kraskal(n: usize, es: &mut [Edge]) -> u64 {
         es.sort_by(|a, b| {
             a.cost.cmp(&b.cost)
         });
