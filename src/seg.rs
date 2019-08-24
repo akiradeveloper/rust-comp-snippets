@@ -56,6 +56,7 @@ impl<M: Monoid> SEG<M> {
     }
 
     #[allow(dead_code)]
+    // [a,b)
     pub fn query(&self, a: usize, b: usize) -> M::T {
         self.do_query(a,b,0,0,self.n)
     }

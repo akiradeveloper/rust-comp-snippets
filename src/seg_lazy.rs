@@ -72,6 +72,7 @@ impl <T: SEGImpl> SEG<T> {
             )
         }
     }
+    // [a,b)
     fn query(&mut self, a: usize, b: usize) -> T::Monoid {
         let n = self.n;
         self.do_query(a, b, 1, 0, n)
@@ -102,7 +103,7 @@ impl SEGImpl for RUQ {
 fn test_ruq() {
     let mut seg: SEG<RUQ> = SEG::new(RUQ::m0(), 10);
     assert_eq!(seg.query(0, 3), 0);
-    seg.update(0, 2, 10);
+    seg.update(0, 2, 10); // [10,10,0,...]
     assert_eq!(seg.query(0, 3), 10);
     assert_eq!(seg.query(2, 3), 0);
     seg.update(1, 5, 20);
