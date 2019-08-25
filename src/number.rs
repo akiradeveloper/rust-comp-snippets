@@ -90,6 +90,7 @@ fn factorial(a: usize, p: usize) -> usize {
 }
 // Knuth's algorithm
 fn nCk(a: usize, b: usize) -> usize {
+    if a < b { return 0; }
     let mut a = a;
     let mut r = 1;
     for d in 1..b+1 {
@@ -101,6 +102,7 @@ fn nCk(a: usize, b: usize) -> usize {
 }
 #[test]
 fn test_knuth_nCk() {
+    assert_eq!(nCk(1,2), 0);
     assert_eq!(nCk(5,0), 1);
     assert_eq!(nCk(5,1), 5);
     assert_eq!(nCk(5,2), 10);
@@ -360,6 +362,7 @@ fn test_prime_factors() {
 }
 
 fn bin_digits(n: usize) -> Vec<bool> {
+    if n == 0 { return vec![]; }
     let logN = (n as f64).log2().floor() as usize;
     // dbg!(logN);
     let mut res = vec![false; logN+1];
@@ -376,6 +379,7 @@ fn bin_digits(n: usize) -> Vec<bool> {
 }
 #[test]
 fn test_bin_digits() {
+    assert_eq!(bin_digits(0), []);
     assert_eq!(bin_digits(3), [true,true]);
     assert_eq!(bin_digits(7), [true,true,true]);
     assert_eq!(bin_digits(6), [false,true,true]);
