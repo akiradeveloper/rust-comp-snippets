@@ -278,6 +278,29 @@ fn eratosthenes(n_max: usize) -> Vec<usize> {
     res
 }
 
+// O(root(N))
+fn divisors(n: usize) -> Vec<usize> {
+    let mut res = vec![];
+    let mut d = 1;
+    while d*d<=n {
+        if n%d == 0 {
+            res.push(d);
+            if d*d != n {
+                res.push(n/d);
+            }
+        }
+        d += 1;
+    }
+    res
+}
+#[test]
+fn test_divisors() {
+    let mut xs = divisors(36);
+    xs.sort();
+    assert_eq!(xs, [1,2,3,4,6,9,12,18,36]);
+}
+
+
 // O(root(n))
 fn is_prime(n: usize) -> bool {
     let mut d = 1;
@@ -311,6 +334,7 @@ fn test_root_int() {
     assert_eq!(root_int(37), 6);
 }
 
+// O(root(N))
 fn prime_factors(n: usize) -> std::collections::HashMap<usize,usize> {
     let mut n = n;
     let mut m = std::collections::HashMap::new();
