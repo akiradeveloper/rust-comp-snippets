@@ -1,8 +1,10 @@
+#[snippet = "BinarySearch"]
 struct BinarySearch<F> {
     p: F,
     lower: usize,
     upper: usize,
 }
+#[snippet = "BinarySearch"]
 impl <F: Fn(usize) -> bool> BinarySearch<F> {
     fn search(&self) -> (Option<usize>, usize) {
         let lower = self.lower as i32;

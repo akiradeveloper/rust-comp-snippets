@@ -11,7 +11,6 @@ fn lis<T: Ord + Clone>(xs: &[T], inf: T) -> Vec<T> {
     }
     return dp;
 }
-
 #[test]
 fn test_lis() {
     let xs = vec![1,3,2,4,6,5];
@@ -58,7 +57,6 @@ fn lcs<T: Eq>(xs: &[T], ys: &[T]) -> Vec<Vec<usize>> {
     }
     return dp;
 }
-
 #[test]
 fn test_lcs() {
     let xs = vec![6,9,2,8,3,7,4,6];
@@ -82,7 +80,6 @@ fn inversion(xs: &[usize]) -> Vec<usize> {
     }
     res
 }
-
 #[test]
 fn test_inversion() {
     let xs = vec![1,3,2,4,2,1];

@@ -1,4 +1,4 @@
-fn cum1(init: &[i64]) -> Vec<i64> {
+fn cumsum1(init: &[i64]) -> Vec<i64> {
     let n = init.len();
     let mut dp = vec![0; n+1];
     let mut acc = 0;
@@ -9,9 +9,9 @@ fn cum1(init: &[i64]) -> Vec<i64> {
     dp
 }
 #[test]
-fn test_cum1() {
+fn test_cumsum1() {
     let x = vec![0,1,2,1];
-    assert_eq!(cum1(&x), [0,0,1,3,4]);
+    assert_eq!(cumsum1(&x), [0,0,1,3,4]);
 }
 
 struct CumSum2 {

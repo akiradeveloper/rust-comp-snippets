@@ -1,6 +1,6 @@
 /// https://github.com/hatoo/competitive-rust-snippets
 
-#[snippet = "mod"]
+#[snippet = "gcd"]
 #[allow(dead_code)]
 pub fn gcd(a: usize, b: usize) -> usize {
     if b == 0 {
@@ -10,13 +10,13 @@ pub fn gcd(a: usize, b: usize) -> usize {
     }
 }
 
-#[snippet = "mod"]
+#[snippet = "lcm"]
 #[allow(dead_code)]
 pub fn lcm(a: usize, b: usize) -> usize {
     a / gcd(a, b) * b
 }
 
-#[snippet = "mod"]
+#[snippet = "extgcd"]
 #[allow(dead_code)]
 /// O(log n)
 /// solve ax+by=gcd(a,b)
@@ -42,12 +42,14 @@ fn test_extgcg() {
 /// ax=b(mod m)
 /// ay=1 (mod m) -> y=a^{-1}
 /// x=yb (mod m)
+#[snippet = "mod_inverse"]
 pub fn mod_inverse(a: i64, m: i64) -> i64 {
     let (_, x, _) = extgcd(a, m);
     (m + x % m) % m
 }
 
-#[snippet = "mod"]
+#[snippet = "ModComb"]
+#[snippet = "modpow"]
 #[allow(dead_code)]
 /// x ^ n % m
 pub fn modpow(x: usize, n: usize, m: usize) -> usize {
@@ -75,6 +77,7 @@ fn test_modpow() {
     }
 }
 
+#[snippet = "factorial"]
 fn factorial(a: usize, p: usize) -> usize {
     if a == 0 {
         return 1
@@ -88,7 +91,9 @@ fn factorial(a: usize, p: usize) -> usize {
     }
     n
 }
+
 // Knuth's algorithm
+#[snippet = "nCk"]
 fn nCk(a: usize, b: usize) -> usize {
     if a < b { return 0; }
     let mut a = a;
@@ -110,6 +115,7 @@ fn test_knuth_nCk() {
 }
 
 // O(N^2)
+#[snippet = "comb_table"]
 fn comb_table(n_max: usize) -> Vec<Vec<usize>> {
     let mut dp = vec![vec![0; n_max+1]; n_max+1];
     for i in 0..n_max {
@@ -132,12 +138,14 @@ fn test_comb_table() {
     assert_eq!(nCk[5][5], 1);
 }
 
+#[snippet = "ModComb"]
 struct ModComb {
     fact: Vec<usize>,
     fact_inv: Vec<usize>,
     n: usize,
     p: usize,
 }
+#[snippet = "ModComb"]
 impl ModComb {
     // O(N)
     fn initialize(ft: &mut Self) {
@@ -263,6 +271,7 @@ fn test_factor_table() {
 }
 
 // O(n log log n)
+#[snippet = "eratosthenes"]
 fn eratosthenes(n_max: usize) -> Vec<usize> {
     let mut res = vec![];
     let mut v = vec![0; n_max+1];
@@ -280,6 +289,7 @@ fn eratosthenes(n_max: usize) -> Vec<usize> {
 }
 
 // O(root(N))
+#[snippet = "divisors"]
 fn divisors(n: usize) -> Vec<usize> {
     let mut res = vec![];
     let mut d = 1;
@@ -303,6 +313,7 @@ fn test_divisors() {
 
 
 // O(root(n))
+#[snippet = "is_prime"]
 fn is_prime(n: usize) -> bool {
     let mut d = 1;
     // O(root(n))
@@ -320,23 +331,16 @@ fn is_prime(n: usize) -> bool {
     res
 }
 
-// O(root(n))
-fn root_int(n: usize) -> usize {
-    let mut d = 1;
-    while d * d <= n {
-        d += 1;
-    }
-    d - 1
-}
-#[test]
-fn test_root_int() {
-    assert_eq!(root_int(35), 5);
-    assert_eq!(root_int(36), 6);
-    assert_eq!(root_int(37), 6);
-}
-
 // O(root(N))
+#[snippet = "prime_factors"]
 fn prime_factors(n: usize) -> std::collections::HashMap<usize,usize> {
+    fn root_int(n: usize) -> usize {
+        let mut d = 1;
+        while d * d <= n {
+            d += 1;
+        }
+        d - 1
+    }
     let mut n = n;
     let mut m = std::collections::HashMap::new();
     for i in 2..root_int(n)+1 {
@@ -360,6 +364,7 @@ fn test_prime_factors() {
     dbg!(prime_factors(15));
 }
 
+#[snippet = "bin_digits"]
 fn bin_digits(n: usize) -> Vec<bool> {
     if n == 0 { return vec![]; }
     let logN = (n as f64).log2().floor() as usize;
@@ -384,4 +389,32 @@ fn test_bin_digits() {
     assert_eq!(bin_digits(6), [false,true,true]);
     assert_eq!(bin_digits(10), [false,true,false,true]);
     assert_eq!(bin_digits(16), [false,false,false,false,true]);
+}
+
+#[snippet = "partition_dp"]
+#[allow(dead_code)]
+/// dp[i][j] = j th partition number of i
+pub fn partition_dp(n: usize, m: usize, p: u64) -> Vec<Vec<u64>> {
+    let mut dp = vec![vec![0; m + 1]; n + 1];
+    for i in 0..m + 1 {
+        dp[0][i] = 1;
+    }
+    for i in 1..n + 1 {
+        for j in 1..m + 1 {
+            if i >= j {
+                dp[i][j] = (dp[i - j][j] + dp[i][j - 1]) % p;
+            } else {
+                dp[i][j] = dp[i][j - 1];
+            }
+        }
+    }
+    dp
+}
+#[test]
+fn test_partition_dp() {
+    const M: u64 = 1000000007;
+    let dp = partition_dp(100, 50, M);
+
+    assert_eq!(dp[4][3], 4);
+    assert_eq!(dp[5][4], 6);
 }
