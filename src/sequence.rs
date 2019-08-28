@@ -71,12 +71,12 @@ fn inversion(xs: &[usize]) -> Vec<usize> {
         max_v = max(max_v, x);
     }
     let mut res = vec![];
-    let mut bit = BIT::new(max_v+1, &0, |a: &mut usize, b: &usize| *a += b);
+    let mut bit = BIT::new(max_v+1);
     for i in 0..xs.len() {
         let x = xs[i];
         let cnt = bit.sum_excl(x+1); // cnt of <= x
         res.push(i-cnt);
-        bit.add_0_orig(x, &1);
+        bit.add_0_orig(x, 1);
     }
     res
 }

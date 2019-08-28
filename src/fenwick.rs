@@ -1,19 +1,19 @@
 /// https://github.com/hatoo/competitive-rust-snippets
  
-#[snippet = "BIT"]
+#[snippet = "BITGeneric"]
 #[allow(dead_code)]
 /// Generic Binary Indexed Tree
-pub struct BIT<T: Clone, F: Fn(&mut T, &T) -> ()> {
+pub struct BITGeneric<T: Clone, F: Fn(&mut T, &T) -> ()> {
     buf: Vec<T>,
     zero: T,
     f: F,
 }
 
-#[snippet = "BIT"]
-impl<T: Clone, F: Fn(&mut T, &T) -> ()> BIT<T, F> {
+#[snippet = "BITGeneric"]
+impl<T: Clone, F: Fn(&mut T, &T) -> ()> BITGeneric<T, F> {
     #[allow(dead_code)]
-    pub fn new(n: usize, zero: &T, f: F) -> BIT<T, F> {
-        BIT {
+    pub fn new(n: usize, zero: &T, f: F) -> BITGeneric<T, F> {
+        BITGeneric {
             buf: vec![zero.clone(); n + 1],
             zero: zero.clone(),
             f: f,
@@ -51,8 +51,8 @@ impl<T: Clone, F: Fn(&mut T, &T) -> ()> BIT<T, F> {
 }
 
 #[test]
-fn test_fenwick() {
-    let mut bit = BIT::new(4, &0, |a: &mut usize, b: &usize| *a += b);
+fn test_bit_generic() {
+    let mut bit = BITGeneric::new(4, &0, |a: &mut usize, b: &usize| *a += b);
     bit.add_0_orig(0, &1);
     bit.add_0_orig(1, &2);
     bit.add_0_orig(2, &3);
@@ -69,7 +69,7 @@ fn test_bit_vs_cumsum() {
     use rand::{Rng, SeedableRng, StdRng};
     let size = 1000;
     let mut cum_sum = vec![0; size + 1];
-    let mut bit = BIT::new(size, &0, |a: &mut usize, b: &usize| {
+    let mut bit = BITGeneric::new(size, &0, |a: &mut usize, b: &usize| {
         *a += b;
     });
 
@@ -100,7 +100,7 @@ fn bench_bit_add_sum_100k(b: &mut Bencher) {
     use rand::{Rng, SeedableRng, StdRng};
 
     let size = 100_000;
-    let mut bit = BIT::new(size, &0, |a: &mut usize, b: &usize| *a += b);
+    let mut bit = BITGeneric::new(size, &0, |a: &mut usize, b: &usize| *a += b);
     let mut rng = StdRng::from_seed(&[1, 2, 3]);
 
     let bench_size = 100000;
@@ -121,18 +121,18 @@ fn bench_bit_add_sum_100k(b: &mut Bencher) {
     });
 }
 
-#[snippet = "BITSimple"]
+#[snippet = "BIT"]
 #[allow(dead_code)]
 /// Binary Indexed Tree of usize
-pub struct BITSimple {
+pub struct BIT {
     buf: Vec<usize>,
 }
 
-#[snippet = "BITSimple"]
+#[snippet = "BIT"]
 #[allow(dead_code)]
-impl BITSimple {
-    pub fn new(n: usize) -> BITSimple {
-        BITSimple {
+impl BIT {
+    pub fn new(n: usize) -> BIT {
+        BIT {
             buf: vec![0; n + 1],
         }
     }
@@ -169,7 +169,7 @@ fn test_bit_simple_vs_cumsum() {
     use rand::{Rng, SeedableRng, StdRng};
     let size = 1000;
     let mut cum_sum = vec![0; size + 1];
-    let mut bit = BITSimple::new(size);
+    let mut bit = BIT::new(size);
 
     let mut rng = StdRng::from_seed(&[1, 2, 3]);
 
@@ -189,7 +189,7 @@ fn test_bit_simple_vs_cumsum() {
 
 #[test]
 fn test_bit_simple() {
-    let mut bit = BITSimple::new(4);
+    let mut bit = BIT::new(4);
     bit.add_0_orig(0, 1);
     bit.add_0_orig(1, 2);
     bit.add_0_orig(2, 3);
