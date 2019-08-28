@@ -183,7 +183,6 @@ impl ModComb {
         let mut res = 0;
         for i in 0..k+1 {
             let v = self.nCk(k, i) * modpow(i, n, self.p) % self.p;
-            dbg!(v);
             if (k - i) % 2 == 1 { // odd
                 res = (res + self.p - v) % self.p;
             } else { // 
