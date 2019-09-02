@@ -8,3 +8,4 @@ pub mod scc;
 pub mod lca;
 pub mod mst;
 pub mod bipartite_matching;
+pub mod cycle;
