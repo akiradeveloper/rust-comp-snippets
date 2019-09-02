@@ -1,10 +1,10 @@
+// verified: GRL_6_B
 mod bellman_ford {
     #[derive(Clone)]
     struct Edge {
         to: usize,
         cap: i64,
-        cost: i64,
-        rev: usize,
+        cost: i64, rev: usize,
     }
 
     struct Network {
@@ -111,32 +111,12 @@ mod bellman_ford {
         g.add_edge(3, 2, 3, 3);
         g.add_edge(2, 4, 5, 2);
         g.add_edge(3, 4, 8, 6);
-        println!("{}", g.min_cost_flow(0, 4, 9).unwrap());
+        assert_eq!(g.min_cost_flow(0,4,9), Some(80));
     }
 }
 
+// verified: GRL_6_B
 mod dijkstra {
-    #[derive(Copy, Clone, Eq, PartialEq)]
-    struct State {
-        cost: i64,
-        v: usize,
-    }
-
-    impl Ord for State {
-        fn cmp(&self, other: &State) -> std::cmp::Ordering {
-            other
-                .cost
-                .cmp(&self.cost)
-                .then_with(|| self.v.cmp(&other.v))
-        }
-    }
-
-    impl PartialOrd for State {
-        fn partial_cmp(&self, other: &State) -> Option<std::cmp::Ordering> {
-            Some(self.cmp(other))
-        }
-    }
-    
     #[derive(Clone)]
     struct Edge {
         to: usize,
@@ -187,32 +167,33 @@ mod dijkstra {
 
             while total_flow > 0 {
                 let inf = 2_000_000_001;
-                let mut queue = std::collections::BinaryHeap::new();
+                let mut queue = std::collections::BinaryHeap::new(); // max-heap
                 let mut dist = vec![inf; self.n()]; // for all >= 0
                 dist[s] = 0;
-                queue.push( State { cost: 0, v: s } );
+                queue.push((0, s));
 
-                while let Some(State{ cost, v }) = queue.pop() {
+                while let Some((neg_cost, v)) = queue.pop() {
+                    let cost = -neg_cost; // 逆転させる
                     if dist[v] < cost { continue; }
-                    for i in 0 .. self.g[v].len() {
+                    for i in 0..self.g[v].len() {
                         let e = &self.g[v][i];
                         let new_dist = dist[v] + e.cost + h[v] - h[e.to];
                         if e.cap > 0 && dist[e.to] > new_dist {
                             dist[e.to] = new_dist;
                             prevv[e.to] = v;
                             preve[e.to] = i;
-                            queue.push( State { cost: dist[e.to], v: e.to } );
+                            queue.push((-dist[e.to], e.to)); // 負値にして格納する
                         }
                     }
                 }
                 if dist[t] == inf {
                     return None;
                 }
-                for v in 0 .. self.n() {
+                for v in 0..self.n() {
                     h[v] += dist[v];
                 }
                 
-                let mut actual_flow = f;
+                let mut actual_flow = total_flow;
                 let mut v = t;
                 loop {
                     if v == s { break; }
@@ -236,7 +217,7 @@ mod dijkstra {
         }
     }
     #[test]
-    fn test_dijkstra_min_cost_flow() {
+    fn test_dijkstra_min_cost_flow_0() {
         let mut g = Network::new(5);
         g.add_edge(0, 1, 10, 2);
         g.add_edge(1, 3, 6, 2);
@@ -245,6 +226,25 @@ mod dijkstra {
         g.add_edge(3, 2, 3, 3);
         g.add_edge(2, 4, 5, 2);
         g.add_edge(3, 4, 8, 6);
-        println!("{}", g.min_cost_flow(0, 4, 9).unwrap());
+        assert_eq!(g.min_cost_flow(0,4,9), Some(80));
+    }
+    #[test]
+    fn test_dijkstra_min_cost_flow_1() {
+        let mut g = Network::new(6);
+        let es = vec![
+            (0,1,3,2),
+            (0,2,2,1),
+            (1,2,2,2),
+            (1,3,3,4),
+            (2,3,5,1),
+            (2,4,6,2),
+            (3,4,2,2),
+            (3,5,6,3),
+            (4,5,10,2),
+        ];
+        for (u,v,cap,cost) in es {
+            g.add_edge(u,v,cap,cost);
+        }
+        assert_eq!(g.min_cost_flow(0,5,3), Some(18));
     }
 }
