@@ -4,7 +4,8 @@ mod bellman_ford {
     struct Edge {
         to: usize,
         cap: i64,
-        cost: i64, rev: usize,
+        cost: i64,
+        rev: usize,
     }
 
     struct Network {

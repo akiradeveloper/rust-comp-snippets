@@ -86,8 +86,8 @@ fn test_inversion() {
     assert_eq!(inversion(&xs), [0,0,1,0,2,4]);
 }
 
-#[snippet = "run_length"]
-fn run_length<T: Eq + Clone>(xs: &[T]) -> Vec<(T,usize)> {
+#[snippet = "run_length_compression"]
+fn run_length_compression<T: Eq + Clone>(xs: &[T]) -> Vec<(T,usize)> {
     if xs.is_empty() {
         return vec![]
     }
@@ -107,9 +107,9 @@ fn run_length<T: Eq + Clone>(xs: &[T]) -> Vec<(T,usize)> {
     res
 }
 #[test]
-fn test_run_length() {
+fn test_run_length_compression() {
     let emp: Vec<bool> = vec![];
-    assert_eq!(run_length(&emp), vec![]);
-    assert_eq!(run_length(&vec![true]), vec![(true,1)]);
-    assert_eq!(run_length(&vec![2,3,3,3,2,2]), vec![(2,1),(3,3),(2,2)]);
+    assert_eq!(run_length_compression(&emp), vec![]);
+    assert_eq!(run_length_compression(&vec![true]), vec![(true,1)]);
+    assert_eq!(run_length_compression(&vec![2,3,3,3,2,2]), vec![(2,1),(3,3),(2,2)]);
 }

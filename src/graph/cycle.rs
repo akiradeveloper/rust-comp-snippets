@@ -42,6 +42,7 @@ pub fn cycle_detection_directed_textbook(g: &[Vec<usize>]) -> bool {
 } 
 
 // verified: GRL_4_A
+#[snippet = "cycle_detection_directed"]
 pub fn cycle_detection_directed(g: &[Vec<usize>]) -> bool {
     let n = g.len();
     let mut in_g = vec![HashSet::new();n];
