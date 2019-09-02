@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 // verified: GRL_4_A
-pub fn detect_cycle_directed(g: &[Vec<usize>]) -> bool {
+pub fn cycle_detection_directed_textbook(g: &[Vec<usize>]) -> bool {
     let mut white_set = HashSet::new();
     let mut gray_set = HashSet::new();
     let mut black_set = HashSet::new();
@@ -40,6 +40,39 @@ pub fn detect_cycle_directed(g: &[Vec<usize>]) -> bool {
         to.insert(v);
     }
 } 
+
+// verified: GRL_4_A
+pub fn cycle_detection_directed(g: &[Vec<usize>]) -> bool {
+    let n = g.len();
+    let mut in_g = vec![HashSet::new();n];
+    // O(E)
+    for v in 0..n {
+        for &u in &g[v] {
+            in_g[u].insert(v);
+        }
+    }
+    let mut v_indegree0 = vec![];
+    // O(V)
+    for v in 0..n {
+        if in_g[v].len() == 0 {
+            v_indegree0.push(v);
+        }
+    }
+
+    let mut m=0;
+    // O(E)?
+    while let Some(v) = v_indegree0.pop() {
+        m += 1;
+        for &to in &g[v] {
+            if in_g[to].remove(&v) && in_g[to].is_empty() {
+                v_indegree0.push(to);
+            }
+        }
+    }
+
+    m != n
+}
+
 #[test]
 fn test_detect_cycle_directed_0() {
     let mut g = vec![
@@ -47,7 +80,8 @@ fn test_detect_cycle_directed_0() {
         vec![2],
         vec![],
     ];
-    assert_eq!(detect_cycle_directed(&g), false);
+    assert_eq!(cycle_detection_directed_textbook(&g), false);
+    assert_eq!(cycle_detection_directed(&g), false);
 }
 #[test]
 fn test_detect_cycle_directed_1() {
@@ -59,5 +93,6 @@ fn test_detect_cycle_directed_1() {
         vec![5],
         vec![3],
     ];
-    assert_eq!(detect_cycle_directed(&g), true);
+    assert_eq!(cycle_detection_directed_textbook(&g), true);
+    assert_eq!(cycle_detection_directed(&g), true);
 }
