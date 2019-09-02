@@ -79,8 +79,8 @@ mod bellman_ford {
                     if u == s {
                         break;
                     }
-                    u = prevv[u];
                     actual_flow = std::cmp::min(actual_flow, self.g[prevv[u]][preve[u]].cap);
+                    u = prevv[u];
                 }
 
                 f -= actual_flow;
@@ -91,10 +91,10 @@ mod bellman_ford {
                     if u == s {
                         break;
                     }
-                    u = prevv[u];
                     let e = self.g[prevv[u]][preve[u]].clone();
                     self.g[prevv[u]][preve[u]].cap -= actual_flow;
                     self.g[u][e.rev].cap += actual_flow;
+                    u = prevv[u];
                 }
             }
             

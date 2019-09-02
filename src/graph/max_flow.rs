@@ -1,3 +1,4 @@
+// verified: GRL_6_A
 mod ford_fulkerson {
     #[derive(Clone)]
     struct Edge {
@@ -92,6 +93,7 @@ mod ford_fulkerson {
     }
 }
 
+// verified: GRL_6_A
 mod dinic {
     #[derive(Clone)]
     struct Edge {
