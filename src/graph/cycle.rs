@@ -1,4 +1,5 @@
 use std::collections::HashSet;
+// verified: GRL_4_A
 pub fn detect_cycle_directed(g: &[Vec<usize>]) -> bool {
     let mut white_set = HashSet::new();
     let mut gray_set = HashSet::new();
