@@ -74,9 +74,9 @@ fn inversion(xs: &[usize]) -> Vec<usize> {
     let mut bit = BIT::new(max_v+1);
     for i in 0..xs.len() {
         let x = xs[i];
-        let cnt = bit.sum_excl(x+1); // cnt of <= x
+        let cnt = bit.sum(x); // cnt of <= x
         res.push(i-cnt);
-        bit.add_0_orig(x, 1);
+        bit.add(x, 1);
     }
     res
 }
@@ -84,4 +84,32 @@ fn inversion(xs: &[usize]) -> Vec<usize> {
 fn test_inversion() {
     let xs = vec![1,3,2,4,2,1];
     assert_eq!(inversion(&xs), [0,0,1,0,2,4]);
+}
+
+#[snippet = "run_length"]
+fn run_length<T: Eq + Clone>(xs: &[T]) -> Vec<(T,usize)> {
+    if xs.is_empty() {
+        return vec![]
+    }
+    let mut cur = &xs[0];
+    let mut rep = 1;
+    let mut res = vec![];
+    for i in 1..xs.len() {
+        if &xs[i] == cur {
+            rep += 1;
+        } else {
+            res.push((cur.clone(),rep));
+            cur = &xs[i];
+            rep = 1
+        }
+    }
+    res.push((cur.clone(),rep));
+    res
+}
+#[test]
+fn test_run_length() {
+    let emp: Vec<bool> = vec![];
+    assert_eq!(run_length(&emp), vec![]);
+    assert_eq!(run_length(&vec![true]), vec![(true,1)]);
+    assert_eq!(run_length(&vec![2,3,3,3,2,2]), vec![(2,1),(3,3),(2,2)]);
 }

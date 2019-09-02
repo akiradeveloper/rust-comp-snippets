@@ -16,3 +16,16 @@ pub fn random_range<R: Rng>(rand: &mut R, l: usize, r: usize) -> Range<usize> {
 
     min(a, b)..max(a, b)
 }
+
+#[snippet = "vec_to_string"]
+pub fn vec_to_string<T: ToString>(xs: &[T]) -> Vec<String> {
+    let mut res = vec![];
+    for x in xs {
+        res.push(x.to_string());
+    }
+    res
+}
+#[test]
+fn test_vec_to_string() {
+    assert_eq!(vec_to_string(&vec![1,2]), vec!["1","2"]);
+}
