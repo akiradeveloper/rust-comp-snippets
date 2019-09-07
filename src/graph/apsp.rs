@@ -1,6 +1,8 @@
-mod warshal_froid {
+mod warshal_floyd {
     // dist could be negative as well as bellman ford
-    fn warshal_froid(d: &mut [Vec<i64>]) {
+    #[doc = "directed matrix graph. O(V^3)"]
+    #[snippet = "warshal_floyd"]
+    fn warshal_floyd(d: &mut [Vec<i64>]) {
         let n = d.len();
         for k in 0..n {
             for i in 0..n {
@@ -11,7 +13,7 @@ mod warshal_froid {
         }
     }
     #[test]
-    fn test() {
+    fn test_warshal_floyd() {
         let dat = [
             (0,1,1),
             (0,3,2),
@@ -24,8 +26,8 @@ mod warshal_froid {
             (4,5,3),
         ];
 
-        let INF = 1000000;
-        let mut dist = vec![vec![INF; 6]; 6];
+        let inf = std::i64::MAX/2;
+        let mut dist = vec![vec![inf; 6]; 6];
         for i in 0 .. 6 {
             dist[i][i] = 0;
         }
@@ -34,9 +36,10 @@ mod warshal_froid {
             dist[l.1][l.0] = l.2;
         }
 
-        warshal_froid(&mut dist);
+        warshal_floyd(&mut dist);
 
         assert_eq!(dist[0][5], 5);
         assert_eq!(dist[2][3], 3);
     }
 }
+

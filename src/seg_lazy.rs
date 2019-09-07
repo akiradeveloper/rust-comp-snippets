@@ -240,7 +240,6 @@ impl SEGImpl for RSQ_RUQ {
         y
     }
 }
-
 #[test]
 fn test_rsq_ruq() { // DSL_1_I
     let mut seg: SEG<RSQ_RUQ> = SEG::new(0, 8);

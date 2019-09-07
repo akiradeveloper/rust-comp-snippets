@@ -34,23 +34,19 @@ mod prim {
         
         total_cost
     }
-
-    #[test]
-    fn test() {
-        
-    }
 }
 
 mod kraskal {
     use crate::union_find;
 
+    #[snippet = "kraskal"]
     struct Edge {
         u: usize,
         v: usize,
         cost: u64
     }
-
-    /// O(E logV)
+    #[snippet = "kraskal"]
+    #[doc = "undirected graph as edges. O(ElogV)"]
     fn kraskal(n: usize, es: &mut [Edge]) -> u64 {
         es.sort_by(|a, b| {
             a.cost.cmp(&b.cost)
@@ -71,12 +67,12 @@ mod kraskal {
     }
 
     #[test]
-    fn test() {}
+    fn test_kraskal() {}
 }
 
 mod chu_liu_edmonds {
     use crate::graph::scc;
-    #[derive(Debug, Clone)]
+    #[derive(Debug,Clone,Copy)]
     struct Edge(usize, u64);
     fn min_edge(edges: &[Edge]) -> &Edge {
         let mut r = &edges[0];

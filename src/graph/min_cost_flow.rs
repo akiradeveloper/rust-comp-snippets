@@ -1,6 +1,6 @@
 // verified: GRL_6_B
 mod bellman_ford {
-    #[derive(Clone)]
+    #[derive(Clone,Copy,Debug)]
     struct Edge {
         to: usize,
         cap: i64,
@@ -12,6 +12,7 @@ mod bellman_ford {
         g: Vec<Vec<Edge>>,
     }
 
+    #[doc = "directed flow graph. O(FV^2)"]
     impl Network {
         fn new(n: usize) -> Network {
             Network {
@@ -118,7 +119,7 @@ mod bellman_ford {
 
 // verified: GRL_6_B
 mod dijkstra {
-    #[derive(Clone)]
+    #[derive(Clone,Copy,Debug)]
     struct Edge {
         to: usize,
         cap: i64,
@@ -130,6 +131,7 @@ mod dijkstra {
         g: Vec<Vec<Edge>>,
     }
 
+    #[doc = "directed flow graph. non-negative cost. O(FElogV)"]
     impl Network {
         fn new(n: usize) -> Network {
             Network {
@@ -138,6 +140,7 @@ mod dijkstra {
         }
     
         fn add_edge(&mut self, from: usize, to: usize, cap: i64, cost: i64) {
+            assert!(cost>=0);
             let from_rev = self.g[to].len();
             let to_rev = self.g[from].len();
             self.g[from].push(Edge {

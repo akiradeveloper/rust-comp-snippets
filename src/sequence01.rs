@@ -86,26 +86,29 @@ fn test_binary_search_generic_array_ref() {
 }
 
 
+#[snippet = "FTSearch"]
 struct FTSearch<F> {
     f_search: Vec<Option<usize>>,
     t_search: Vec<usize>,
     p: F,
     lower: usize,
 }
+#[snippet = "FTSearch"]
 impl <F: Fn(usize) -> bool> FTSearch<F> {
+    #[doc = "O(upper-lower)"]
     fn new(p: F, lower: usize, upper: usize) -> FTSearch<F> {
-        let N = upper+1 - lower;
-        let mut f_search = vec![None; N];
+        let n = upper+1 - lower;
+        let mut f_search = vec![None; n];
         let mut f_i = None;
-        for i in 0..N {
+        for i in 0..n {
             if p(i+lower) == false {
                 f_i = Some(i);
             }
             f_search[i] = f_i;
         }
-        let mut t_search = vec![N; N];
-        let mut t_i = N;
-        for i in (0..N).rev() {
+        let mut t_search = vec![n; n];
+        let mut t_i = n;
+        for i in (0..n).rev() {
             if p(i+lower) == true {
                 t_i = i;
             }
@@ -118,9 +121,11 @@ impl <F: Fn(usize) -> bool> FTSearch<F> {
             lower: lower,
         }
     }
+    #[doc = "including i and find the closest false in the left"]
     fn f_search(&self, i: usize) -> Option<usize> {
         self.f_search[i-self.lower].map(|x| x+self.lower)
     }
+    #[doc = "including i and find the closest true in the right"]
     fn t_search(&self, i: usize) -> usize {
         self.t_search[i-self.lower] + self.lower
     }

@@ -1,19 +1,22 @@
 // verified: GRL_6_A
 mod ford_fulkerson {
-    #[derive(Clone)]
+    #[snippet = "ford_fulkerson"]
+    #[derive(Clone,Copy,Debug)]
     struct Edge {
         to: usize,
-        cap: u64,
+        cap: i64,
         rev: usize,
     }
-
+    #[snippet = "ford_fulkerson"]
     struct Network {
         g: Vec<Vec<Edge>>,
         used: Vec<bool>,
     }
 
+    #[doc = "directed flow graph. O(FE)"]
+    #[snippet = "ford_fulkerson"]
     impl Network {
-        fn new(n: usize) -> Network {
+        pub fn new(n: usize) -> Network {
             Network {
                 g: vec![vec![]; n],
                 used: vec![false; n],
@@ -24,7 +27,9 @@ mod ford_fulkerson {
             self.g.len()
         }
 
-        fn add_edge(&mut self, from: usize, to: usize, cap: u64) {
+        pub fn add_edge(&mut self, from: usize, to: usize, cap: i64) {
+            assert!(cap>=0);
+
             let from_rev = self.g[to].len();
             let to_rev = self.g[from].len();
 
@@ -40,7 +45,7 @@ mod ford_fulkerson {
             });
         }
 
-        fn dfs(&mut self, v: usize, t: usize, f: u64) -> u64 {
+        fn dfs(&mut self, v: usize, t: usize, f: i64) -> i64 {
             if v == t {
                 return f;
             }
@@ -59,7 +64,7 @@ mod ford_fulkerson {
             return 0;
         }
 
-        fn max_flow(&mut self, s: usize, t: usize) -> u64 {
+        pub fn max_flow(&mut self, s: usize, t: usize) -> i64 {
             let mut flow = 0;
             loop {
                 self.used = vec![false; self.n()];
@@ -72,7 +77,7 @@ mod ford_fulkerson {
         }
     }
     #[test]
-    fn test() {
+    fn test_ford_fulkerson() {
         let mut nw = Network::new(5);
 
         let conns = [
@@ -95,17 +100,21 @@ mod ford_fulkerson {
 
 // verified: GRL_6_A
 mod dinic {
-    #[derive(Clone)]
+    #[snippet = "dinic"]
+    #[derive(Clone,Copy,Debug)]
     struct Edge {
         to: usize,
-        cap: u64,
+        cap: i64,
         rev: usize,
     }
+    #[snippet = "dinic"]
     struct Network {
         g: Vec<Vec<Edge>>,
         level: Vec<Option<usize>>,
         iter: Vec<usize>,
     }
+    #[doc = "direct flow graph. O(EV^2)"]
+    #[snippet = "dinic"]
     impl Network {
         fn new(n: usize) -> Network {
             Network {
@@ -114,7 +123,9 @@ mod dinic {
                 iter: vec![0; n],
             }
         }
-        fn add_edge(&mut self, from: usize, to: usize, cap: u64) {
+        fn add_edge(&mut self, from: usize, to: usize, cap: i64) {
+            assert!(cap>=0);
+
             let from_rev = self.g[to].len();
             let to_rev = self.g[from].len();
             self.g[from].push( Edge { to: to, cap: cap, rev: from_rev } );
@@ -137,7 +148,7 @@ mod dinic {
                 }
             }
         }
-        fn dfs(&mut self, v: usize, t: usize, f: u64) -> u64 {
+        fn dfs(&mut self, v: usize, t: usize, f: i64) -> i64 {
             if v == t {
                 return f;
             }
@@ -156,7 +167,7 @@ mod dinic {
             }
             return 0;
         }
-        fn max_flow(&mut self, s: usize, t: usize) -> u64 {
+        pub fn max_flow(&mut self, s: usize, t: usize) -> i64 {
             let mut flow = 0;
             loop {
                 self.bfs(s);
@@ -177,7 +188,7 @@ mod dinic {
     }
 
     #[test]
-    fn test() {
+    fn test_dinic() {
       let mut nw = Network::new(5);
 
         let conns = [

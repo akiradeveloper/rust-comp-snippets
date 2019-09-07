@@ -1,5 +1,6 @@
 mod bfs01 {
     // connected[i][i] == false
+    #[snippet = "bfs01"]
     fn bfs01(g: &[Vec<u64>], s: usize, inf: u64) -> Vec<u64> {
         use std::collections::VecDeque;
         let n = g.len();
@@ -101,16 +102,18 @@ mod dijkstra {
         d
     }
     #[test]
-    fn test() {}
+    fn test_dijkstra() {}
 }
 
 mod djikstra_heap {
-    #[derive(Clone,Copy)]
+    #[snippet = "dijkstra"]
+    #[derive(Clone,Copy,Debug)]
     struct Edge {
         to: usize,
         cost: i64,
     }
 
+    #[snippet = "dijkstra"]
     fn dijkstra_heap(g: &[Vec<Edge>], s: usize, inf: i64) -> Vec<i64> {
         let n = g.len();
         let mut queue = std::collections::BinaryHeap::new(); // max-heap
@@ -138,17 +141,19 @@ mod djikstra_heap {
     }
 
     #[test]
-    fn test() {}
+    fn test_dijkstra_heap() {}
 }
 
 mod bellman_ford {
-    #[derive(Clone)]
+    #[snippet = "bellman_ford"]
+    #[derive(Clone,Copy,Debug)]
     struct Edge {
         from: usize,
         to: usize,
         cost: i64, // can be negative
     }
 
+    #[snippet = "bellman_ford"]
     fn bellman_ford(n: usize, es: &[Edge], source: usize) -> Vec<i64> {
         const INF: i64 = 1<<60;
         let mut d = vec![INF; n];
@@ -168,6 +173,7 @@ mod bellman_ford {
         d
     }
 
+    #[snippet = "bellman_ford"]
     fn find_negative_loop(n: usize, es: &[Edge]) -> bool {
         let mut d = vec![0; n];
         for i in 0..n {
