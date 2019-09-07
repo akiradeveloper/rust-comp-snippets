@@ -113,3 +113,32 @@ fn test_run_length_compression() {
     assert_eq!(run_length_compression(&vec![true]), vec![(true,1)]);
     assert_eq!(run_length_compression(&vec![2,3,3,3,2,2]), vec![(2,1),(3,3),(2,2)]);
 }
+
+#[snippet = "group_fold"]
+pub fn group_fold<T, F: Fn(&T) -> G, G: Eq+Clone>(xs: Vec<T>, f: F) -> Vec<Vec<T>> {
+    let mut res = vec![];
+    let mut cur_g = None;
+    let mut tmp = vec![];
+    for x in xs {
+        let g = Some(f(&x));
+        if g != cur_g {
+            if !tmp.is_empty() {
+                res.push(tmp);
+            }
+            tmp = vec![x];
+            cur_g = g;
+        } else {
+            tmp.push(x);
+        }
+    }
+    if !tmp.is_empty() {
+        res.push(tmp);
+    }
+    res
+}
+#[test]
+fn test_group_fold() {
+    let emp: Vec<usize> = vec![];
+    assert_eq!(group_fold(vec![1,2,1], |&x| {x}), vec![vec![1],vec![2],vec![1]]);
+    assert_eq!(group_fold(vec![('L',1),('L',3),('R',2),('L',1)], |&x| {x.0}), vec![vec![('L',1),('L',3)],vec![('R',2)],vec![('L',1)]]);
+}

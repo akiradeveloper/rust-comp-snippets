@@ -1,3 +1,4 @@
+#[snippet = "bipartite_matching"]
 fn bipartite_matching(g_list: &[Vec<usize>]) -> Vec<(usize,usize)> {
 
     fn dfs(v: usize, g_list: &[Vec<usize>], used: &mut [bool], matching: &mut [Option<usize>]) -> bool {

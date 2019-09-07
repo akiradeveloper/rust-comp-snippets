@@ -1,3 +1,4 @@
+#[snippet = "cumsum1"]
 fn cumsum1(init: &[i64]) -> Vec<i64> {
     let n = init.len();
     let mut dp = vec![0; n+1];
@@ -14,9 +15,11 @@ fn test_cumsum1() {
     assert_eq!(cumsum1(&x), [0,0,1,3,4]);
 }
 
+#[snippet = "cumsum2"]
 struct CumSum2 {
     dp: Vec<Vec<i64>>,
 }
+#[snippet = "cumsum2"]
 impl CumSum2 {
     fn build(base: &[Vec<i64>]) -> CumSum2 {
         let n = base.len();
