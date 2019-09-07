@@ -1,7 +1,8 @@
 mod bfs01 {
     // connected[i][i] == false
+    #[doc = "shortest path from directed matrix graph with 0/1 cost. O(V)"]
     #[snippet = "bfs01"]
-    fn bfs01(g: &[Vec<u64>], s: usize, inf: u64) -> Vec<u64> {
+    fn bfs01(g: &[Vec<i64>], s: usize, inf: i64) -> Vec<i64> {
         use std::collections::VecDeque;
         let n = g.len();
         let mut dp = vec![inf; n];
@@ -25,7 +26,6 @@ mod bfs01 {
                             dp[j] = new_cost;
                             deque.push_front(j);
                         }
-
                     }
                 }
             }
@@ -76,7 +76,8 @@ mod bfs01 {
 mod dijkstra {
     // self = 0
     // not connected = inf;
-    fn dijkstra(g: &[Vec<u64>], s: usize, inf: u64) -> Vec<u64> {
+    #[doc = "shortest path from directed matrix graph"]
+    fn dijkstra(g: &[Vec<i64>], s: usize, inf: i64) -> Vec<i64> {
         let n = g.len();
         let mut d = vec![inf; n];
 
@@ -113,6 +114,7 @@ mod djikstra_heap {
         cost: i64,
     }
 
+    #[doc = "shortest path from directed adjacent graph with non-negative costs. O(ElogV)"]
     #[snippet = "dijkstra"]
     fn dijkstra_heap(g: &[Vec<Edge>], s: usize, inf: i64) -> Vec<i64> {
         let n = g.len();
@@ -150,9 +152,10 @@ mod bellman_ford {
     struct Edge {
         from: usize,
         to: usize,
-        cost: i64, // can be negative
+        cost: i64,
     }
 
+    #[doc = "shorted path from graph as edges. negative costs allowed. O(V^2)"]
     #[snippet = "bellman_ford"]
     fn bellman_ford(n: usize, es: &[Edge], source: usize) -> Vec<i64> {
         const INF: i64 = 1<<60;
