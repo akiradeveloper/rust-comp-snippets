@@ -1,10 +1,11 @@
-#[snippet = "bipartite_matching"]
-fn bipartite_matching(g_list: &[Vec<usize>]) -> Vec<(usize,usize)> {
+use std::collections::HashSet;
 
-    fn dfs(v: usize, g_list: &[Vec<usize>], used: &mut [bool], matching: &mut [Option<usize>]) -> bool {
+#[snippet = "bipartite_matching"]
+fn bipartite_matching(g_list: &[HashSet<usize>]) -> Vec<(usize,usize)> {
+
+    fn dfs(v: usize, g_list: &[HashSet<usize>], used: &mut [bool], matching: &mut [Option<usize>]) -> bool {
         used[v] = true;
-        for i in 0..g_list[v].len() {
-            let u = g_list[v][i];
+        for &u in &g_list[v] {
             let w = matching[u];
             if w.is_none() || (!used[w.unwrap()] && dfs(w.unwrap(), g_list, used, matching)) {
                 matching[v] = Some(u);
@@ -38,18 +39,18 @@ fn bipartite_matching(g_list: &[Vec<usize>]) -> Vec<(usize,usize)> {
 }
 
 struct BipartiteMatching {
-    g: Vec<Vec<usize>>,
+    g: Vec<HashSet<usize>>,
 }
 impl BipartiteMatching {
     fn new(n: usize) -> BipartiteMatching {
         BipartiteMatching {
-            g: vec![vec![]; n],
+            g: vec![HashSet::new(); n],
         }
     }
     fn connect(&mut self, u: usize, v: usize) {
         assert!(u != v);
-        self.g[u].push(v);
-        self.g[v].push(u);
+        self.g[u].insert(v);
+        self.g[v].insert(u);
     }
     fn run(&self) -> Vec<(usize, usize)> {
         bipartite_matching(&self.g)
