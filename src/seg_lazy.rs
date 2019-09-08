@@ -79,9 +79,9 @@ impl <T: SEGImpl> SEG<T> {
     }
 }
 
-#[snippet = "MAX_RUQ"]
+#[snippet = "SEG_LAZY_MAX_RUQ"]
 struct MAX_RUQ;
-#[snippet = "MAX_RUQ"]
+#[snippet = "SEG_LAZY_MAX_RUQ"]
 impl SEGImpl for MAX_RUQ {
     type Monoid = i64;
     type OperatorMonoid = i64;
@@ -113,9 +113,9 @@ fn test_MAX_RUQ() {
     assert_eq!(seg.query(0, 1), 10);
 }
 
-#[snippet = "MIN_RUQ"]
+#[snippet = "SEG_LAZY_MIN_RUQ"]
 struct MIN_RUQ;
-#[snippet = "MIN_RUQ"]
+#[snippet = "SEG_LAZY_MIN_RUQ"]
 impl SEGImpl for MIN_RUQ {
     type Monoid = i64;
     type OperatorMonoid = i64;
@@ -150,9 +150,9 @@ fn test_MIN_RUQ() { // DSL_2_D
     seg.update(1,8,2);
 }
 
-#[snippet = "SUM_RUQ"]
+#[snippet = "SEG_LAZY_SUM_RUQ"]
 struct SUM_RUQ;
-#[snippet = "SUM_RUQ"]
+#[snippet = "SEG_LAZY_SUM_RUQ"]
 impl SEGImpl for SUM_RUQ { 
     type Monoid = i64;
     type OperatorMonoid = i64;
@@ -187,9 +187,9 @@ fn test_SUM_RUQ() { // DSL_1_I
     seg.update(0,2,1);
 }
 
-#[snippet = "SUM_RAQ"]
+#[snippet = "SEG_LAZY_SUM_RAQ"]
 struct SUM_RAQ;
-#[snippet = "SUM_RAQ"]
+#[snippet = "SEG_LAZY_SUM_RAQ"]
 impl SEGImpl for SUM_RAQ {
     type Monoid = i64;
     type OperatorMonoid = i64;
@@ -224,9 +224,9 @@ fn test_SUM_RAQ() {
     assert_eq!(seg.query(4, 7), 20);
 }
 
-#[snippet = "MIN_RAQ"]
+#[snippet = "SEG_LAZY_MIN_RAQ"]
 struct MIN_RAQ;
-#[snippet = "MIN_RAQ"]
+#[snippet = "SEG_LAZY_MIN_RAQ"]
 impl SEGImpl for MIN_RAQ { 
     type Monoid = i64;
     type OperatorMonoid = i64;
