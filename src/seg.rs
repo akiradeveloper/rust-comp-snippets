@@ -62,10 +62,11 @@ impl<M: Monoid> SEG<M> {
     }
 }
 
+#[snippet = "SEG_SUM"]
 #[allow(dead_code)]
 struct SUM;
 impl Monoid for SUM {
-    type T = u64;
+    type T = i64;
     fn id() -> Self::T {
         0
     }
@@ -73,7 +74,6 @@ impl Monoid for SUM {
         *a + *b
     }
 }
-
 #[test]
 fn test_seg_sum() {
     let mut seg: SEG<SUM> = SEG::new(4);
@@ -90,14 +90,26 @@ fn test_seg_sum() {
     assert_eq!(seg.query(2, 4), 7);
 }
 
+#[snippet = "SEG_MIN"]
 #[allow(dead_code)]
 struct MIN;
 impl Monoid for MIN {
-    type T = usize;
+    type T = i64;
     fn id() -> Self::T {
-        (1 << 31) - 1
+        std::i64::MAX
     }
     fn op(a: &Self::T, b: &Self::T) -> Self::T {
         std::cmp::min(*a, *b)
+    }
+}
+#[snippet = "SEG_MAX"]
+struct MAX;
+impl Monoid for MAX {
+    type T = i64;
+    fn id() -> Self::T {
+        std::i64::MIN
+    }
+    fn op(a: &Self::T, b: &Self::T) -> Self::T {
+        std::cmp::max(*a, *b)
     }
 }

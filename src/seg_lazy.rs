@@ -79,8 +79,10 @@ impl <T: SEGImpl> SEG<T> {
     }
 }
 
-struct RUQ;
-impl SEGImpl for RUQ {
+#[snippet = "MAX_RUQ"]
+struct MAX_RUQ;
+#[snippet = "MAX_RUQ"]
+impl SEGImpl for MAX_RUQ {
     type Monoid = i64;
     type OperatorMonoid = i64;
     fn m0() -> Self::Monoid {
@@ -100,8 +102,8 @@ impl SEGImpl for RUQ {
     }
 }
 #[test]
-fn test_ruq() {
-    let mut seg: SEG<RUQ> = SEG::new(RUQ::m0(), 10);
+fn test_MAX_RUQ() {
+    let mut seg: SEG<MAX_RUQ> = SEG::new(MAX_RUQ::m0(), 10);
     assert_eq!(seg.query(0, 3), 0);
     seg.update(0, 2, 10); // [10,10,0,...]
     assert_eq!(seg.query(0, 3), 10);
@@ -111,12 +113,14 @@ fn test_ruq() {
     assert_eq!(seg.query(0, 1), 10);
 }
 
-struct RUQ_INF;
-impl SEGImpl for RUQ_INF {
+#[snippet = "MIN_RUQ"]
+struct MIN_RUQ;
+#[snippet = "MIN_RUQ"]
+impl SEGImpl for MIN_RUQ {
     type Monoid = i64;
     type OperatorMonoid = i64;
     fn m0() -> Self::Monoid {
-        (1<<31)-1
+        std::i64::MAX
     }
     fn om0() -> Self::OperatorMonoid {
         0
@@ -132,22 +136,61 @@ impl SEGImpl for RUQ_INF {
     }
 }
 #[test]
-fn test_ruq_inf() { // DSL_2_D
-    let mut seg: SEG<RUQ_INF> = SEG::new(RUQ_INF::m0(), 8);
+fn test_MIN_RUQ() { // DSL_2_D
+    let mut seg: SEG<MIN_RUQ> = SEG::new(MIN_RUQ::m0(), 8);
     seg.update(1,7,5);
     seg.update(2,8,2);
     seg.update(2,6,7);
     assert_eq!(seg.query(3, 4),7);
     seg.update(4,7,6);
-    assert_eq!(seg.query(0, 1),2147483647);
+    assert_eq!(seg.query(0, 1),std::i64::MAX);
     seg.update(0,8,9);
     assert_eq!(seg.query(2, 3),9);
     assert_eq!(seg.query(3, 4),9);
     seg.update(1,8,2);
 }
 
-struct RSQ_RAQ;
-impl SEGImpl for RSQ_RAQ {
+#[snippet = "SUM_RUQ"]
+struct SUM_RUQ;
+#[snippet = "SUM_RUQ"]
+impl SEGImpl for SUM_RUQ { 
+    type Monoid = i64;
+    type OperatorMonoid = i64;
+    fn m0() -> Self::Monoid {
+        0
+    }
+    fn om0() -> Self::OperatorMonoid {
+        std::i64::MAX
+    }
+    fn f(x: Self::Monoid, y: Self::Monoid) -> Self::Monoid {
+        x + y
+    }
+    fn g(x: Self::Monoid, y: Self::OperatorMonoid, len: usize) -> Self::Monoid {
+        len as i64 * y
+    }
+    fn h(x: Self::OperatorMonoid, y: Self::OperatorMonoid) -> Self::OperatorMonoid {
+        y
+    }
+}
+#[test]
+fn test_SUM_RUQ() { // DSL_1_I
+    let mut seg: SEG<SUM_RUQ> = SEG::new(SUM_RUQ::m0(), 8);
+    seg.update(1,7,-5);
+    seg.update(2,5,-9);
+    assert_eq!(seg.query(2,4),-18);
+    seg.update(3,7,0);
+    assert_eq!(seg.query(0,4),-14); // this
+    assert_eq!(seg.query(5,8),0);
+    assert_eq!(seg.query(2,7),-9);
+    seg.update(3,8,9);
+    assert_eq!(seg.query(2,6),18);
+    seg.update(0,2,1);
+}
+
+#[snippet = "SUM_RAQ"]
+struct SUM_RAQ;
+#[snippet = "SUM_RAQ"]
+impl SEGImpl for SUM_RAQ {
     type Monoid = i64;
     type OperatorMonoid = i64;
     fn m0() -> Self::Monoid {
@@ -167,8 +210,8 @@ impl SEGImpl for RSQ_RAQ {
     }
 }
 #[test]
-fn test_rsq_raq() {
-    let mut seg: SEG<RSQ_RAQ> = SEG::new(RSQ_RAQ::m0(), 10);
+fn test_SUM_RAQ() {
+    let mut seg: SEG<SUM_RAQ> = SEG::new(0, 10);
     assert_eq!(seg.query(0, 3), 0);
     seg.update(0,5,10);
     assert_eq!(seg.query(0, 1), 10);
@@ -181,15 +224,14 @@ fn test_rsq_raq() {
     assert_eq!(seg.query(4, 7), 20);
 }
 
-struct RMQ_RAQ;
-impl SEGImpl for RMQ_RAQ { 
+#[snippet = "MIN_RAQ"]
+struct MIN_RAQ;
+#[snippet = "MIN_RAQ"]
+impl SEGImpl for MIN_RAQ { 
     type Monoid = i64;
     type OperatorMonoid = i64;
-    // this is the value taken when the node value has not ever been computed.
-    // since our goal is to compute the min of the computed values,
-    // it is reasonable to set very large data here.
     fn m0() -> Self::Monoid {
-        (1<<31)-1
+        std::i64::MAX
     }
     fn om0() -> Self::OperatorMonoid {
         0
@@ -206,7 +248,7 @@ impl SEGImpl for RMQ_RAQ {
 }
 #[test]
 fn test_rmq_raq() { // DSL_2_H
-    let mut seg: SEG<RMQ_RAQ> = SEG::new(0, 6);
+    let mut seg: SEG<MIN_RAQ> = SEG::new(0, 6);
     seg.update(1,4,1);
     seg.update(2,5,-2);
     assert_eq!(seg.query(0,6),-2);
@@ -216,41 +258,3 @@ fn test_rmq_raq() { // DSL_2_H
     assert_eq!(seg.query(0,6),-1);
 }
 
-struct RSQ_RUQ;
-impl SEGImpl for RSQ_RUQ { 
-    type Monoid = i64;
-    type OperatorMonoid = i64;
-    fn m0() -> Self::Monoid {
-        0
-    }
-    // we assing om0 as very large number
-    // to tell updating by 0 and not having done anything.
-    // if we set 0 here, the line marked as 'this' fails as the result is -23
-    // which is -5 + -9 + -9 + -9
-    fn om0() -> Self::OperatorMonoid {
-        1<<40
-    }
-    fn f(x: Self::Monoid, y: Self::Monoid) -> Self::Monoid {
-        x + y
-    }
-    fn g(x: Self::Monoid, y: Self::OperatorMonoid, len: usize) -> Self::Monoid {
-        len as i64 * y
-    }
-    fn h(x: Self::OperatorMonoid, y: Self::OperatorMonoid) -> Self::OperatorMonoid {
-        y
-    }
-}
-#[test]
-fn test_rsq_ruq() { // DSL_1_I
-    let mut seg: SEG<RSQ_RUQ> = SEG::new(0, 8);
-    seg.update(1,7,-5);
-    seg.update(2,5,-9);
-    assert_eq!(seg.query(2,4),-18);
-    seg.update(3,7,0);
-    assert_eq!(seg.query(0,4),-14); // this
-    assert_eq!(seg.query(5,8),0);
-    assert_eq!(seg.query(2,7),-9);
-    seg.update(3,8,9);
-    assert_eq!(seg.query(2,6),18);
-    seg.update(0,2,1);
-}
