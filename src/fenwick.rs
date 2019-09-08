@@ -116,33 +116,33 @@ fn bench_bit_add_sum_100k(b: &mut Bencher) {
 #[snippet = "BIT"]
 #[allow(dead_code)]
 /// Binary Indexed Tree of usize
-pub struct BIT {
-    buf: Vec<usize>,
+pub struct BIT<T> {
+    buf: Vec<T>,
 }
 
 #[snippet = "BIT"]
 #[allow(dead_code)]
-impl BIT {
-    pub fn new(n: usize) -> BIT {
+impl <T: Clone + Default + std::ops::AddAssign> BIT<T> {
+    pub fn new(n: usize) -> BIT<T> {
         BIT {
-            buf: vec![0; n + 1],
+            buf: vec![T::default(); n+1],
         }
     }
 
-    pub fn sum(&self, i: usize) -> usize {
+    pub fn sum(&self, i: usize) -> T {
         let mut i = i;
-        let mut s = 0;
+        let mut s = T::default();
         while i > 0 {
-            s += self.buf[i];
+            s += self.buf[i].clone();
             i &= i - 1;
         }
         s
     }
 
-    pub fn add(&mut self, i: usize, x: usize) {
+    pub fn add(&mut self, i: usize, x: T) {
         let mut i = i as i64;
         while i < self.buf.len() as i64 {
-            self.buf[i as usize] += x;
+            self.buf[i as usize] += x.clone();
             i += i & -i;
         }
     }
