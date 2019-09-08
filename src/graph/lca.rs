@@ -5,6 +5,8 @@ struct LCA <'a> {
     depth: Vec<usize>,
 }
 
+#[snippet = "LCA"]
+#[doc = "compute LCA in directed adjacency graph"]
 impl <'a> LCA<'a> {
     fn new(root: usize, tree: &'a [Vec<usize>]) -> Self {
         let n = tree.len();
