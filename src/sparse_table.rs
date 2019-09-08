@@ -1,9 +1,11 @@
+#[snippet = "SparseTable"]
 struct SparseTable {
     data: Vec<i64>,
     log_table: Vec<usize>,
     table: Vec<Vec<usize>>,
 }
-
+#[doc = "find the index of the RMQ. build O(nlogn). query O(1)"]
+#[snippet = "SparseTable"]
 impl SparseTable {
     fn new(data: Vec<i64>) -> Self {
         let n = data.len();
