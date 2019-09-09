@@ -1,3 +1,5 @@
+#[snippet = "manacher"]
+#[doc = "manacher[i] is the palindrome radius at i"]
 pub fn manacher(s: &[usize]) -> Vec<usize> {
     let mut r = vec![0; s.len()];
     let mut i = 0;
