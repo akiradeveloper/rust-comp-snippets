@@ -34,7 +34,7 @@ impl RollingHash {
         }
     }
 
-    // [l, r)
+    #[doc = "return hash value of [l,r)"]
     pub fn get(&self, l: usize, r: usize) -> u64 {
         self.hash_pow_list
             .iter()

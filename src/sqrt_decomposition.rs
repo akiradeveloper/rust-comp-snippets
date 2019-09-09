@@ -1,16 +1,23 @@
-#[derive(Debug)]
+#[snippet = "SqrtDecomposition"]
+#[derive(Debug, Copy, Clone)]
 enum Bucket {
-    Filled(usize), // b
-    Partial(usize, usize, usize), // b, to, from
+    #[doc = "b-idx"]
+    Filled(usize),
+    #[doc = "b-idx, [to, from)"]
+    Partial(usize, usize, usize),
 }
+#[snippet = "SqrtDecomposition"]
 struct SqrtDecomposition {
     n: usize,
     d: usize,
 }
+#[snippet = "SqrtDecomposition"]
 impl SqrtDecomposition {
     pub fn bucket(&self, i: usize) -> usize {
         i / self.d
     }
+    
+    #[doc = "[from, to)"]
     pub fn buckets(&self, from: usize, to: usize) -> Vec<Bucket> {
         let mut res = vec![];
         let mut i = 0;
