@@ -32,3 +32,4 @@ pub mod rolling_hash;
 pub mod manacher;
 pub mod z_algorithm;
 pub mod cumsum;
+pub mod skiplist;
