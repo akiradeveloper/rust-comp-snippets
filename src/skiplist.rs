@@ -1,17 +1,48 @@
 mod skiplist {
-    use std::collections::BTreeMap;
+    use std::collections::{BTreeMap, BTreeSet};
     use std::rc::Rc;
     use std::cell::RefCell;
     use std::ops::RangeBounds;
     use std::fmt;
+
+    struct RandGen {
+        x: i64,
+    }
+    impl RandGen {
+        const a: i64 = 1103515245;
+        const b: i64 = 12345;
+        const m: i64 = 1<<32;
+        fn new(seed: i64) -> RandGen {
+            RandGen {
+                x: seed,
+            }
+        }
+        fn next(&mut self) -> i64 {
+            self.x = (Self::a*self.x+Self::b)%Self::m;
+            self.x
+        }
+    }
+
     struct Skiplist<T> {
         sentinel: Rc<RefCell<SkipNode<T>>>,
+        rand_gen: RandGen,
     }
     impl <T> Skiplist<T> where T: std::cmp::Ord + fmt::Debug {
         fn new() -> Skiplist<T> {
             Skiplist {
-                sentinel: Rc::new(SkipNode::sentinel().into())
+                sentinel: Rc::new(SkipNode::sentinel().into()),
+                rand_gen: RandGen::new(0),
             }
+        }
+        fn pick_height(&mut self) -> usize {
+            let z = self.rand_gen.next();
+            let mut k = 0;
+            let mut m = 1;
+            while z&m!=0 {
+                k+=1;
+                m<<=1;
+            }
+            k+1
         }
         fn insert(&mut self, x: T) -> bool {
             if self.find(&x) { return false }
@@ -24,14 +55,22 @@ mod skiplist {
                     return false
                 }
                 let node = node0.unwrap();
-                let found = node.borrow().value == Some(x);
+                let found = node.borrow().value.as_ref() == Some(&x);
                 if found {
                     return false;
                 }
             }
 
-            // compute the height
-            // connect
+            let new_height = self.pick_height();
+            let new_node = Rc::new(RefCell::new(SkipNode::new(x)));
+            for level in (0..new_height).rev() {
+                if !self.sentinel.borrow().next.contains_key(&level) {
+                    SkipNode::connect(self.sentinel.clone(), new_node.clone(), level);
+                } else {
+                    let prev = paths[level].clone();
+                    SkipNode::connect(prev, new_node.clone(), level);
+                }
+            }
             
             true
         }
@@ -149,6 +188,20 @@ mod skiplist {
         assert_eq!(y.borrow().height(), 2);
     }
     #[test]
+    fn test_rand() {
+        let mut r = RandGen::new(0);
+        for _ in 0..100 {
+            println!("{}",r.next())
+        }
+    }
+    #[test]
+    fn test_pick_height() {
+        let mut sl = Skiplist::<i64>::new();
+        for _ in 0..100 {
+            println!("{}",sl.pick_height())
+        }
+    }
+    #[test]
     fn test_insert() {
         let mut s = Skiplist::new();
         assert_eq!(s.find(&10), false);
@@ -156,18 +209,74 @@ mod skiplist {
         assert_eq!(s.find(&8), false);
         assert_eq!(s.find(&10), true);
     }
-    #[bench]
-    fn bench_skiplist(b: &mut test::Bencher) {
+    #[test]
+    fn test_debug0() {
+        let mut s = Skiplist::new();
+        let mut data = vec![920,265,659];
+        for x in data {
+            s.insert(x);
+            assert!(s.find(&x));
+        }
+        s.insert(660);
+        assert!(s.find(&660));
+    }
+    #[test]
+    fn test_debug1() {
+        let mut s = Skiplist::new();
+        s.insert(0);
+        assert!(s.find(&0));
+        s.insert(5);
+        assert!(s.find(&5));
+    }
+    #[test]
+    fn test_compare_reference_insert_and_find() {
         use rand::{Rng, SeedableRng, StdRng};
-        let size = 1_000_000;
+        let mut rng = StdRng::from_seed(&[3, 2, 1]); 
+        let mut ts = BTreeSet::new();
+        let mut sl = Skiplist::new();
+
+        let size = 10;
+        let mut data1 = vec![];
+        for _ in 0..size {
+            let x = rng.next_u64()%size;
+            data1.push(x);
+        }
+        let mut data2 = vec![];
+        for _ in 0..size {
+            let x = rng.next_u64()%size;
+            data2.push(x);
+        }
+        for x in data1 {
+            dbg!(x);
+            ts.insert(x);
+            sl.insert(x);
+            assert_eq!(sl.find(&x), ts.contains(&x));
+        }
+        for x in data2 {
+            assert_eq!(sl.find(&x), ts.contains(&x));
+        }
+    }
+    #[bench]
+    fn bench_skiplist_insert(b: &mut test::Bencher) {
+        use rand::{Rng, SeedableRng, StdRng};
+        let size = 10000;
         let mut s = Skiplist::new();
         let mut rng = StdRng::from_seed(&[3, 2, 1]);
-
         b.iter(||
             for _ in 0..size {
                 s.insert(rng.next_u64());
             }
         );
+    }
+    #[bench]
+    fn bench_skiplist_find(b: &mut test::Bencher) {
+        use rand::{Rng, SeedableRng, StdRng};
+        let size = 10000;
+        let mut s = Skiplist::new();
+        let mut rng = StdRng::from_seed(&[3, 2, 1]);
+        for _ in 0..size {
+            s.insert(rng.next_u64());
+        }
         b.iter(||
             for _ in 0..size {
                 s.find(&rng.next_u64());
