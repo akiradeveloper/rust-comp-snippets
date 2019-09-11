@@ -103,8 +103,8 @@ mod skiplist {
             // println!("new height: {}", new_height);
             let new_node = Rc::new(RefCell::new(SkipNode::new(x, new_height)));
             for level in 0..new_height {
-                let prev = paths[level].clone();
-                SkipNode::connect(prev, new_node.clone(), level);
+                let prev = &paths[level];
+                SkipNode::connect(prev, &new_node, level);
             }
             
             true
@@ -219,7 +219,7 @@ mod skiplist {
         }
         // x -> z => x -> y -> z
         // z = some or none
-        fn connect(x: Rc<RefCell<Self>>, y: Rc<RefCell<Self>>, level: usize) {
+        fn connect(x: &Rc<RefCell<Self>>, y: &Rc<RefCell<Self>>, level: usize) {
             let x_next0 = x.borrow().next[level].clone();
             x.borrow_mut().next[level] = Some(y.clone());
             y.borrow_mut().prev[level] = Some(x.clone());
@@ -230,13 +230,6 @@ mod skiplist {
         }
     }
 
-    #[test]
-    fn test_rand() {
-        let mut r = RandGen::new(0);
-        for _ in 0..100 {
-            println!("{}",r.next())
-        }
-    }
     #[test]
     fn test_pick_height() {
         let mut sl = Skiplist::<i64>::new();
