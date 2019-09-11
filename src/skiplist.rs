@@ -24,27 +24,29 @@ mod skiplist {
     }
 
     struct Skiplist<T> {
-        sentinel: Rc<RefCell<SkipNode<T>>>,
+        left_sentinel: Rc<RefCell<SkipNode<T>>>,
+        right_sentinel: Rc<RefCell<SkipNode<T>>>,
         rand_gen: RandGen,
     }
     impl Skiplist<usize> {
         fn print_graph(&self) {
             for level in (0..self.height()).rev() {
                 let mut line=vec![];
-                let mut cur = self.sentinel.clone();
+                let mut cur = self.left_sentinel.clone();
                 loop {
                     let next0 = cur.borrow().next.get(&level).cloned();
-                    if next0.is_none() {
+                    let next = next0.unwrap().clone();
+                    if next.borrow().value.is_none() {
                         break;
                     } else {
-                        cur = next0.unwrap().clone();
+                        cur = next.clone();
                         let v = cur.borrow().value.clone().unwrap();
                         line.push(v);
                     }
                 }
                 let mut ss = vec![];
                 for x in line {
-                    while ss.len()+1 < x {
+                    while ss.len() < x {
                         ss.push("--".to_string());
                     }
                     ss.push(format!("{:>02}", x));
@@ -56,12 +58,13 @@ mod skiplist {
     impl <T> Skiplist<T> where T: std::cmp::Ord + fmt::Debug + Clone {
         fn new() -> Skiplist<T> {
             Skiplist {
-                sentinel: Rc::new(SkipNode::sentinel().into()),
+                left_sentinel: Rc::new(SkipNode::sentinel().into()),
+                right_sentinel: Rc::new(SkipNode::sentinel().into()),
                 rand_gen: RandGen::new(0),
             }
         }
         fn height(&self) -> usize {
-            self.sentinel.borrow().height()
+            self.left_sentinel.borrow().height()
         }
         fn pick_height(&mut self) -> usize {
             let z = self.rand_gen.next();
@@ -78,13 +81,11 @@ mod skiplist {
             println!("insert {:?}: {:?}", x, &paths);
 
             if !paths.is_empty() {
-                let node0 = paths[0].borrow().next.get(&0).cloned();
-                if node0.is_some() {
-                    let node = node0.unwrap();
-                    let found = node.borrow().value.as_ref() == Some(&x);
-                    if found {
-                        return false;
-                    }
+                let next0 = paths[0].borrow().next.get(&0).cloned();
+                let next = next0.unwrap();
+                let found = next.borrow().value.as_ref() == Some(&x);
+                if found {
+                    return false;
                 }
             }
 
@@ -92,13 +93,15 @@ mod skiplist {
             println!("new height: {}", new_height);
             let new_node = Rc::new(RefCell::new(SkipNode::new(x)));
             for level in (0..new_height).rev() {
-                if !self.sentinel.borrow().next.contains_key(&level) {
-                    SkipNode::connect(self.sentinel.clone(), new_node.clone(), level);
+                if !self.left_sentinel.borrow().next.contains_key(&level) {
+                    SkipNode::connect(self.left_sentinel.clone(), self.right_sentinel.clone(), level);
+                    SkipNode::connect(self.left_sentinel.clone(), new_node.clone(), level);
                 } else {
                     let prev = paths[level].clone();
                     SkipNode::connect(prev, new_node.clone(), level);
                 }
             }
+            println!("inserted");
             
             true
         }
@@ -110,12 +113,9 @@ mod skiplist {
                 return false;
             }
 
-            let node0 = paths[0].borrow().next.get(&0).cloned();
-            if node0.is_none() {
-                return false
-            }
-            let node = node0.unwrap();
-            let found = node.borrow().value.as_ref() == Some(x);
+            let next0 = paths[0].borrow().next.get(&0).cloned();
+            let next = next0.unwrap();
+            let found = next.borrow().value.as_ref() == Some(x);
             found
         }
         fn range<R: RangeBounds<T>>(&self, range: R) -> Range<T> {
@@ -126,8 +126,8 @@ mod skiplist {
                 return vec![]
             }
 
-            let mut cur = self.sentinel.clone();
-            let mut acc = vec![self.sentinel.clone(); self.height()];
+            let mut cur = self.left_sentinel.clone();
+            let mut acc = vec![self.left_sentinel.clone(); self.height()];
             let mut level = self.height()-1;
             loop {
                 if level==0 {
@@ -135,34 +135,24 @@ mod skiplist {
                         acc[level] = cur.clone();
 
                         let next0 = cur.borrow().next.get(&level).cloned();
-                        if next0.is_none() {
+                        let next = next0.unwrap();
+                        if next.borrow().value.is_none() || next.borrow().value.as_ref().unwrap() >= x {
                             break;
                         } else {
-                            let next = next0.unwrap();
-                            if next.borrow().value.as_ref().unwrap() >= x {
-                                break;
-                            } else {
-                                cur = next.clone();
-                            }
+                            cur = next.clone();
                         }
                     }
                     break;
                 }
 
                 let next0 = cur.borrow().next.get(&level).cloned();
-                if next0.is_none() {
+                let next = next0.unwrap();
+                if next.borrow().value.is_none() || next.borrow().value.as_ref().unwrap() >= x {
                     acc[level] = cur.clone();
                     level-=1;
-                    continue; 
+                    continue;
                 } else {
-                    let next = next0.unwrap();
-                    if next.borrow().value.as_ref().unwrap() >= x {
-                        acc[level] = cur.clone();
-                        level-=1;
-                        continue;
-                    } else {
-                        cur = next;
-                    }
+                    cur = next;
                 }
             }
             acc
