@@ -27,12 +27,41 @@ mod skiplist {
         sentinel: Rc<RefCell<SkipNode<T>>>,
         rand_gen: RandGen,
     }
-    impl <T> Skiplist<T> where T: std::cmp::Ord + fmt::Debug {
+    impl Skiplist<usize> {
+        fn print_graph(&self) {
+            for level in (0..self.height()).rev() {
+                let mut line=vec![];
+                let mut cur = self.sentinel.clone();
+                loop {
+                    let next0 = cur.borrow().next.get(&level).cloned();
+                    if next0.is_none() {
+                        break;
+                    } else {
+                        cur = next0.unwrap().clone();
+                        let v = cur.borrow().value.clone().unwrap();
+                        line.push(v);
+                    }
+                }
+                let mut ss = vec![];
+                for x in line {
+                    while ss.len()+1 < x {
+                        ss.push("--".to_string());
+                    }
+                    ss.push(format!("{:>02}", x));
+                }
+                println!("{}",ss.connect(","));
+            }
+        }
+    }
+    impl <T> Skiplist<T> where T: std::cmp::Ord + fmt::Debug + Clone {
         fn new() -> Skiplist<T> {
             Skiplist {
                 sentinel: Rc::new(SkipNode::sentinel().into()),
                 rand_gen: RandGen::new(0),
             }
+        }
+        fn height(&self) -> usize {
+            self.sentinel.borrow().height()
         }
         fn pick_height(&mut self) -> usize {
             let z = self.rand_gen.next();
@@ -45,23 +74,22 @@ mod skiplist {
             k+1
         }
         fn insert(&mut self, x: T) -> bool {
-            if self.find(&x) { return false }
-
             let paths = self.traverse(&x);
+            println!("insert {:?}: {:?}", x, &paths);
 
             if !paths.is_empty() {
                 let node0 = paths[0].borrow().next.get(&0).cloned();
-                if node0.is_none() {
-                    return false
-                }
-                let node = node0.unwrap();
-                let found = node.borrow().value.as_ref() == Some(&x);
-                if found {
-                    return false;
+                if node0.is_some() {
+                    let node = node0.unwrap();
+                    let found = node.borrow().value.as_ref() == Some(&x);
+                    if found {
+                        return false;
+                    }
                 }
             }
 
             let new_height = self.pick_height();
+            println!("new height: {}", new_height);
             let new_node = Rc::new(RefCell::new(SkipNode::new(x)));
             for level in (0..new_height).rev() {
                 if !self.sentinel.borrow().next.contains_key(&level) {
@@ -76,6 +104,8 @@ mod skiplist {
         }
         fn find(&self, x: &T) -> bool {
             let paths = self.traverse(x);
+            println!("find {:?}: {:?}", x, &paths);
+
             if paths.is_empty() {
                 return false;
             }
@@ -91,9 +121,6 @@ mod skiplist {
         fn range<R: RangeBounds<T>>(&self, range: R) -> Range<T> {
             unimplemented!()
         }
-        fn height(&self) -> usize {
-            self.sentinel.borrow().height()
-        }
         fn traverse(&self, x: &T) -> Vec<Rc<RefCell<SkipNode<T>>>> {
             if self.height()==0 {
                 return vec![]
@@ -104,7 +131,21 @@ mod skiplist {
             let mut level = self.height()-1;
             loop {
                 if level==0 {
-                    acc[level] = cur.clone();
+                    loop {
+                        acc[level] = cur.clone();
+
+                        let next0 = cur.borrow().next.get(&level).cloned();
+                        if next0.is_none() {
+                            break;
+                        } else {
+                            let next = next0.unwrap();
+                            if next.borrow().value.as_ref().unwrap() >= x {
+                                break;
+                            } else {
+                                cur = next.clone();
+                            }
+                        }
+                    }
                     break;
                 }
 
@@ -135,9 +176,9 @@ mod skiplist {
         prev: BTreeMap<usize, Rc<RefCell<SkipNode<T>>>>,
         next: BTreeMap<usize, Rc<RefCell<SkipNode<T>>>>,
     }
-    impl <T> fmt::Debug for SkipNode<T> where T: fmt::Debug {
+    impl <T> fmt::Debug for SkipNode<T> where T: fmt::Debug + std::cmp::Ord {
         fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-            writeln!(f, "value: {:?}", self.value);
+            writeln!(f, "value: {:?}, height: {}", self.value, self.height());
             Ok(())
         }
     }
@@ -172,20 +213,57 @@ mod skiplist {
                 }
             }
         }
+        // x -> z => x -> y -> z
+        // z = some or none
         fn connect(x: Rc<RefCell<Self>>, y: Rc<RefCell<Self>>, level: usize) {
+            let x_next = x.borrow().next.get(&level).cloned();
             x.borrow_mut().next.insert(level, y.clone());
             y.borrow_mut().prev.insert(level, x.clone());
+            if x_next.is_some() {
+                let x_next = x_next.unwrap();
+                y.borrow_mut().next.insert(level, x_next.clone());
+                x_next.borrow_mut().prev.insert(level, y.clone());
+            }
+        }
+        fn is_connected_prev(&self, level: usize, x: Option<T>) -> bool {
+            let prev0 = self.prev.get(&level);
+            if prev0.is_none() {
+                return x == None;
+            } else {
+                let prev = prev0.unwrap().clone();
+                let prev_v = &prev.borrow().value;
+                return &x == prev_v;
+            }
+        }
+        fn is_connected_next(&self, level: usize, x: Option<T>) -> bool {
+            let next0 = self.next.get(&level);
+            if next0.is_none() {
+                return x == None;
+            } else {
+                let next = next0.unwrap().clone();
+                let next_v = &next.borrow().value;
+                return &x == next_v;
+            }
         }
     }
 
     #[test]
     fn test_skip_node_connection() {
         let x=Rc::new(RefCell::new(SkipNode::<i64>::sentinel()));
-        let y=Rc::new(RefCell::new(SkipNode::<i64>::new(0)));
+        let y=Rc::new(RefCell::new(SkipNode::<i64>::new(100)));
         SkipNode::connect(x.clone(), y.clone(), 0);
         SkipNode::connect(x.clone(), y.clone(), 1);
         assert_eq!(x.borrow().height(), 2);
         assert_eq!(y.borrow().height(), 2);
+        assert!(x.borrow().is_connected_next(0, Some(100)));
+        assert!(y.borrow().is_connected_prev(0, None));
+
+        let z=Rc::new(RefCell::new(SkipNode::<i64>::new(10)));
+        SkipNode::connect(x.clone(), z.clone(), 0);
+        assert!(x.borrow().is_connected_next(0, Some(10)));
+        assert!(y.borrow().is_connected_prev(0, Some(10)));
+        assert!(z.borrow().is_connected_prev(0, None));
+        assert!(z.borrow().is_connected_next(0, Some(100)));
     }
     #[test]
     fn test_rand() {
@@ -229,29 +307,43 @@ mod skiplist {
         assert!(s.find(&5));
     }
     #[test]
+    fn test_debug2() {
+        let mut s = Skiplist::new();
+        s.insert(0);
+        s.insert(5);
+        s.print_graph();
+        s.insert(9);
+        s.print_graph();
+        assert_eq!(s.find(&5),true);
+    }
+    #[test]
     fn test_compare_reference_insert_and_find() {
         use rand::{Rng, SeedableRng, StdRng};
         let mut rng = StdRng::from_seed(&[3, 2, 1]); 
         let mut ts = BTreeSet::new();
         let mut sl = Skiplist::new();
 
-        let size = 10;
+        let size = 50;
         let mut data1 = vec![];
         for _ in 0..size {
             let x = rng.next_u64()%size;
-            data1.push(x);
+            data1.push(x as usize);
         }
         let mut data2 = vec![];
         for _ in 0..size {
             let x = rng.next_u64()%size;
-            data2.push(x);
+            data2.push(x as usize);
         }
+        println!("insert and find phase");
         for x in data1 {
             dbg!(x);
             ts.insert(x);
             sl.insert(x);
             assert_eq!(sl.find(&x), ts.contains(&x));
+            // sl.print_graph();
         }
+        sl.print_graph();
+        println!("find phase");
         for x in data2 {
             assert_eq!(sl.find(&x), ts.contains(&x));
         }
