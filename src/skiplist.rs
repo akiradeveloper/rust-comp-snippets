@@ -8,18 +8,18 @@ mod skiplist {
     use std::fmt;
 
     struct RandGen {
-        x: i64,
+        x: u64,
     }
     impl RandGen {
-        fn new(seed: i64) -> RandGen {
+        fn new(seed: u64) -> RandGen {
             RandGen {
                 x: seed,
             }
         }
-        fn next(&mut self) -> i64 {
-            const a: i64 = 1103515245;
-            const b: i64 = 12345;
-            const m: i64 = 1<<32;
+        fn next(&mut self) -> u64 {
+            const a: u64 = 1103515245;
+            const b: u64 = 12345;
+            const m: u64 = 1<<32;
             self.x = (a*self.x+b)%m;
             self.x
         }
