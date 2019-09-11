@@ -1,3 +1,4 @@
+#[snippet = "skiplist"]
 mod skiplist {
     use std::collections::{BTreeMap, BTreeSet};
     use std::rc::Rc;
@@ -52,6 +53,7 @@ mod skiplist {
                     ss.push(format!("{:>02}", x));
                 }
                 println!("{}",ss.connect(","));
+                println!("");
             }
         }
     }
@@ -78,7 +80,7 @@ mod skiplist {
         }
         fn insert(&mut self, x: T) -> bool {
             let paths = self.traverse(&x);
-            println!("insert {:?}: {:?}", x, &paths);
+            // println!("insert {:?}: {:?}", x, &paths);
 
             if !paths.is_empty() {
                 let next0 = paths[0].borrow().next.get(&0).cloned();
@@ -90,7 +92,7 @@ mod skiplist {
             }
 
             let new_height = self.pick_height();
-            println!("new height: {}", new_height);
+            // println!("new height: {}", new_height);
             let new_node = Rc::new(RefCell::new(SkipNode::new(x)));
             for level in (0..new_height).rev() {
                 if !self.left_sentinel.borrow().next.contains_key(&level) {
@@ -101,22 +103,27 @@ mod skiplist {
                     SkipNode::connect(prev, new_node.clone(), level);
                 }
             }
-            println!("inserted");
             
             true
         }
-        fn find(&self, x: &T) -> bool {
+        fn find_node(&self, x: &T) -> Option<Rc<RefCell<SkipNode<T>>>> {
             let paths = self.traverse(x);
-            println!("find {:?}: {:?}", x, &paths);
+            // println!("find {:?}: {:?}", x, &paths);
 
             if paths.is_empty() {
-                return false;
+                return None
             }
 
             let next0 = paths[0].borrow().next.get(&0).cloned();
             let next = next0.unwrap();
-            let found = next.borrow().value.as_ref() == Some(x);
-            found
+            if next.borrow().value.as_ref() == Some(x) {
+                Some(next)
+            } else {
+                None
+            }
+        }
+        fn find(&self, x: &T) -> bool {
+            self.find_node(x).is_some()
         }
         fn range<R: RangeBounds<T>>(&self, range: R) -> Range<T> {
             unimplemented!()
@@ -156,6 +163,15 @@ mod skiplist {
                 }
             }
             acc
+        }
+        fn remove(&mut self, x: &T) -> bool {
+            let node = self.find_node(x);
+            if node.is_none() {
+                return false
+            }
+            let node = node.unwrap();
+            node.borrow_mut().remove();
+            true
         }
     }
     struct Range<T> {
@@ -307,6 +323,15 @@ mod skiplist {
         s.insert(9);
         s.print_graph();
         assert_eq!(s.find(&5),true);
+        s.remove(&4);
+        assert_eq!(s.find(&5),true);
+        s.remove(&5);
+        s.print_graph();
+        assert_eq!(s.find(&5),false);
+        s.remove(&9);
+        s.print_graph();
+        assert_eq!(s.find(&9),false);
+        assert_eq!(s.find(&0),true);
     }
     #[test]
     fn test_compare_reference_insert_and_find() {
@@ -315,7 +340,7 @@ mod skiplist {
         let mut ts = BTreeSet::new();
         let mut sl = Skiplist::new();
 
-        let size = 50;
+        let size = 100000;
         let mut data1 = vec![];
         for _ in 0..size {
             let x = rng.next_u64()%size;
@@ -326,24 +351,34 @@ mod skiplist {
             let x = rng.next_u64()%size;
             data2.push(x as usize);
         }
+        let mut data3 = vec![];
+        for _ in 0..size {
+            let x = rng.next_u64()%size;
+            data3.push(x as usize);
+        }
         println!("insert and find phase");
         for x in data1 {
-            dbg!(x);
+            // dbg!(x);
             ts.insert(x);
             sl.insert(x);
             assert_eq!(sl.find(&x), ts.contains(&x));
             // sl.print_graph();
         }
-        sl.print_graph();
+        // sl.print_graph();
         println!("find phase");
         for x in data2 {
+            assert_eq!(sl.find(&x), ts.contains(&x));
+        }
+        println!("remove phase");
+        for x in data3 {
+            assert_eq!(sl.remove(&x), ts.remove(&x));
             assert_eq!(sl.find(&x), ts.contains(&x));
         }
     }
     #[bench]
     fn bench_skiplist_insert(b: &mut test::Bencher) {
         use rand::{Rng, SeedableRng, StdRng};
-        let size = 10000;
+        let size = 1000;
         let mut s = Skiplist::new();
         let mut rng = StdRng::from_seed(&[3, 2, 1]);
         b.iter(||
@@ -355,7 +390,7 @@ mod skiplist {
     #[bench]
     fn bench_skiplist_find(b: &mut test::Bencher) {
         use rand::{Rng, SeedableRng, StdRng};
-        let size = 10000;
+        let size = 1000;
         let mut s = Skiplist::new();
         let mut rng = StdRng::from_seed(&[3, 2, 1]);
         for _ in 0..size {
