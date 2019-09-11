@@ -1,25 +1,26 @@
 #[snippet = "skiplist"]
 mod skiplist {
+    use std;
     use std::collections::{BTreeMap, BTreeSet};
     use std::rc::Rc;
     use std::cell::RefCell;
-    use std::ops::RangeBounds;
+    // use std::ops::RangeBounds;
     use std::fmt;
 
     struct RandGen {
         x: i64,
     }
     impl RandGen {
-        const a: i64 = 1103515245;
-        const b: i64 = 12345;
-        const m: i64 = 1<<32;
         fn new(seed: i64) -> RandGen {
             RandGen {
                 x: seed,
             }
         }
         fn next(&mut self) -> i64 {
-            self.x = (Self::a*self.x+Self::b)%Self::m;
+            const a: i64 = 1103515245;
+            const b: i64 = 12345;
+            const m: i64 = 1<<32;
+            self.x = (a*self.x+b)%m;
             self.x
         }
     }
@@ -125,9 +126,9 @@ mod skiplist {
         fn find(&self, x: &T) -> bool {
             self.find_node(x).is_some()
         }
-        fn range<R: RangeBounds<T>>(&self, range: R) -> Range<T> {
-            unimplemented!()
-        }
+        // fn range<R: RangeBounds<T>>(&self, range: R) -> Range<T> {
+        //     unimplemented!()
+        // }
         fn traverse(&self, x: &T) -> Vec<Rc<RefCell<SkipNode<T>>>> {
             if self.height()==0 {
                 return vec![]
@@ -340,7 +341,7 @@ mod skiplist {
         let mut ts = BTreeSet::new();
         let mut sl = Skiplist::new();
 
-        let size = 100000;
+        let size = 1000;
         let mut data1 = vec![];
         for _ in 0..size {
             let x = rng.next_u64()%size;
