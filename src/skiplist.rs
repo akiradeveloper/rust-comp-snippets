@@ -25,7 +25,7 @@ mod skiplist {
         }
     }
 
-    struct Skiplist<T> {
+    pub struct Skiplist<T> {
         left_sentinel: Rc<RefCell<SkipNode<T>>>,
         right_sentinel: Rc<RefCell<SkipNode<T>>>,
         rand_gen: RandGen,
@@ -59,7 +59,7 @@ mod skiplist {
         }
     }
     impl <T> Skiplist<T> where T: std::cmp::Ord + fmt::Debug + Clone {
-        fn new() -> Skiplist<T> {
+        pub fn new() -> Skiplist<T> {
             Skiplist {
                 left_sentinel: Rc::new(SkipNode::sentinel().into()),
                 right_sentinel: Rc::new(SkipNode::sentinel().into()),
@@ -79,7 +79,7 @@ mod skiplist {
             }
             k+1
         }
-        fn insert(&mut self, x: T) -> bool {
+        pub fn insert(&mut self, x: T) -> bool {
             let paths = self.traverse(&x);
             // println!("insert {:?}: {:?}", x, &paths);
 
@@ -123,7 +123,7 @@ mod skiplist {
                 None
             }
         }
-        fn find(&self, x: &T) -> bool {
+        pub fn find(&self, x: &T) -> bool {
             self.find_node(x).is_some()
         }
         // fn range<R: RangeBounds<T>>(&self, range: R) -> Range<T> {
@@ -165,7 +165,7 @@ mod skiplist {
             }
             acc
         }
-        fn remove(&mut self, x: &T) -> bool {
+        pub fn remove(&mut self, x: &T) -> bool {
             let node = self.find_node(x);
             if node.is_none() {
                 return false
