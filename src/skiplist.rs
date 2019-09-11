@@ -206,11 +206,13 @@ mod skiplist {
         // x -> z => x -> y -> z
         // z = some or none
         fn connect(x: Rc<RefCell<Self>>, y: Rc<RefCell<Self>>, level: usize) {
-            let x_next = x.borrow().next.get(&level).cloned();
+            let x_next0 = x.borrow().next.get(&level).cloned();
             x.borrow_mut().next.insert(level, y.clone());
             y.borrow_mut().prev.insert(level, x.clone());
-            if x_next.is_some() {
-                let x_next = x_next.unwrap();
+            // We still need this guard:
+            // Left sentinal doesn't have link to the right at initial state.
+            if x_next0.is_some() {
+                let x_next = x_next0.unwrap();
                 y.borrow_mut().next.insert(level, x_next.clone());
                 x_next.borrow_mut().prev.insert(level, y.clone());
             }
