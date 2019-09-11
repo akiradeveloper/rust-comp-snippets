@@ -26,6 +26,7 @@ mod skiplist {
     }
 
     pub struct Skiplist<T> {
+        max_height: usize,
         left_sentinel: Rc<RefCell<SkipNode<T>>>,
         right_sentinel: Rc<RefCell<SkipNode<T>>>,
         rand_gen: RandGen,
@@ -68,13 +69,14 @@ mod skiplist {
                 right_sentinel.borrow_mut().next[level] = Some(left_sentinel.clone());
             }
             Skiplist {
+                max_height: 0,
                 left_sentinel: left_sentinel,
                 right_sentinel: right_sentinel,
                 rand_gen: RandGen::new(0),
             }
         }
         fn height(&self) -> usize {
-            self.left_sentinel.borrow().height()
+            self.max_height
         }
         fn pick_height(&mut self) -> usize {
             let z = self.rand_gen.next();
@@ -87,7 +89,7 @@ mod skiplist {
             k+1
         }
         pub fn insert(&mut self, x: T) -> bool {
-            let paths = self.traverse(&x);
+            let mut paths = self.traverse(&x);
             // println!("insert {:?}: {:?}", x, &paths);
 
             if !paths.is_empty() {
@@ -100,6 +102,10 @@ mod skiplist {
             }
 
             let new_height = self.pick_height();
+            self.max_height = std::cmp::max(self.max_height, new_height);
+            while paths.len() < new_height {
+                paths.push(self.left_sentinel.clone());
+            }
             // println!("new height: {}", new_height);
             let new_node = Rc::new(RefCell::new(SkipNode::new(x, new_height)));
             for level in 0..new_height {
@@ -132,13 +138,13 @@ mod skiplist {
         //     unimplemented!()
         // }
         fn traverse(&self, x: &T) -> Vec<Rc<RefCell<SkipNode<T>>>> {
-            if self.height()==0 {
+            if self.height() == 0 {
                 return vec![]
             }
 
             let mut cur = self.left_sentinel.clone();
             let mut acc = vec![self.left_sentinel.clone(); self.height()];
-            let mut level = self.height()-1;
+            let mut level = self.height() - 1;
             loop {
                 if level==0 {
                     loop {
@@ -330,7 +336,7 @@ mod skiplist {
     #[bench]
     fn bench_skiplist_insert(b: &mut test::Bencher) {
         use rand::{Rng, SeedableRng, StdRng};
-        let size = 1000;
+        let size = 10000;
         let mut s = Skiplist::new();
         let mut rng = StdRng::from_seed(&[3, 2, 1]);
         b.iter(||
@@ -342,7 +348,7 @@ mod skiplist {
     #[bench]
     fn bench_skiplist_find(b: &mut test::Bencher) {
         use rand::{Rng, SeedableRng, StdRng};
-        let size = 1000;
+        let size = 10000;
         let mut s = Skiplist::new();
         let mut rng = StdRng::from_seed(&[3, 2, 1]);
         for _ in 0..size {
