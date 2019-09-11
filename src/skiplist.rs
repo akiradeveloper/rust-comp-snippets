@@ -102,7 +102,7 @@ mod skiplist {
             let new_height = self.pick_height();
             // println!("new height: {}", new_height);
             let new_node = Rc::new(RefCell::new(SkipNode::new(x, new_height)));
-            for level in (0..new_height).rev() {
+            for level in 0..new_height {
                 let prev = paths[level].clone();
                 SkipNode::connect(prev, new_node.clone(), level);
             }
@@ -240,9 +240,11 @@ mod skiplist {
     #[test]
     fn test_pick_height() {
         let mut sl = Skiplist::<i64>::new();
-        for _ in 0..100 {
-            println!("{}",sl.pick_height())
+        let mut cnt = vec![0;60];
+        for _ in 0..1000000 {
+            cnt[sl.pick_height()] += 1;
         }
+        println!("{:?}",cnt);
     }
     #[test]
     fn test_insert() {
