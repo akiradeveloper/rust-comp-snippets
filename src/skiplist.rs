@@ -1,5 +1,7 @@
 #[snippet = "skiplist"]
 mod skiplist {
+    use crate::xorshift;
+    
     use std;
     use std::collections::{BTreeMap, BTreeSet};
     use std::rc::Rc;
@@ -426,5 +428,32 @@ mod skiplist {
                 sl.pick_height();
             }
         )
+    }
+    #[bench]
+    fn bench_btree_insert_random(b: &mut test::Bencher) {
+        use rand::{Rng, SeedableRng, StdRng};
+        let size = 1000;
+        let mut s = BTreeSet::new();
+        let mut rng = StdRng::from_seed(&[3, 2, 1]);
+        b.iter(||
+            for _ in 0..size {
+                s.insert(rng.next_u64());
+            }
+        );
+    }
+    #[bench]
+    fn bench_btree_find_random(b: &mut test::Bencher) {
+        use rand::{Rng, SeedableRng, StdRng};
+        let size = 1000;
+        let mut s = BTreeSet::new();
+        let mut rng = StdRng::from_seed(&[3, 2, 1]);
+        for _ in 0..size {
+            s.insert(rng.next_u64());
+        }
+        b.iter(||
+            for _ in 0..size {
+                s.contains(&rng.next_u64());
+            }
+        );
     }
 }

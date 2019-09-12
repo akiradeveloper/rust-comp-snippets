@@ -33,3 +33,4 @@ pub mod manacher;
 pub mod z_algorithm;
 pub mod cumsum;
 pub mod skiplist;
+pub mod xorshift;
