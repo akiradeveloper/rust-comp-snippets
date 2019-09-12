@@ -61,8 +61,8 @@ mod skiplist {
     }
     impl <T> Skiplist<T> where T: std::cmp::Ord + fmt::Debug + Clone {
         pub fn new() -> Skiplist<T> {
-            let mut left_sentinel = Rc::new(RefCell::new(SkipNode::sentinel()));
-            let mut right_sentinel = Rc::new(RefCell::new(SkipNode::sentinel()));
+            let left_sentinel = Rc::new(RefCell::new(SkipNode::sentinel()));
+            let right_sentinel = Rc::new(RefCell::new(SkipNode::sentinel()));
             let sentinel_height = left_sentinel.borrow().height();
             for level in 0..sentinel_height {
                 left_sentinel.borrow_mut().next[level] = Some(right_sentinel.clone());
@@ -240,7 +240,7 @@ mod skiplist {
     fn test_pick_height() {
         let mut sl = Skiplist::<i64>::new();
         let mut cnt = vec![0;60];
-        for _ in 0..1000000 {
+        for _ in 0..100 {
             cnt[sl.pick_height()] += 1;
         }
         println!("{:?}",cnt);
@@ -334,9 +334,9 @@ mod skiplist {
         }
     }
     #[bench]
-    fn bench_skiplist_insert(b: &mut test::Bencher) {
+    fn bench_skiplist_insert_random(b: &mut test::Bencher) {
         use rand::{Rng, SeedableRng, StdRng};
-        let size = 10000;
+        let size = 1000;
         let mut s = Skiplist::new();
         let mut rng = StdRng::from_seed(&[3, 2, 1]);
         b.iter(||
@@ -346,9 +346,9 @@ mod skiplist {
         );
     }
     #[bench]
-    fn bench_skiplist_find(b: &mut test::Bencher) {
+    fn bench_skiplist_find_random(b: &mut test::Bencher) {
         use rand::{Rng, SeedableRng, StdRng};
-        let size = 10000;
+        let size = 1000;
         let mut s = Skiplist::new();
         let mut rng = StdRng::from_seed(&[3, 2, 1]);
         for _ in 0..size {
@@ -357,6 +357,35 @@ mod skiplist {
         b.iter(||
             for _ in 0..size {
                 s.find(&rng.next_u64());
+            }
+        );
+    }
+    #[bench]
+    fn bench_skiplist_insert_forward(b: &mut test::Bencher) {
+        let mut s = Skiplist::new();
+        let size = 1000;
+        let mut data = vec![];
+        for i in 0..size {
+            data.push(i);
+        }
+        b.iter(||
+            for &x in &data {
+                s.insert(x);
+            }
+        );
+    }
+    #[bench]
+    fn bench_skiplist_insert_reverse(b: &mut test::Bencher) {
+        let mut s = Skiplist::new();
+        let size = 1000;
+        let mut data = vec![];
+        for i in 0..size {
+            data.push(i);
+        }
+        data.reverse();
+        b.iter(||
+            for &x in &data {
+                s.insert(x);
             }
         );
     }
