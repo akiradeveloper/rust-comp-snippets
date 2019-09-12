@@ -203,8 +203,17 @@ mod skiplist {
         pub fn le_iter(&self, x: &T) -> Range<T> {
             unimplemented!();
         }
+        #[doc = "iterator in range [..]"]
+        pub fn iter(&self) -> Range<T> {
+            Range {
+                forward: true,
+                cur: self.left_sentinel.clone(),
+                last: self.right_sentinel.clone(),
+                _marker: std::marker::PhantomData,
+            }
+        }
     }
-    struct Range<'a, T: 'a> {
+    pub struct Range<'a, T: 'a> {
         forward: bool,
         cur: Rc<RefCell<SkipNode<T>>>,
         last: Rc<RefCell<SkipNode<T>>>,
@@ -213,6 +222,11 @@ mod skiplist {
     impl <'a, T: 'a> Iterator for Range<'a, T> {
         type Item = &'a T;
         fn next(&mut self) -> Option<Self::Item> {
+            unimplemented!();
+        }
+    }
+    impl <'a, T: 'a> DoubleEndedIterator for Range<'a, T> {
+        fn next_back(&mut self) -> Option<Self::Item> {
             unimplemented!();
         }
     }
