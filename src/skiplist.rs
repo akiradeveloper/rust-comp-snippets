@@ -148,9 +148,6 @@ mod skiplist {
             println!("traverse: {}", self.traverse_stat.get());
             println!("connect: {}", self.connect_stat.get());
         }
-        // fn range<R: RangeBounds<T>>(&self, range: R) -> Range<T> {
-        //     unimplemented!()
-        // }
         fn traverse(&self, x: &T) -> Vec<Rc<RefCell<SkipNode<T>>>> {
             if self.height() == 0 {
                 return vec![]
@@ -198,9 +195,26 @@ mod skiplist {
             node.borrow_mut().remove();
             true
         }
+        #[doc = "iterator in range [x,]"]
+        pub fn ge_iter(&self, x: &T) -> Range<T> {
+            unimplemented!();
+        }
+        #[doc = "iterator in range [,x]"]
+        pub fn le_iter(&self, x: &T) -> Range<T> {
+            unimplemented!();
+        }
     }
-    struct Range<T> {
+    struct Range<'a, T: 'a> {
+        forward: bool,
         cur: Rc<RefCell<SkipNode<T>>>,
+        last: Rc<RefCell<SkipNode<T>>>,
+        _marker: std::marker::PhantomData<&'a T>,
+    }
+    impl <'a, T: 'a> Iterator for Range<'a, T> {
+        type Item = &'a T;
+        fn next(&mut self) -> Option<Self::Item> {
+            unimplemented!();
+        }
     }
     struct SkipNode<T> {
         value: Option<T>,
