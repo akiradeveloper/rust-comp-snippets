@@ -85,33 +85,33 @@ fn test_bit_generic_vs_cumsum() {
 #[cfg(test)]
 use test::Bencher;
 
-#[bench]
-/// Add and sum 10^5 times to get averaged time.
-/// This is typical scenario to solve a problem which is O(N log(N)) and N = 10^5.
-fn bench_bit_add_sum_100k(b: &mut Bencher) {
-    use rand::{Rng, SeedableRng, StdRng};
+// #[bench]
+// /// Add and sum 10^5 times to get averaged time.
+// /// This is typical scenario to solve a problem which is O(N log(N)) and N = 10^5.
+// fn bench_bit_add_sum_100k(b: &mut Bencher) {
+//     use rand::{Rng, SeedableRng, StdRng};
 
-    let size = 100_000;
-    let mut bit = BITGeneric::new(size, &0, |a: &mut usize, b: &usize| *a += b);
-    let mut rng = StdRng::from_seed(&[1, 2, 3]);
+//     let size = 100_000;
+//     let mut bit = BITGeneric::new(size, &0, |a: &mut usize, b: &usize| *a += b);
+//     let mut rng = StdRng::from_seed(&[1, 2, 3]);
 
-    let bench_size = 100000;
-    let mut args = Vec::with_capacity(bench_size);
+//     let bench_size = 100000;
+//     let mut args = Vec::with_capacity(bench_size);
 
-    for _ in 0..bench_size {
-        let i = rng.next_u32() as usize % size + 1;
-        let x = rng.next_u32() as usize / bench_size;
+//     for _ in 0..bench_size {
+//         let i = rng.next_u32() as usize % size + 1;
+//         let x = rng.next_u32() as usize / bench_size;
 
-        args.push((i, x));
-    }
+//         args.push((i, x));
+//     }
 
-    b.iter(|| {
-        for &(i, x) in &args {
-            bit.add(i, &x);
-            bit.sum(i);
-        }
-    });
-}
+//     b.iter(|| {
+//         for &(i, x) in &args {
+//             bit.add(i, &x);
+//             bit.sum(i);
+//         }
+//     });
+// }
 
 #[snippet = "BIT"]
 #[allow(dead_code)]

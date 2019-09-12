@@ -240,7 +240,7 @@ mod skiplist {
     fn test_pick_height() {
         let mut sl = Skiplist::<i64>::new();
         let mut cnt = vec![0;60];
-        for _ in 0..100 {
+        for _ in 0..1_000_000 {
             cnt[sl.pick_height()] += 1;
         }
         println!("{:?}",cnt);
@@ -388,5 +388,43 @@ mod skiplist {
                 s.insert(x);
             }
         );
+    }
+    #[bench]
+    fn bench_skiplist_connect(b: &mut test::Bencher) {
+        let left=Rc::new(RefCell::new(SkipNode::new(0,5)));
+        let right=Rc::new(RefCell::new(SkipNode::new(10000000,5)));
+        for l in 0..5 {
+            left.borrow_mut().next[l]=Some(right.clone());
+            right.borrow_mut().prev[l]=Some(left.clone());
+        }
+        let mut data = vec![];
+        for i in 0..1000 {
+            let n=Rc::new(RefCell::new(SkipNode::new(i+1,5)));
+            data.push(n)
+        }
+        b.iter(||
+            for n in &data {
+                for l in 0..5 {
+                    SkipNode::connect(&left, n, l);
+                }
+            }
+        )
+    }
+    #[bench]
+    fn bench_skiplist_alloc_new_node(b: &mut test::Bencher) {
+        b.iter(||
+            for _ in 0..1000 {
+                Rc::new(RefCell::new(SkipNode::new(0,5)));
+            }
+        )
+    }
+    #[bench]
+    fn bench_skiplist_pick_height(b: &mut test::Bencher) {
+        let mut sl=Skiplist::<i64>::new();
+        b.iter(||
+            for _ in 0..1000 {
+                sl.pick_height();
+            }
+        )
     }
 }

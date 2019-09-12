@@ -90,32 +90,32 @@ fn test_xorshift_randf() {
 #[cfg(test)]
 use test::Bencher;
 
-#[bench]
-fn bench_xorshift_next(b: &mut Bencher) {
-    let mut rng = Xorshift::new();
-    b.iter(|| {
-        for _ in 0..1_000_000 {
-            rng.next();
-        }
-    });
-}
+// #[bench]
+// fn bench_xorshift_next(b: &mut Bencher) {
+//     let mut rng = Xorshift::new();
+//     b.iter(|| {
+//         for _ in 0..1_000_000 {
+//             rng.next();
+//         }
+//     });
+// }
 
-#[bench]
-fn bench_xorshift_rand(b: &mut Bencher) {
-    let mut rng = Xorshift::new();
-    b.iter(|| {
-        for _ in 0..1_000_000 {
-            rng.rand(10000);
-        }
-    });
-}
+// #[bench]
+// fn bench_xorshift_rand(b: &mut Bencher) {
+//     let mut rng = Xorshift::new();
+//     b.iter(|| {
+//         for _ in 0..1_000_000 {
+//             rng.rand(10000);
+//         }
+//     });
+// }
 
-#[bench]
-fn bench_xorshift_randf(b: &mut Bencher) {
-    let mut rng = Xorshift::new();
-    b.iter(|| {
-        for _ in 0..1_000_000 {
-            rng.randf();
-        }
-    });
-}
+// #[bench]
+// fn bench_xorshift_randf(b: &mut Bencher) {
+//     let mut rng = Xorshift::new();
+//     b.iter(|| {
+//         for _ in 0..1_000_000 {
+//             rng.randf();
+//         }
+//     });
+// }
