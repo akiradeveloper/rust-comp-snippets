@@ -197,7 +197,12 @@ mod skiplist {
         }
         #[doc = "iterator in range [x,]"]
         pub fn ge_iter(&self, x: &T) -> Range<T> {
-            unimplemented!();
+            let f = self.traverse(x)[0].clone();
+            Range {
+                forward: true,
+                f: f,
+                b: self.right_sentinel.clone(),
+            }
         }
         #[doc = "iterator in range [,x]"]
         pub fn le_iter(&self, x: &T) -> Range<T> {
@@ -207,45 +212,55 @@ mod skiplist {
         pub fn iter(&self) -> Range<T> {
             Range {
                 forward: true,
-                cur: self.left_sentinel.clone(),
-                last: self.right_sentinel.clone(),
+                f: self.left_sentinel.clone(),
+                b: self.right_sentinel.clone(),
             }
         }
     }
     pub struct Range<T> {
         forward: bool,
-        cur: Rc<RefCell<SkipNode<T>>>,
-        last: Rc<RefCell<SkipNode<T>>>,
+        f: Rc<RefCell<SkipNode<T>>>,
+        b: Rc<RefCell<SkipNode<T>>>,
     }
     impl <T: Clone> Iterator for Range<T> {
         type Item = T;
         fn next(&mut self) -> Option<Self::Item> {
             let next0 = if self.forward {
-                self.cur.borrow().next[0].clone()
+                self.f.borrow().next[0].clone()
             } else {
-                self.cur.borrow().prev[0].clone()
+                self.b.borrow().prev[0].clone()
             };
             if next0.is_none() {
                 return None
             }
             let next = next0.unwrap();
-            self.cur = next;
-            self.cur.borrow().value.clone()
+            if self.forward {
+                self.f = next;
+                self.f.borrow().value.clone()
+            } else {
+                self.b = next;
+                self.b.borrow().value.clone()
+            }
         }
     }
     impl <T: Clone> DoubleEndedIterator for Range<T> {
         fn next_back(&mut self) -> Option<Self::Item> {
             let next0 = if self.forward {
-                self.cur.borrow().prev[0].clone()
+                self.b.borrow().prev[0].clone()
             } else {
-                self.cur.borrow().next[0].clone()
+                self.f.borrow().next[0].clone()
             };
             if next0.is_none() {
                 return None
             }
             let next = next0.unwrap();
-            self.cur = next;
-            self.cur.borrow().value.clone()
+            if self.forward {
+                self.b = next;
+                self.b.borrow().value.clone()
+            } else {
+                self.f = next;
+                self.f.borrow().value.clone()
+            }
         }
     }
     struct SkipNode<T> {
@@ -296,7 +311,25 @@ mod skiplist {
             x_next.borrow_mut().prev[level] = Some(y.clone());
         }
     }
-
+    #[test]
+    fn test_iter() {
+        let mut sl = Skiplist::new();
+        for i in 1..6 {
+            sl.insert(i);
+        }
+        for x in sl.iter() {
+            println!("{}",x);
+        }
+        for x in sl.iter().rev() {
+            println!("{}",x);
+        }
+        for x in sl.ge_iter(&2) {
+            println!("{}",x);
+        }
+        // for x in sl.le_iter(&2) {
+        //     println!("{}",x);
+        // }
+    }
     #[test]
     fn test_pick_height() {
         let mut sl = Skiplist::<i64>::new();
