@@ -1,7 +1,5 @@
 #[snippet = "skiplist"]
 mod skiplist {
-    use crate::xorshift;
-    
     use std;
     use std::collections::{BTreeMap, BTreeSet};
     use std::rc::Rc;
@@ -357,21 +355,21 @@ mod skiplist {
         for x in sl.iter() {
             println!("{}",x);
         }
-        for x in sl.iter().rev() {
-            println!("{}",x);
-        }
+        // for x in sl.iter().rev() {
+        //     println!("{}",x);
+        // }
         for x in sl.ge_iter(&2) {
             println!("{}",x);
         }
-        for x in sl.ge_iter(&2).rev() {
-            println!("{}",x);
-        }
+        // for x in sl.ge_iter(&2).rev() {
+        //     println!("{}",x);
+        // }
         for x in sl.le_iter(&2) {
             println!("{}",x);
         }
-        for x in sl.le_iter(&2).rev() {
-            println!("{}",x);
-        }
+        // for x in sl.le_iter(&2).rev() {
+        //     println!("{}",x);
+        // }
     }
     #[test]
     fn test_pick_height() {
