@@ -242,11 +242,10 @@ mod skiplist {
         // x -> z => x -> y -> z
         // z = some or none
         fn connect(x: &Rc<RefCell<Self>>, y: &Rc<RefCell<Self>>, level: usize) {
-            let x_next0 = x.borrow().next[level].clone();
+            let x_next = x.borrow().next[level].clone().unwrap();
             x.borrow_mut().next[level] = Some(y.clone());
             y.borrow_mut().prev[level] = Some(x.clone());
 
-            let x_next = x_next0.unwrap();
             y.borrow_mut().next[level] = Some(x_next.clone());
             x_next.borrow_mut().prev[level] = Some(y.clone());
         }
