@@ -5,7 +5,7 @@ mod skiplist {
     use std;
     use std::collections::{BTreeMap, BTreeSet};
     use std::rc::Rc;
-    use std::cell::RefCell;
+    use std::cell::{Cell, RefCell};
     // use std::ops::RangeBounds;
     use std::fmt;
 
@@ -32,6 +32,7 @@ mod skiplist {
         left_sentinel: Rc<RefCell<SkipNode<T>>>,
         right_sentinel: Rc<RefCell<SkipNode<T>>>,
         rand_gen: RandGen,
+        stat: Cell<usize>,
     }
     impl Skiplist<usize> {
         fn print_graph(&self) {
@@ -75,6 +76,7 @@ mod skiplist {
                 left_sentinel: left_sentinel,
                 right_sentinel: right_sentinel,
                 rand_gen: RandGen::new(0),
+                stat: Cell::new(0),
             }
         }
         fn height(&self) -> usize {
@@ -136,6 +138,12 @@ mod skiplist {
         pub fn find(&self, x: &T) -> bool {
             self.find_node(x).is_some()
         }
+        pub fn reset_stat(&self) {
+            self.stat.set(0);
+        }
+        pub fn show_stat(&self) {
+            println!("{}", self.stat.get());
+        }
         // fn range<R: RangeBounds<T>>(&self, range: R) -> Range<T> {
         //     unimplemented!()
         // }
@@ -158,6 +166,7 @@ mod skiplist {
                             break;
                         } else {
                             cur = next.clone();
+                            self.stat.set(self.stat.get()+1);
                         }
                     }
                     break;
@@ -171,6 +180,7 @@ mod skiplist {
                     continue;
                 } else {
                     cur = next;
+                    self.stat.set(self.stat.get()+1);
                 }
             }
             acc
@@ -334,6 +344,22 @@ mod skiplist {
             assert_eq!(sl.remove(&x), ts.remove(&x));
             assert_eq!(sl.find(&x), ts.contains(&x));
         }
+    }
+    #[test]
+    fn test_skiplist_stat() {
+        use rand::{Rng, SeedableRng, StdRng};
+        let size = 1000;
+        let mut rng = StdRng::from_seed(&[3, 2, 1]);
+        let mut s = Skiplist::new();
+        for _ in 0..size {
+            s.insert(rng.next_u64());
+        }
+        s.show_stat();
+        s.reset_stat();
+        for _ in 0..size {
+            s.find(&rng.next_u64());
+        }
+        s.show_stat();
     }
     #[bench]
     fn bench_skiplist_insert_random(b: &mut test::Bencher) {
