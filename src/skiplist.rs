@@ -70,7 +70,7 @@ mod skiplist {
             let sentinel_height = left_sentinel.borrow().height();
             for level in 0..sentinel_height {
                 left_sentinel.borrow_mut().next[level] = Some(right_sentinel.clone());
-                right_sentinel.borrow_mut().next[level] = Some(left_sentinel.clone());
+                right_sentinel.borrow_mut().prev[level] = Some(left_sentinel.clone());
             }
             Skiplist {
                 max_height: 0,
@@ -82,7 +82,11 @@ mod skiplist {
             }
         }
         fn height(&self) -> usize {
-            self.max_height
+            if self.max_height == 0 {
+                33
+            } else {
+                self.max_height
+            }
         }
         fn pick_height(&mut self) -> usize {
             let z = self.rand_gen.next();
@@ -157,10 +161,9 @@ mod skiplist {
             let mut acc = vec![self.left_sentinel.clone(); self.height()];
             let mut level = self.height() - 1;
             loop {
-                if level==0 {
+                if level == 0 {
                     loop {
                         acc[level] = cur.clone();
-
                         let next0 = cur.borrow().next[level].clone();
                         let next = next0.unwrap();
                         if next.borrow().value.is_none() || next.borrow().value.as_ref().unwrap() >= x {
@@ -177,11 +180,44 @@ mod skiplist {
                 let next = next0.unwrap();
                 if next.borrow().value.is_none() || next.borrow().value.as_ref().unwrap() >= x {
                     acc[level] = cur.clone();
-                    level-=1;
+                    level -= 1;
                     continue;
                 } else {
                     cur = next;
                     self.traverse_stat.set(self.traverse_stat.get()+1);
+                }
+            }
+            acc
+        }
+        fn traverse_rev(&self, x: &T) -> Vec<Rc<RefCell<SkipNode<T>>>> {
+            if self.height() == 0 {
+                return vec![]
+            }
+
+            let mut cur = self.right_sentinel.clone();
+            let mut acc = vec![self.right_sentinel.clone(); self.height()];
+            let mut level = self.height() - 1;
+            loop {
+                if level == 0 {
+                    loop {
+                        acc[level] = cur.clone();
+                        let next = cur.borrow().prev[level].clone().unwrap();
+                        if next.borrow().value.is_none() || next.borrow().value.as_ref().unwrap() <= x {
+                            break;
+                        } else {
+                            cur = next.clone();
+                        }
+                    }
+                    break;
+                }
+
+                let next = cur.borrow().prev[level].clone().unwrap();
+                if next.borrow().value.is_none() || next.borrow().value.as_ref().unwrap() <= x {
+                    acc[level] = cur.clone();
+                    level -= 1;
+                    continue;
+                } else {
+                    cur = next;
                 }
             }
             acc
@@ -206,7 +242,12 @@ mod skiplist {
         }
         #[doc = "iterator in range [,x]"]
         pub fn le_iter(&self, x: &T) -> Range<T> {
-            unimplemented!();
+            let b = self.traverse_rev(x)[0].clone();
+            Range {
+                forward: false,
+                f: self.left_sentinel.clone(),
+                b: b,
+            }
         }
         #[doc = "iterator in range [..]"]
         pub fn iter(&self) -> Range<T> {
@@ -326,9 +367,15 @@ mod skiplist {
         for x in sl.ge_iter(&2) {
             println!("{}",x);
         }
-        // for x in sl.le_iter(&2) {
-        //     println!("{}",x);
-        // }
+        for x in sl.ge_iter(&2).rev() {
+            println!("{}",x);
+        }
+        for x in sl.le_iter(&2) {
+            println!("{}",x);
+        }
+        for x in sl.le_iter(&2).rev() {
+            println!("{}",x);
+        }
     }
     #[test]
     fn test_pick_height() {
