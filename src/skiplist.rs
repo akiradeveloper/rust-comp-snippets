@@ -650,22 +650,39 @@ mod skiplist {
             }
         }
         pub fn insert(&mut self, x: T) {
-
+            self.sl.insert(x.clone());
+            *self.counting.entry(x).or_insert(0) += 1;
         }
         pub fn counting(&self, x: &T) -> usize {
-            0
+            self.counting.get(x).cloned().unwrap_or(0)
         }
-        pub fn remove(&mut self, x: &T) {
+        pub fn remove(&mut self, x: &T) -> bool {
+            let cnt = self.counting(x);
+            if cnt == 0 {
+                return false
+            }
 
+            if cnt > 2 {
+                *self.counting.get_mut(&x).unwrap() -= 1;
+            }
+            else if cnt == 1 {
+                self.counting.remove(&x);
+            }
+            return true
         }
-        pub fn len(&self) -> usize {
-            0
+        pub fn unwrap(&self) -> &Skiplist<T> {
+            &self.sl
         }
-        pub fn le_iter(&self) {
-
-        }
-        pub fn ge_iter(&self) {
-
-        }
+    }
+    #[test]
+    fn test_multiset() {
+        let mut s = Multiset::new();
+        assert_eq!(s.counting(&1),0);
+        s.insert(1);
+        assert_eq!(s.counting(&1),1);
+        s.insert(1);
+        assert_eq!(s.counting(&1),2);
+        assert!(s.remove(&1));
+        assert_eq!(s.unwrap().ge_iter(&1).next().unwrap(),1);
     }
 }
