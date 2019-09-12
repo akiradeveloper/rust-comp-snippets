@@ -209,25 +209,43 @@ mod skiplist {
                 forward: true,
                 cur: self.left_sentinel.clone(),
                 last: self.right_sentinel.clone(),
-                _marker: std::marker::PhantomData,
             }
         }
     }
-    pub struct Range<'a, T: 'a> {
+    pub struct Range<T> {
         forward: bool,
         cur: Rc<RefCell<SkipNode<T>>>,
         last: Rc<RefCell<SkipNode<T>>>,
-        _marker: std::marker::PhantomData<&'a T>,
     }
-    impl <'a, T: 'a> Iterator for Range<'a, T> {
-        type Item = &'a T;
+    impl <T: Clone> Iterator for Range<T> {
+        type Item = T;
         fn next(&mut self) -> Option<Self::Item> {
-            unimplemented!();
+            let next0 = if self.forward {
+                self.cur.borrow().next[0].clone()
+            } else {
+                self.cur.borrow().prev[0].clone()
+            };
+            if next0.is_none() {
+                return None
+            }
+            let next = next0.unwrap();
+            self.cur = next;
+            self.cur.borrow().value.clone()
         }
     }
-    impl <'a, T: 'a> DoubleEndedIterator for Range<'a, T> {
+    impl <T: Clone> DoubleEndedIterator for Range<T> {
         fn next_back(&mut self) -> Option<Self::Item> {
-            unimplemented!();
+            let next0 = if self.forward {
+                self.cur.borrow().prev[0].clone()
+            } else {
+                self.cur.borrow().next[0].clone()
+            };
+            if next0.is_none() {
+                return None
+            }
+            let next = next0.unwrap();
+            self.cur = next;
+            self.cur.borrow().value.clone()
         }
     }
     struct SkipNode<T> {
