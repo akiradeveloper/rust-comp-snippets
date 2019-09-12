@@ -635,4 +635,37 @@ mod skiplist {
             }
         );
     }
+
+
+    use std::collections::HashMap;
+    struct Multiset<T> {
+        sl: Skiplist<T>,
+        counting: HashMap<T, usize>,
+    }
+    impl <T> Multiset<T> where T: Ord + fmt::Debug + Clone + std::hash::Hash {
+        pub fn new() -> Multiset<T> {
+            Multiset {
+                sl: Skiplist::new(),
+                counting: HashMap::new(),
+            }
+        }
+        pub fn insert(&mut self, x: T) {
+
+        }
+        pub fn counting(&self, x: &T) -> usize {
+            0
+        }
+        pub fn remove(&mut self, x: &T) {
+
+        }
+        pub fn len(&self) -> usize {
+            0
+        }
+        pub fn le_iter(&self) {
+
+        }
+        pub fn ge_iter(&self) {
+
+        }
+    }
 }
