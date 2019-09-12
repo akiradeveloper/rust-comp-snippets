@@ -369,7 +369,7 @@ mod skiplist {
     #[bench]
     fn bench_skiplist_insert_random(b: &mut test::Bencher) {
         use rand::{Rng, SeedableRng, StdRng};
-        let size = 1000;
+        let size = 10000;
         let mut s = Skiplist::new();
         let mut rng = StdRng::from_seed(&[3, 2, 1]);
         b.iter(||
@@ -381,7 +381,7 @@ mod skiplist {
     #[bench]
     fn bench_skiplist_find_random(b: &mut test::Bencher) {
         use rand::{Rng, SeedableRng, StdRng};
-        let size = 1000;
+        let size = 10000;
         let mut s = Skiplist::new();
         let mut rng = StdRng::from_seed(&[3, 2, 1]);
         for _ in 0..size {
@@ -396,7 +396,7 @@ mod skiplist {
     #[bench]
     fn bench_skiplist_insert_forward(b: &mut test::Bencher) {
         let mut s = Skiplist::new();
-        let size = 1000;
+        let size = 10000;
         let mut data = vec![];
         for i in 0..size {
             data.push(i);
@@ -410,7 +410,7 @@ mod skiplist {
     #[bench]
     fn bench_skiplist_insert_reverse(b: &mut test::Bencher) {
         let mut s = Skiplist::new();
-        let size = 1000;
+        let size = 10000;
         let mut data = vec![];
         for i in 0..size {
             data.push(i);
@@ -423,7 +423,7 @@ mod skiplist {
         );
     }
     #[bench]
-    fn bench_skiplist_connect(b: &mut test::Bencher) {
+    fn bench_skiplist_connect_simple(b: &mut test::Bencher) {
         let left=Rc::new(RefCell::new(SkipNode::new(0,2)));
         let right=Rc::new(RefCell::new(SkipNode::new(10000000,2)));
         for l in 0..2 {
@@ -431,7 +431,7 @@ mod skiplist {
             right.borrow_mut().prev[l]=Some(left.clone());
         }
         let mut data = vec![];
-        for i in 0..1000 {
+        for i in 0..10000 {
             let n=Rc::new(RefCell::new(SkipNode::new(i+1,2)));
             data.push(n)
         }
@@ -444,9 +444,37 @@ mod skiplist {
         )
     }
     #[bench]
+    fn bench_skiplist_connect_random(b: &mut test::Bencher) {
+        use rand::{Rng, SeedableRng, StdRng};
+        let mut rng = StdRng::from_seed(&[3, 2, 1]);
+
+        let left=Rc::new(RefCell::new(SkipNode::new(0,2)));
+        let right=Rc::new(RefCell::new(SkipNode::new(10000000,2)));
+        for l in 0..2 {
+            left.borrow_mut().next[l]=Some(right.clone());
+            right.borrow_mut().prev[l]=Some(left.clone());
+        }
+        let mut prev_cands = vec![left.clone()];
+        let mut data = vec![];
+        for i in 0..10000 {
+            let n=Rc::new(RefCell::new(SkipNode::new(i+1,2)));
+            let i=rng.next_u64() as usize % prev_cands.len();
+            let prev = prev_cands[i].clone();
+            data.push((prev,n.clone()));
+            prev_cands.push(n.clone());
+        }
+        b.iter(||
+            for (prev,n) in &data {
+                for l in 0..2 {
+                    SkipNode::connect(&prev, &n, l);
+                }
+            }
+        )
+    }
+    #[bench]
     fn bench_skiplist_alloc_new_node(b: &mut test::Bencher) {
         b.iter(||
-            for _ in 0..1000 {
+            for _ in 0..10000 {
                 Rc::new(RefCell::new(SkipNode::new(0,2)));
             }
         )
@@ -455,7 +483,7 @@ mod skiplist {
     fn bench_skiplist_pick_height(b: &mut test::Bencher) {
         let mut sl=Skiplist::<i64>::new();
         b.iter(||
-            for _ in 0..1000 {
+            for _ in 0..10000 {
                 sl.pick_height();
             }
         )
@@ -463,7 +491,7 @@ mod skiplist {
     #[bench]
     fn bench_btree_insert_random(b: &mut test::Bencher) {
         use rand::{Rng, SeedableRng, StdRng};
-        let size = 1000;
+        let size = 10000;
         let mut s = BTreeSet::new();
         let mut rng = StdRng::from_seed(&[3, 2, 1]);
         b.iter(||
@@ -475,7 +503,7 @@ mod skiplist {
     #[bench]
     fn bench_btree_find_random(b: &mut test::Bencher) {
         use rand::{Rng, SeedableRng, StdRng};
-        let size = 1000;
+        let size = 10000;
         let mut s = BTreeSet::new();
         let mut rng = StdRng::from_seed(&[3, 2, 1]);
         for _ in 0..size {
