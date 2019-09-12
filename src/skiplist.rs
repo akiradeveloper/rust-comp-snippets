@@ -28,7 +28,7 @@ mod skiplist {
     }
 
     pub struct Skiplist<T> {
-        max_height: usize,
+        max_height: Option<usize>,
         left_sentinel: Rc<RefCell<SkipNode<T>>>,
         right_sentinel: Rc<RefCell<SkipNode<T>>>,
         rand_gen: RandGen,
@@ -73,7 +73,7 @@ mod skiplist {
                 right_sentinel.borrow_mut().prev[level] = Some(left_sentinel.clone());
             }
             Skiplist {
-                max_height: 0,
+                max_height: None,
                 left_sentinel: left_sentinel,
                 right_sentinel: right_sentinel,
                 rand_gen: RandGen::new(0),
@@ -82,11 +82,7 @@ mod skiplist {
             }
         }
         fn height(&self) -> usize {
-            if self.max_height == 0 {
-                33
-            } else {
-                self.max_height
-            }
+            self.max_height.unwrap_or(33)
         }
         fn pick_height(&mut self) -> usize {
             let z = self.rand_gen.next();
@@ -112,7 +108,7 @@ mod skiplist {
             }
 
             let new_height = self.pick_height();
-            self.max_height = std::cmp::max(self.max_height, new_height);
+            self.max_height = Some(std::cmp::max(self.max_height.unwrap_or(0), new_height));
             while paths.len() < new_height {
                 paths.push(self.left_sentinel.clone());
             }
