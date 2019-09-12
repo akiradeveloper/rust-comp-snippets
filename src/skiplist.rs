@@ -32,7 +32,8 @@ mod skiplist {
         left_sentinel: Rc<RefCell<SkipNode<T>>>,
         right_sentinel: Rc<RefCell<SkipNode<T>>>,
         rand_gen: RandGen,
-        stat: Cell<usize>,
+        traverse_stat: Cell<usize>,
+        connect_stat: Cell<usize>,
     }
     impl Skiplist<usize> {
         fn print_graph(&self) {
@@ -76,7 +77,8 @@ mod skiplist {
                 left_sentinel: left_sentinel,
                 right_sentinel: right_sentinel,
                 rand_gen: RandGen::new(0),
-                stat: Cell::new(0),
+                traverse_stat: Cell::new(0),
+                connect_stat: Cell::new(0),
             }
         }
         fn height(&self) -> usize {
@@ -110,10 +112,10 @@ mod skiplist {
             while paths.len() < new_height {
                 paths.push(self.left_sentinel.clone());
             }
-            // println!("new height: {}", new_height);
             let new_node = Rc::new(RefCell::new(SkipNode::new(x, new_height)));
             for level in 0..new_height {
                 let prev = &paths[level];
+                self.connect_stat.set(self.connect_stat.get()+1);
                 SkipNode::connect(prev, &new_node, level);
             }
             
@@ -139,10 +141,12 @@ mod skiplist {
             self.find_node(x).is_some()
         }
         pub fn reset_stat(&self) {
-            self.stat.set(0);
+            self.traverse_stat.set(0);
+            self.connect_stat.set(0);
         }
         pub fn show_stat(&self) {
-            println!("{}", self.stat.get());
+            println!("traverse: {}", self.traverse_stat.get());
+            println!("connect: {}", self.connect_stat.get());
         }
         // fn range<R: RangeBounds<T>>(&self, range: R) -> Range<T> {
         //     unimplemented!()
@@ -166,7 +170,7 @@ mod skiplist {
                             break;
                         } else {
                             cur = next.clone();
-                            self.stat.set(self.stat.get()+1);
+                            self.traverse_stat.set(self.traverse_stat.get()+1);
                         }
                     }
                     break;
@@ -180,7 +184,7 @@ mod skiplist {
                     continue;
                 } else {
                     cur = next;
-                    self.stat.set(self.stat.get()+1);
+                    self.traverse_stat.set(self.traverse_stat.get()+1);
                 }
             }
             acc
@@ -252,7 +256,7 @@ mod skiplist {
     fn test_pick_height() {
         let mut sl = Skiplist::<i64>::new();
         let mut cnt = vec![0;60];
-        for _ in 0..1_000_000 {
+        for _ in 0..1_000 {
             cnt[sl.pick_height()] += 1;
         }
         println!("{:?}",cnt);
@@ -351,11 +355,13 @@ mod skiplist {
         let size = 1000;
         let mut rng = StdRng::from_seed(&[3, 2, 1]);
         let mut s = Skiplist::new();
+        println!("insert");
         for _ in 0..size {
             s.insert(rng.next_u64());
         }
         s.show_stat();
         s.reset_stat();
+        println!("connect");
         for _ in 0..size {
             s.find(&rng.next_u64());
         }
@@ -419,20 +425,20 @@ mod skiplist {
     }
     #[bench]
     fn bench_skiplist_connect(b: &mut test::Bencher) {
-        let left=Rc::new(RefCell::new(SkipNode::new(0,5)));
-        let right=Rc::new(RefCell::new(SkipNode::new(10000000,5)));
-        for l in 0..5 {
+        let left=Rc::new(RefCell::new(SkipNode::new(0,2)));
+        let right=Rc::new(RefCell::new(SkipNode::new(10000000,2)));
+        for l in 0..2 {
             left.borrow_mut().next[l]=Some(right.clone());
             right.borrow_mut().prev[l]=Some(left.clone());
         }
         let mut data = vec![];
         for i in 0..1000 {
-            let n=Rc::new(RefCell::new(SkipNode::new(i+1,5)));
+            let n=Rc::new(RefCell::new(SkipNode::new(i+1,2)));
             data.push(n)
         }
         b.iter(||
             for n in &data {
-                for l in 0..5 {
+                for l in 0..2 {
                     SkipNode::connect(&left, n, l);
                 }
             }
@@ -442,7 +448,7 @@ mod skiplist {
     fn bench_skiplist_alloc_new_node(b: &mut test::Bencher) {
         b.iter(||
             for _ in 0..1000 {
-                Rc::new(RefCell::new(SkipNode::new(0,5)));
+                Rc::new(RefCell::new(SkipNode::new(0,2)));
             }
         )
     }
