@@ -298,6 +298,13 @@ mod skiplist {
             }
         }
     }
+    impl <T> fmt::Debug for Skiplist<T> where T: fmt::Debug + Clone + std::cmp::Ord {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            let v: Vec<T> = self.iter().collect();
+            writeln!(f, "{:?}", v);
+            Ok(())
+        }
+    }
     struct SkipNode<T> {
         value: Option<T>,
         prev: Vec<Option<Rc<RefCell<SkipNode<T>>>>>,
@@ -305,7 +312,7 @@ mod skiplist {
     }
     impl <T> fmt::Debug for SkipNode<T> where T: fmt::Debug + std::cmp::Ord {
         fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-            writeln!(f, "value: {:?}, height: {}", self.value, self.height());
+            writeln!(f, "{:?}, {:?}", self.value, self.height());
             Ok(())
         }
     }
@@ -397,6 +404,7 @@ mod skiplist {
             assert!(s.find(&x));
         }
         s.insert(660);
+        dbg!(&s);
         assert!(s.find(&660));
     }
     #[test]
