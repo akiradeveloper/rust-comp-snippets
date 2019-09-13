@@ -646,7 +646,7 @@ mod skiplist {
 
 
     use std::collections::HashMap;
-    struct Multiset<T> {
+    pub struct Multiset<T> {
         sl: Skiplist<T>,
         counting: HashMap<T, usize>,
     }
@@ -670,11 +670,12 @@ mod skiplist {
                 return false
             }
 
-            if cnt > 2 {
-                *self.counting.get_mut(&x).unwrap() -= 1;
+            if cnt >= 2 {
+                *self.counting.get_mut(x).unwrap() -= 1;
             }
             else if cnt == 1 {
-                self.counting.remove(&x);
+                self.counting.remove(x);
+                self.sl.remove(x);
             }
             return true
         }
@@ -692,5 +693,9 @@ mod skiplist {
         assert_eq!(s.counting(&1),2);
         assert!(s.remove(&1));
         assert_eq!(s.unwrap().ge_iter(&1).next().unwrap(),1);
+        assert_eq!(s.counting(&1),1);
+        assert!(s.remove(&1));
+        assert_eq!(s.counting(&1),0);
+        assert_eq!(s.unwrap().ge_iter(&1).next(),None);
     }
 }
