@@ -114,7 +114,7 @@ mod djikstra_heap {
         cost: i64,
     }
 
-    #[doc = "shortest path from directed adjacent graph with non-negative costs. O(ElogV)"]
+    #[doc = "g: directed adjacent graph with non-negative costs. O(ElogV)"]
     #[snippet = "dijkstra"]
     fn dijkstra_heap(g: &[Vec<Edge>], s: usize, inf: i64) -> Vec<i64> {
         let n = g.len();
@@ -155,7 +155,7 @@ mod bellman_ford {
         cost: i64,
     }
 
-    #[doc = "shorted path from graph as edges. negative costs allowed. O(V^2)"]
+    #[doc = "es: directed edges. negative costs allowed. O(V^2)"]
     #[snippet = "bellman_ford"]
     fn bellman_ford(n: usize, es: &[Edge], source: usize) -> Vec<i64> {
         const INF: i64 = 1<<60;

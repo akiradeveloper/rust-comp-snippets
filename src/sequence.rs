@@ -160,3 +160,23 @@ fn test_maximum_subarray() {
     assert_eq!(maxium_subarray(&[1,5,-1,0,10]),15);
     assert_eq!(maxium_subarray(&[0,-1,-5,0,-4]),0);
 }
+#[snippet = "vec_max"]
+fn vec_max<T: Ord + Clone>(xs: &[T]) -> T {
+    let mut v = &xs[0];
+    for x in xs {
+        if x > v {
+            v = x;
+        }
+    }
+    v.clone()
+}
+#[snippet = "vec_min"]
+fn vec_min<T: Ord + Clone>(xs: &[T]) -> T {
+    let mut v = &xs[0];
+    for x in xs {
+        if x < v {
+            v = x;
+        }
+    }
+    v.clone()
+}

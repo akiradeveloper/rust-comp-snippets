@@ -1,3 +1,4 @@
+#[snippet = "Lowlink"]
 fn minmax(p: (usize, usize)) -> (usize, usize) {
     if p.0 <= p.1 {
         p
@@ -6,16 +7,20 @@ fn minmax(p: (usize, usize)) -> (usize, usize) {
     }
 }
 
+#[snippet = "Lowlink"]
 struct LowLink<'a> {
     g: &'a [Vec<usize>],
     used: Vec<bool>,
     ord: Vec<usize>,
     low: Vec<usize>,
-    articulation: Vec<usize>,
-    bridge: Vec<(usize, usize)>,
+    pub articulation: Vec<usize>,
+    pub bridge: Vec<(usize, usize)>,
 }
 
+#[snippet = "Lowlink"]
+#[doc = "find articulation points and bridges at the same time"]
 impl <'a> LowLink<'a> {
+    #[doc = "g: undirected adjacency graph"]
     fn new(g: &'a [Vec<usize>]) -> LowLink {
         let n = g.len();
         let mut used = vec![false; n];

@@ -46,7 +46,7 @@ mod kraskal {
         cost: u64
     }
     #[snippet = "kraskal"]
-    #[doc = "undirected graph as edges. O(ElogV)"]
+    #[doc = "es: undirected edges. O(ElogV)"]
     fn kraskal(n: usize, es: &mut [Edge]) -> u64 {
         es.sort_by(|a, b| {
             a.cost.cmp(&b.cost)

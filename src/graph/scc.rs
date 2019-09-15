@@ -1,5 +1,6 @@
 use std::collections::VecDeque;
 
+#[snippet = "SCC"]
 pub struct SCC<'a> {
     g: &'a [Vec<usize>],
     r_g: Vec<Vec<usize>>,
@@ -8,7 +9,10 @@ pub struct SCC<'a> {
     pub order: Vec<usize>,
 }
 
+#[snippet = "SCC"]
+#[doc = "nodes that communicates each others are contracted into one node"]
 impl <'a> SCC<'a> {
+    #[doc = "g: directed adjacency graph"]
     pub fn new(g: &'a [Vec<usize>]) -> Self {
         let n = g.len();
         let mut r_g = vec![vec![]; n];
