@@ -34,3 +34,4 @@ pub mod z_algorithm;
 pub mod cumsum;
 pub mod skiplist;
 pub mod xorshift;
+pub mod ternary_search;
