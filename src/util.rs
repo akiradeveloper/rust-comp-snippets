@@ -29,3 +29,25 @@ pub fn vec_to_string<T: ToString>(xs: &[T]) -> Vec<String> {
 fn test_vec_to_string() {
     assert_eq!(vec_to_string(&vec![1,2]), vec!["1","2"]);
 }
+
+#[snippet = "ctoi"]
+fn ctoi(c: char) -> usize {
+    if 'A' <= c && c <= 'Z' {
+        c as usize - 'A' as usize
+    } else if 'a' <= c && c <= 'z' {
+        c as usize - 'a' as usize + 26
+    } else {
+        unreachable!("wrong character");
+    }
+}
+ 
+#[snippet = "itoc"]
+fn itoc(c: usize) -> char {
+    if 0 <= c && c < 26 {
+        (c as u8 + 'A' as u8) as char
+    } else if c < 52 {
+        (c as u8 - 26 + 'a' as u8) as char
+    } else {
+        unreachable!("wrong character");
+    }
+}

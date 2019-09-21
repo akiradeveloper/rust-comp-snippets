@@ -65,6 +65,7 @@ impl<M: Monoid> SEG<M> {
 #[snippet = "SEG_SUM"]
 #[allow(dead_code)]
 struct SUM;
+#[snippet = "SEG_SUM"]
 impl Monoid for SUM {
     type T = i64;
     fn id() -> Self::T {
@@ -93,6 +94,7 @@ fn test_seg_sum() {
 #[snippet = "SEG_MIN"]
 #[allow(dead_code)]
 struct MIN;
+#[snippet = "SEG_MIN"]
 impl Monoid for MIN {
     type T = i64;
     fn id() -> Self::T {
@@ -104,6 +106,7 @@ impl Monoid for MIN {
 }
 #[snippet = "SEG_MAX"]
 struct MAX;
+#[snippet = "SEG_MAX"]
 impl Monoid for MAX {
     type T = i64;
     fn id() -> Self::T {

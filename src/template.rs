@@ -11,6 +11,16 @@ use std::io::{stdin, stdout, BufWriter, Write};
 #[allow(unused_imports)]
 use std::iter::FromIterator;
 
+macro_rules! dvec {
+    ($t:expr ; $len:expr) => {
+        vec![$t; $len]
+    };
+ 
+    ($t:expr ; $len:expr, $($rest:expr),*) => {
+        vec![dvec!($t; $($rest),*); $len]
+    };
+}
+
 #[allow(unused_macros)]
 macro_rules! debug {
     ($($a:expr),*) => {
