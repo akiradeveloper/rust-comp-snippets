@@ -36,3 +36,4 @@ pub mod skiplist;
 pub mod xorshift;
 pub mod ternary_search;
 pub mod matrix;
+pub mod range;

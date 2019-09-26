@@ -11,6 +11,7 @@ use std::io::{stdin, stdout, BufWriter, Write};
 #[allow(unused_imports)]
 use std::iter::FromIterator;
 
+#[macro_export]
 macro_rules! dvec {
     ($t:expr ; $len:expr) => {
         vec![$t; $len]

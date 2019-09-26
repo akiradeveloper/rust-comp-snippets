@@ -2,7 +2,7 @@
 
 #[snippet = "gcd"]
 #[allow(dead_code)]
-pub fn gcd(a: usize, b: usize) -> usize {
+pub fn gcd(a: u64, b: u64) -> u64 {
     if b == 0 {
         a
     } else {
@@ -12,15 +12,13 @@ pub fn gcd(a: usize, b: usize) -> usize {
 
 #[snippet = "lcm"]
 #[allow(dead_code)]
-pub fn lcm(a: usize, b: usize) -> usize {
+pub fn lcm(a: u64, b: u64) -> u64 {
     a / gcd(a, b) * b
 }
 
+#[doc = "ax+by=gcd(a,b) returns (gcd, x, y)"]
 #[snippet = "extgcd"]
 #[allow(dead_code)]
-/// O(log n)
-/// solve ax+by=gcd(a,b)
-/// returns (gcd, x, y)
 pub fn extgcd(a: i64, b: i64) -> (i64, i64, i64) {
     if b == 0 {
         (a, 1, 0)
@@ -52,7 +50,7 @@ pub fn mod_inverse(a: i64, m: i64) -> i64 {
 #[snippet = "modpow"]
 #[allow(dead_code)]
 /// x ^ n % m
-pub fn modpow(x: usize, n: usize, m: usize) -> usize {
+pub fn modpow(x: u64, n: u64, m: u64) -> u64 {
     let mut res = 1;
     let mut x = x % m;
     let mut n = n;
@@ -78,7 +76,7 @@ fn test_modpow() {
 }
 
 #[snippet = "factorial"]
-fn factorial(a: usize, p: usize) -> usize {
+fn factorial(a: u64, p: u64) -> u64 {
     if a == 0 {
         return 1
     }
@@ -94,7 +92,7 @@ fn factorial(a: usize, p: usize) -> usize {
 
 // Knuth's algorithm
 #[snippet = "nCk"]
-fn nCk(a: usize, b: usize) -> usize {
+fn nCk(a: u64, b: u64) -> u64 {
     if a < b { return 0; }
     let mut a = a;
     let mut r = 1;
@@ -116,9 +114,9 @@ fn test_knuth_nCk() {
 
 // O(N^2)
 #[snippet = "comb_table"]
-fn comb_table(n_max: usize) -> Vec<Vec<usize>> {
-    let mut dp = vec![vec![0; n_max+1]; n_max+1];
-    for i in 0..n_max {
+fn comb_table(n_max: u64) -> Vec<Vec<u64>> {
+    let mut dp = vec![vec![0; (n_max+1) as usize]; (n_max+1) as usize];
+    for i in 0..n_max as usize {
         for j in 0..i+1 {
             if j==0 || j==i {
                 dp[i][j] = 1;
@@ -140,10 +138,10 @@ fn test_comb_table() {
 
 #[snippet = "ModComb"]
 struct ModComb {
-    fact: Vec<usize>,
-    fact_inv: Vec<usize>,
-    n: usize,
-    p: usize,
+    fact: Vec<u64>,
+    fact_inv: Vec<u64>,
+    n: u64,
+    p: u64,
 }
 #[snippet = "ModComb"]
 impl ModComb {
@@ -153,40 +151,40 @@ impl ModComb {
 
         ft.fact[0] = 1;
         for i in 1..n {
-            ft.fact[i] = (ft.fact[i-1] * i) % ft.p;
+            ft.fact[i] = (ft.fact[i-1] * i as u64) % ft.p;
         }
         ft.fact_inv[n-1] = modpow(ft.fact[n-1], ft.p-2, ft.p);
         for i in (0..n-1).rev() {
-            ft.fact_inv[i] = (ft.fact_inv[i+1] * (i+1)) % ft.p;
+            ft.fact_inv[i] = (ft.fact_inv[i+1] * (i+1) as u64) % ft.p;
         }
     }
-    fn new(max_n: usize, p: usize) -> ModComb {
+    fn new(max_n: u64, p: u64) -> ModComb {
         let mut ft = ModComb {
-            fact: vec![0; max_n+1 as usize],
-            fact_inv: vec![0; max_n+1 as usize],
+            fact: vec![0; (max_n+1) as usize],
+            fact_inv: vec![0; (max_n+1) as usize],
             n: max_n+1,
             p: p,
         };
         Self::initialize(&mut ft);
         ft
     }
-    fn fact(&self, n: usize) -> usize {
+    fn fact(&self, n: usize) -> u64 {
         self.fact[n]
     }
-    fn nCk(&self, n: usize, k: usize) -> usize {
+    fn nCk(&self, n: u64, k: u64) -> u64 {
         if n < k { return 0; }
-        (self.nPk(n,k) * self.fact_inv[k]) % self.p 
+        (self.nPk(n, k) * self.fact_inv[k as usize]) % self.p 
     }
-    fn nPk(&self, n: usize, k: usize) -> usize {
+    fn nPk(&self, n: u64, k: u64) -> u64 {
         if n < k { return 0; }
-        self.fact[n] * self.fact_inv[n-k] % self.p
+        self.fact[n as usize] * self.fact_inv[(n-k) as usize] % self.p
     }
-    fn nHk(&self, n: usize, k: usize) -> usize {
+    fn nHk(&self, n: u64, k: u64) -> u64 {
         if n==0 && k==0 { return 1 }
-        self.nCk(n+k-1,k)
+        self.nCk(n+k-1, k)
     }
     // 区別できるnを区別出来ないkに分割
-    fn nSk(&self, n: usize, k: usize) -> usize {
+    fn nSk(&self, n: u64, k: u64) -> u64 {
         if n < k { return 0; }
         let mut res = 0;
         for i in 0..k+1 {
@@ -197,9 +195,9 @@ impl ModComb {
                 res = (res + v) % self.p;
             }
         }
-        return res * self.fact_inv[k] % self.p;
+        return res * self.fact_inv[k as usize] % self.p;
     }
-    fn nBk(&self, n: usize, k: usize) -> usize {
+    fn nBk(&self, n: u64, k: u64) -> u64 {
         0
     }
 }
