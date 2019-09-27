@@ -38,3 +38,4 @@ pub mod ternary_search;
 pub mod matrix;
 pub mod range;
 pub mod convex_hull_trick;
+pub mod counter;
