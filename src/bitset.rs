@@ -323,8 +323,8 @@ fn test_chomp() {
     assert_eq!((set1.clone() ^ &set2).count_ones(), 2);
 }
 
-#[cfg(test)]
-use test::Bencher;
+// #[cfg(test)]
+// use test::Bencher;
 
 // #[bench(ignore)]
 // fn bench_dp(b: &mut Bencher) {
