@@ -39,3 +39,4 @@ pub mod matrix;
 pub mod range;
 pub mod convex_hull_trick;
 pub mod counter;
+pub mod coord_compression;
