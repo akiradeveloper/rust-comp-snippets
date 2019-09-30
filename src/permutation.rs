@@ -80,3 +80,45 @@ where
         true
     }
 }
+#[test]
+fn test_lexical_permutation() {
+    // use LexicalPermutation;
+    let mut x = vec![0,1,2,3];
+    loop {
+        dbg!(&x);
+        if !x.next_permutation() {
+            break;
+        }
+    }
+}
+
+#[snippet = "all_masks"]
+struct AllMasks {
+    mask: u64,
+    smask: u64,
+}
+#[snippet = "all_masks"]
+impl Iterator for AllMasks {
+    type Item = u64;
+    fn next(&mut self) -> Option<Self::Item> {
+        let old = self.smask;
+        if old == 0 {
+            return None
+        }
+        self.smask = (self.smask-1) & self.mask;
+        return Some(old)
+    }
+}
+#[snippet = "all_masks"]
+fn all_masks(mask: u64) -> AllMasks {
+    AllMasks {
+        mask: mask,
+        smask: mask,
+    }
+}
+#[test]
+fn test_all_masks() {
+    for mask in all_masks(13) {
+        println!("{}",mask);
+    }
+}

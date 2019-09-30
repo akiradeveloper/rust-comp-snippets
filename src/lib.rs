@@ -41,3 +41,4 @@ pub mod convex_hull_trick;
 pub mod counter;
 pub mod coord_compression;
 pub mod mod_int;
+pub mod permutation;
