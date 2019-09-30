@@ -5,11 +5,34 @@ pub struct Matrix {
 }
 #[snippet = "Matrix"]
 impl Matrix {
+    fn identity(n: usize) -> Self {
+        let mut v = vec![vec![0;n];n];
+        for i in 0..n {
+            v[i][i] = 1;
+        }
+        Matrix { v: v }
+    }
     fn m(&self) -> usize {
         self.v.len()
     }
     fn n(&self) -> usize {
         self.v[0].len()
+    }
+    fn pow(&self, k: u64, m: i64) -> Self {
+        assert!(self.m() == self.n());
+        let mut k = k;
+        let mut x = Self::identity(self.m());
+        let mut y = self.clone();
+        while k > 0 {
+            if k & 1 > 0 {
+                x = y.clone() * x;
+                x %= m;
+            }
+            y = y.clone() * y.clone();
+            y %= m;
+            k >>= 1;
+        }
+        x
     }
 }
 #[snippet = "Matrix"]
@@ -122,4 +145,15 @@ fn test_matrix_mul() {
     };
     let c = a*b;
     dbg!(c.v);
+}
+#[test]
+fn test_matrix_pow() {
+    let x = Matrix {
+        v: vec![
+            vec![1,2],
+            vec![3,4]
+        ]
+    };
+    let x3 = x.clone() * x.clone() * x.clone();
+    assert_eq!(x.pow(3, std::i64::MAX).v, x3.v);
 }
