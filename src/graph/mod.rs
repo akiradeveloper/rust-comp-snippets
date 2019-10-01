@@ -9,5 +9,5 @@ pub mod lca;
 pub mod mst;
 pub mod bipartite_matching;
 pub mod cycle;
-pub mod dfs_tree;
+pub mod traversal;
 pub mod rerooting;
