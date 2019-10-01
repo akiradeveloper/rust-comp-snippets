@@ -1,24 +1,14 @@
-#[doc = "dfs on adjacent graph and analyze the connectivity. O(V)"]
+#[doc = "traverse on an adjacent graph and analyze the connectivity. O(V)"]
 #[snippet = "analyze_tree"]
 fn analyze_tree(n: usize, g: &[Vec<usize>], root: usize) -> (Vec<usize>, Vec<Option<usize>>) {
-    let mut depth = vec![n;n];
-    let mut stack = vec![root];
-    let mut visited = vec![false;n];
+    let mut depth = vec![0;n];
     let mut par = vec![None;n];
-    depth[root]=0;
-    par[root]=None;
-    visited[root]=true;
-    while !stack.is_empty() {
-        let r = stack.pop().unwrap();
-        let cs = &g[r];
-        for &c in cs {
-            if visited[c] { continue; }
-            visited[c]=true;
-            par[c]=Some(r);
-            depth[c]=depth[r]+1;
-            stack.push(c);
+    dfs(n, g, root, &mut |conn, v| {
+        if let Some((r,i)) = conn {
+            par[v]=Some(r);
+            depth[v]=depth[r]+1;
         }
-    }
+    });
     (depth,par)
 }
 
