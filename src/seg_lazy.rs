@@ -224,6 +224,29 @@ fn test_SUM_RAQ() {
     assert_eq!(seg.query(4, 7), 20);
 }
 
+#[snippet = "SEG_LAZY_MAX_RAQ"]
+struct MAX_RAQ;
+#[snippet = "SEG_LAZY_MAX_RAQ"]
+impl SEGImpl for MAX_RAQ {
+    type Monoid = i64;
+    type OperatorMonoid = i64;
+    fn m0() -> Self::Monoid {
+        std::i64::MIN
+    }
+    fn om0() -> Self::OperatorMonoid {
+        0
+    }
+    fn f(x: Self::Monoid, y: Self::Monoid) -> Self::Monoid {
+        std::cmp::max(x, y)
+    }
+    fn g(x: Self::Monoid, y: Self::OperatorMonoid, len: usize) -> Self::Monoid {
+        x + y
+    }
+    fn h(x: Self::OperatorMonoid, y: Self::OperatorMonoid) -> Self::OperatorMonoid {
+        x + y
+    }
+}
+
 #[snippet = "SEG_LAZY_MIN_RAQ"]
 struct MIN_RAQ;
 #[snippet = "SEG_LAZY_MIN_RAQ"]
@@ -240,7 +263,7 @@ impl SEGImpl for MIN_RAQ {
         std::cmp::min(x, y)
     }
     fn g(x: Self::Monoid, y: Self::OperatorMonoid, len: usize) -> Self::Monoid {
-        x + (len as i64) * y
+        x + y
     }
     fn h(x: Self::OperatorMonoid, y: Self::OperatorMonoid) -> Self::OperatorMonoid {
         x + y
