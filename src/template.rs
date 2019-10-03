@@ -172,4 +172,7 @@ fn main() {
     }
 }
 
-fn solve() {}
+fn solve() {
+    let out = stdout();
+    let mut out = BufWriter::new(out.lock());
+}
