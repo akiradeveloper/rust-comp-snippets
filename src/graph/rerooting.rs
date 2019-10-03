@@ -1,14 +1,23 @@
+#[snippet = "ReRooting"]
 trait Foldable {
     type T: Clone + std::fmt::Debug;
     fn identity() -> Self::T;
     fn fold(acc: &Self::T, x: &Self::T) -> Self::T;
-    fn merge(a: &Self::T, b: &Self::T) -> Self::T;
 }
+#[snippet = "ReRooting"]
 struct ReRooting<F: Foldable> {
     g: Vec<Vec<usize>>,
     dp: Vec<Vec<F::T>>,
 }
+#[snippet = "ReRooting"]
 impl<F: Foldable> ReRooting<F> {
+    fn merge(a: &F::T, b: &F::T) -> F::T {
+        let mut acc = F::identity();
+        acc = F::fold(&acc, a);
+        acc = F::fold(&acc, b);
+        acc
+    }
+
     fn new(g: Vec<Vec<usize>>) -> Self {
         let mut dp = vec![];
         for u in 0..g.len() {
@@ -58,7 +67,7 @@ impl<F: Foldable> ReRooting<F> {
             // 枝iを除いた値を計算する
             let l = if i>0 { prefix[i-1].clone() } else { F::identity() };
             let r = if i<n-1 { suffix[i+1].clone() } else { F::identity() };
-            self.dfs2(Some(u), v, F::merge(&l, &r));
+            self.dfs2(Some(u), v, Self::merge(&l, &r));
         }
     }
 
