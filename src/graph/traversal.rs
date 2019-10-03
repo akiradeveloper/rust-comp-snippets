@@ -1,9 +1,10 @@
 #[doc = "traverse on an adjacent graph and analyze the connectivity. O(V)"]
 #[snippet = "analyze_tree"]
-fn analyze_tree(n: usize, g: &[Vec<usize>], root: usize) -> (Vec<usize>, Vec<Option<usize>>) {
+fn analyze_tree(g: &[Vec<usize>], root: usize) -> (Vec<usize>, Vec<Option<usize>>) {
+    let n = g.len();
     let mut depth = vec![0;n];
     let mut par = vec![None;n];
-    dfs(n, g, root, &mut |conn, v| {
+    dfs(g, root, &mut |conn, v| {
         if let Some((r,i)) = conn {
             par[v]=Some(r);
             depth[v]=depth[r]+1;
@@ -22,11 +23,13 @@ fn test_analyze_tree() {
         g[x].push(y);
         g[y].push(x);
     }
-    dbg!(analyze_tree(5, &g, 0));
-    dbg!(analyze_tree(5, &g, 1));
+    dbg!(analyze_tree(&g, 0));
+    dbg!(analyze_tree(&g, 1));
 }
 
-fn bfs<F: FnMut(Option<(usize,usize)>,usize)>(n: usize, g: &[Vec<usize>], root: usize, op: &mut F) {
+#[snippet = "bfs"]
+fn bfs<F: FnMut(Option<(usize,usize)>,usize)>(g: &[Vec<usize>], root: usize, op: &mut F) {
+    let n = g.len();
     let mut q = std::collections::VecDeque::new();
     q.push_back(root);
     let mut visited = vec![false; n];
@@ -45,7 +48,9 @@ fn bfs<F: FnMut(Option<(usize,usize)>,usize)>(n: usize, g: &[Vec<usize>], root: 
     }
 }
 
-fn dfs<F: FnMut(Option<(usize, usize)>,usize)>(n: usize, g: &[Vec<usize>], root: usize, op: &mut F) {
+#[snippet = "dfs"]
+fn dfs<F: FnMut(Option<(usize, usize)>,usize)>(g: &[Vec<usize>], root: usize, op: &mut F) {
+    let n = g.len();
     let mut stack = vec![(None,root)];
     let mut visited = vec![false;n];
     visited[root]=true;
@@ -72,7 +77,7 @@ fn test_tree_bfs() {
         g[x].push(y);
         g[y].push(x);
     }
-    dbg!(bfs(5, &g, 0, &mut |conn, v| { println!("{:?},{}",conn,v)}));
+    dbg!(bfs(&g, 0, &mut |conn, v| { println!("{:?},{}",conn,v)}));
 }
 
 #[test]
@@ -85,5 +90,5 @@ fn test_tree_dfs() {
         g[x].push(y);
         g[y].push(x);
     }
-    dbg!(dfs(5, &g, 0, &mut |conn, v| { println!("{:?},{}",conn,v)}));
+    dbg!(dfs(&g, 0, &mut |conn, v| { println!("{:?},{}",conn,v)}));
 }

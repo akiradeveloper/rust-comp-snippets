@@ -46,7 +46,7 @@ mod bellman_ford {
             let mut prevv = vec![0; self.n()];
             let mut preve = vec![0; self.n()];
             let mut f = f;
-            let inf = 2_000_000_001;
+            let inf = std::i64::MAX;
 
             while f > 0 {
                 let mut dist = vec![inf; self.n()];
@@ -170,7 +170,7 @@ mod dijkstra {
             let mut h = vec![0; self.n()];
 
             while total_flow > 0 {
-                let inf = 2_000_000_001;
+                let inf = std::i64::MAX;
                 let mut queue = std::collections::BinaryHeap::new(); // max-heap
                 let mut dist = vec![inf; self.n()]; // for all >= 0
                 dist[s] = 0;

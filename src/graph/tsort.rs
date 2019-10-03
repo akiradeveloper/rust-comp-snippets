@@ -1,5 +1,6 @@
 use std::collections::VecDeque;
 
+#[snippet = "TopologicalSort"]
 struct TopologicalSort<'a> {
     g: &'a [Vec<usize>],
     colors: Vec<bool>,
@@ -8,6 +9,7 @@ struct TopologicalSort<'a> {
     out: Vec<usize>,
 }
 
+#[snippet = "TopologicalSort"]
 impl <'a> TopologicalSort<'a> {
     fn new(g: &'a [Vec<usize>]) -> Self {
         let n = g.len();

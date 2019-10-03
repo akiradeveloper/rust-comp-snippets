@@ -1,5 +1,5 @@
-#[snippet = "mod_int"]
-mod mod_int {
+#[snippet = "modint"]
+mod modint {
     use std::ops::*;
     pub trait Mod: Copy { fn m() -> i64; }
     #[derive(Copy, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
@@ -73,22 +73,27 @@ mod mod_int {
     impl<M: Mod> From<i64> for ModInt<M> {
         fn from(x: i64) -> Self { Self::new(x) }
     }
-} // mod mod_int
+}
 
-#[snippet = "mod_int"]
+#[snippet = "modint"]
 macro_rules! define_mod {
     ($struct_name: ident, $modulo: expr) => {
         #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
         struct $struct_name {}
-        impl mod_int::Mod for $struct_name { fn m() -> i64 { $modulo } }
+        impl modint::Mod for $struct_name { fn m() -> i64 { $modulo } }
     }
 }
 
+#[snippet = "modint"]
+define_mod!(P, 1_000_000_007);
+#[snippet = "modint"]
+type MI = modint::ModInt<P>;
+
 #[test]
-fn test_mod_int() {
+fn test_modint() {
     const mo: i64 = 1_000_000_007;
     define_mod!(P, mo);
-    type mi = mod_int::ModInt<P>;
+    type mi = modint::ModInt<P>;
     let a = 1000000000;
     let b = 2000000000;
     let x: mi = a.into();

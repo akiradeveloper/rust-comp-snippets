@@ -65,6 +65,7 @@ fn test_lcs() {
     dbg!(dp);
 }
 
+#[doc = "O(N log N)"]
 fn inversion(xs: &[usize]) -> Vec<usize> {
     let mut max_v = 0;
     for &x in xs {
@@ -87,7 +88,8 @@ fn test_inversion() {
 }
 
 #[snippet = "run_length_compression"]
-fn run_length_compression<T: Eq + Clone>(xs: &[T]) -> Vec<(T,usize)> {
+#[doc = "O(N)"]
+fn run_length_compression<T: Eq + Clone>(xs: &[T]) -> Vec<(T, usize)> {
     if xs.is_empty() {
         return vec![]
     }
@@ -115,6 +117,7 @@ fn test_run_length_compression() {
 }
 
 #[snippet = "group_fold"]
+#[doc = "fold elems in to groups by f"]
 pub fn group_fold<T, F: Fn(&T) -> G, G: Eq+Clone>(xs: Vec<T>, f: F) -> Vec<Vec<T>> {
     let mut res = vec![];
     let mut cur_g = None;
@@ -142,9 +145,10 @@ fn test_group_fold() {
     assert_eq!(group_fold(vec![1,2,1], |&x| {x}), vec![vec![1],vec![2],vec![1]]);
     assert_eq!(group_fold(vec![('L',1),('L',3),('R',2),('L',1)], |&x| {x.0}), vec![vec![('L',1),('L',3)],vec![('R',2)],vec![('L',1)]]);
 }
-#[snippet = "maximum_subarray"]
+
+#[snippet = "kadane"]
 #[doc = "return the sum of the maximum subarray. (Kadane's algorithm). O(N)"]
-fn maxium_subarray(xs: &[i64]) -> i64 {
+fn kadane(xs: &[i64]) -> i64 {
     let mut max_ending_here = xs[0];
     let mut max_so_far = xs[0];
     for i in 1..xs.len() {
@@ -155,11 +159,12 @@ fn maxium_subarray(xs: &[i64]) -> i64 {
     max_so_far
 }
 #[test]
-fn test_maximum_subarray() {
-    assert_eq!(maxium_subarray(&[1,-2,1,1,-2,1]),2);
-    assert_eq!(maxium_subarray(&[1,5,-1,0,10]),15);
-    assert_eq!(maxium_subarray(&[0,-1,-5,0,-4]),0);
+fn test_kadane() {
+    assert_eq!(kadane(&[1,-2,1,1,-2,1]),2);
+    assert_eq!(kadane(&[1,5,-1,0,10]),15);
+    assert_eq!(kadane(&[0,-1,-5,0,-4]),0);
 }
+
 #[snippet = "vec_max"]
 fn vec_max<T: Ord + Clone>(xs: &[T]) -> T {
     let mut v = &xs[0];
@@ -170,6 +175,7 @@ fn vec_max<T: Ord + Clone>(xs: &[T]) -> T {
     }
     v.clone()
 }
+
 #[snippet = "vec_min"]
 fn vec_min<T: Ord + Clone>(xs: &[T]) -> T {
     let mut v = &xs[0];

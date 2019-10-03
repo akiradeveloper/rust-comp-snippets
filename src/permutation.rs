@@ -94,12 +94,12 @@ fn test_lexical_permutation() {
 
 #[snippet = "all_masks"]
 struct AllMasks {
-    mask: u64,
-    smask: u64,
+    mask: i64,
+    smask: i64,
 }
 #[snippet = "all_masks"]
 impl Iterator for AllMasks {
-    type Item = u64;
+    type Item = i64;
     fn next(&mut self) -> Option<Self::Item> {
         let old = self.smask;
         if old == 0 {
@@ -110,7 +110,7 @@ impl Iterator for AllMasks {
     }
 }
 #[snippet = "all_masks"]
-fn all_masks(mask: u64) -> AllMasks {
+fn all_masks(mask: i64) -> AllMasks {
     AllMasks {
         mask: mask,
         smask: mask,

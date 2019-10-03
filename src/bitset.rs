@@ -36,8 +36,9 @@ impl BitSet {
     }
 
     #[allow(dead_code)]
-    pub fn count_ones(&self) -> u32 {
-        self.buf.iter().map(|x| x.count_ones()).sum()
+    pub fn count_ones(&self) -> usize {
+        let sum: u32 = self.buf.iter().map(|x| x.count_ones()).sum();
+        sum as usize
     }
 
     #[allow(dead_code)]
@@ -322,28 +323,3 @@ fn test_chomp() {
     assert_eq!((set1.clone() & &set2).count_ones(), 2);
     assert_eq!((set1.clone() ^ &set2).count_ones(), 2);
 }
-
-// #[cfg(test)]
-// use test::Bencher;
-
-// #[bench(ignore)]
-// fn bench_dp(b: &mut Bencher) {
-//     use rand::{Rng, SeedableRng, StdRng};
-//     let size = 1000;
-//     let mut v = Vec::new();
-//     let mut rng = StdRng::from_seed(&[3, 2, 1]);
-
-//     for _ in 0..size {
-//         v.push(rng.next_u32() as usize % size);
-//     }
-
-//     let sum = v.iter().sum::<usize>();
-//     b.iter(|| {
-//         let mut bset = BitSet::new(sum + 1);
-//         bset.set(0, true);
-
-//         for &x in &v {
-//             bset |= &(bset.clone() << x);
-//         }
-//     });
-// }

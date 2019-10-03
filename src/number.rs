@@ -2,7 +2,7 @@
 
 #[snippet = "gcd"]
 #[allow(dead_code)]
-pub fn gcd(a: u64, b: u64) -> u64 {
+pub fn gcd(a: i64, b: i64) -> i64 {
     if b == 0 {
         a
     } else {
@@ -12,7 +12,7 @@ pub fn gcd(a: u64, b: u64) -> u64 {
 
 #[snippet = "lcm"]
 #[allow(dead_code)]
-pub fn lcm(a: u64, b: u64) -> u64 {
+pub fn lcm(a: i64, b: i64) -> i64 {
     a / gcd(a, b) * b
 }
 
@@ -50,7 +50,7 @@ pub fn mod_inverse(a: i64, m: i64) -> i64 {
 #[snippet = "modpow"]
 #[allow(dead_code)]
 /// x ^ n % m
-pub fn modpow(x: u64, n: u64, m: u64) -> u64 {
+pub fn modpow(x: i64, n: i64, m: i64) -> i64 {
     let mut res = 1;
     let mut x = x % m;
     let mut n = n;
@@ -76,7 +76,7 @@ fn test_modpow() {
 }
 
 #[snippet = "factorial"]
-fn factorial(a: u64, p: u64) -> u64 {
+fn factorial(a: i64, p: i64) -> i64 {
     if a == 0 {
         return 1
     }
@@ -92,7 +92,7 @@ fn factorial(a: u64, p: u64) -> u64 {
 
 // Knuth's algorithm
 #[snippet = "nCk"]
-fn nCk(a: u64, b: u64) -> u64 {
+fn nCk(a: i64, b: i64) -> i64 {
     if a < b { return 0; }
     let mut a = a;
     let mut r = 1;
@@ -112,11 +112,11 @@ fn test_knuth_nCk() {
     assert_eq!(nCk(5,5), 1);
 }
 
-// O(N^2)
 #[snippet = "comb_table"]
-fn comb_table(n_max: u64) -> Vec<Vec<u64>> {
-    let mut dp = vec![vec![0; (n_max+1) as usize]; (n_max+1) as usize];
-    for i in 0..n_max as usize {
+#[doc = "Pascal's triangle. O(N^2)"]
+fn comb_table(n_max: usize) -> Vec<Vec<i64>> {
+    let mut dp = vec![vec![0; n_max+1]; n_max+1];
+    for i in 0..n_max {
         for j in 0..i+1 {
             if j==0 || j==i {
                 dp[i][j] = 1;
@@ -138,53 +138,53 @@ fn test_comb_table() {
 
 #[snippet = "ModComb"]
 struct ModComb {
-    fact: Vec<u64>,
-    fact_inv: Vec<u64>,
-    n: u64,
-    p: u64,
+    fact: Vec<i64>,
+    fact_inv: Vec<i64>,
+    n: usize,
+    p: i64,
 }
 #[snippet = "ModComb"]
 impl ModComb {
-    // O(N)
     fn initialize(ft: &mut Self) {
-        let n = ft.n as usize;
+        let n = ft.n;
 
         ft.fact[0] = 1;
         for i in 1..n {
-            ft.fact[i] = (ft.fact[i-1] * i as u64) % ft.p;
+            ft.fact[i] = (ft.fact[i-1] * i as i64) % ft.p;
         }
         ft.fact_inv[n-1] = modpow(ft.fact[n-1], ft.p-2, ft.p);
         for i in (0..n-1).rev() {
-            ft.fact_inv[i] = (ft.fact_inv[i+1] * (i+1) as u64) % ft.p;
+            ft.fact_inv[i] = (ft.fact_inv[i+1] * (i+1) as i64) % ft.p;
         }
     }
-    fn new(max_n: u64, p: u64) -> ModComb {
+    #[doc = "O(N)"]
+    fn new(max_n: usize, p: i64) -> ModComb {
         let mut ft = ModComb {
-            fact: vec![0; (max_n+1) as usize],
-            fact_inv: vec![0; (max_n+1) as usize],
+            fact: vec![0; max_n+1],
+            fact_inv: vec![0; max_n+1],
             n: max_n+1,
             p: p,
         };
         Self::initialize(&mut ft);
         ft
     }
-    fn fact(&self, n: usize) -> u64 {
+    fn fact(&self, n: usize) -> i64 {
         self.fact[n]
     }
-    fn nCk(&self, n: u64, k: u64) -> u64 {
+    fn nCk(&self, n: i64, k: i64) -> i64 {
         if n < k { return 0; }
         (self.nPk(n, k) * self.fact_inv[k as usize]) % self.p 
     }
-    fn nPk(&self, n: u64, k: u64) -> u64 {
+    fn nPk(&self, n: i64, k: i64) -> i64 {
         if n < k { return 0; }
         self.fact[n as usize] * self.fact_inv[(n-k) as usize] % self.p
     }
-    fn nHk(&self, n: u64, k: u64) -> u64 {
+    fn nHk(&self, n: i64, k: i64) -> i64 {
         if n==0 && k==0 { return 1 }
         self.nCk(n+k-1, k)
     }
     // 区別できるnを区別出来ないkに分割
-    fn nSk(&self, n: u64, k: u64) -> u64 {
+    fn nSk(&self, n: i64, k: i64) -> i64 {
         if n < k { return 0; }
         let mut res = 0;
         for i in 0..k+1 {
@@ -197,7 +197,7 @@ impl ModComb {
         }
         return res * self.fact_inv[k as usize] % self.p;
     }
-    fn nBk(&self, n: u64, k: u64) -> u64 {
+    fn nBk(&self, n: i64, k: i64) -> i64 {
         0
     }
 }
@@ -239,10 +239,8 @@ fn test_modcomb_mem_bound() {
     assert_eq!(modcomb.nPk(9, 3), 9);
 }
 
-// O(n log log n)
-// compute the maximum factor for each number
-// e.g 5 for 60 (2x2x3x5)
 #[snippet = "factor_table"]
+#[doc = "compute the maximum factor for each number. O(N log log N)"]
 #[allow(dead_code)]
 pub fn factor_table(max_n: usize) -> Vec<usize> {
     let mut res = vec![0; max_n + 1];
@@ -268,8 +266,8 @@ fn test_factor_table() {
     }
 }
 
-// O(n log log n)
 #[snippet = "eratosthenes"]
+#[doc = "O(N log log N)"]
 fn eratosthenes(n_max: usize) -> Vec<usize> {
     let mut res = vec![];
     let mut v = vec![0; n_max+1];
@@ -286,9 +284,9 @@ fn eratosthenes(n_max: usize) -> Vec<usize> {
     res
 }
 
-// O(root(N))
 #[snippet = "divisors"]
-fn divisors(n: usize) -> Vec<usize> {
+#[doc = "O(root N)"]
+fn divisors(n: i64) -> Vec<i64> {
     let mut res = vec![];
     let mut d = 1;
     while d*d<=n {
@@ -310,9 +308,9 @@ fn test_divisors() {
 }
 
 
-// O(root(n))
 #[snippet = "is_prime"]
-fn is_prime(n: usize) -> bool {
+#[doc = "O(root N)"]
+fn is_prime(n: i64) -> bool {
     let mut d = 1;
     // O(root(n))
     while d * d <= n {
@@ -331,8 +329,8 @@ fn is_prime(n: usize) -> bool {
 
 // O(root(N))
 #[snippet = "prime_factors"]
-fn prime_factors(n: usize) -> std::collections::HashMap<usize,usize> {
-    fn root_int(n: usize) -> usize {
+fn prime_factors(n: i64) -> std::collections::HashMap<i64, i64> {
+    fn root_int(n: i64) -> i64 {
         let mut d = 1;
         while d * d <= n {
             d += 1;
@@ -344,7 +342,7 @@ fn prime_factors(n: usize) -> std::collections::HashMap<usize,usize> {
     for i in 2..root_int(n)+1 {
         while n % i == 0 {
             if !m.contains_key(&i) {
-                m.insert(i, 0 as usize);
+                m.insert(i, 0);
             }
             *m.get_mut(&i).unwrap() += 1;
             n /= i;
@@ -363,7 +361,7 @@ fn test_prime_factors() {
 }
 
 #[snippet = "bin_digits"]
-fn bin_digits(n: usize) -> Vec<bool> {
+fn bin_digits(n: i64) -> Vec<bool> {
     if n == 0 { return vec![]; }
     let logN = (n as f64).log2().floor() as usize;
     // dbg!(logN);
@@ -392,7 +390,7 @@ fn test_bin_digits() {
 #[snippet = "partition_dp"]
 #[allow(dead_code)]
 /// dp[i][j] = j th partition number of i
-pub fn partition_dp(n: usize, m: usize, p: u64) -> Vec<Vec<u64>> {
+pub fn partition_dp(n: usize, m: usize, p: i64) -> Vec<Vec<i64>> {
     let mut dp = vec![vec![0; m + 1]; n + 1];
     for i in 0..m + 1 {
         dp[0][i] = 1;
@@ -410,9 +408,8 @@ pub fn partition_dp(n: usize, m: usize, p: u64) -> Vec<Vec<u64>> {
 }
 #[test]
 fn test_partition_dp() {
-    const M: u64 = 1000000007;
+    const M: i64 = 1000000007;
     let dp = partition_dp(100, 50, M);
-
     assert_eq!(dp[4][3], 4);
     assert_eq!(dp[5][4], 6);
 }

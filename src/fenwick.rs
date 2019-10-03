@@ -21,6 +21,7 @@ impl<T: Clone, F: Fn(&mut T, &T) -> ()> BITGeneric<T, F> {
     }
 
     #[allow(dead_code)]
+    #[doc = "O(log N)"]
     pub fn sum(&self, i: usize) -> T {
         let mut i = i;
         let mut s = self.zero.clone();
@@ -32,6 +33,7 @@ impl<T: Clone, F: Fn(&mut T, &T) -> ()> BITGeneric<T, F> {
     }
 
     #[allow(dead_code)]
+    #[doc = "O(log N)"]
     pub fn add(&mut self, i: usize, x: &T) {
         let mut i = i as i64;
         while i < self.buf.len() as i64 {
