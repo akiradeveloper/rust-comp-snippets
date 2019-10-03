@@ -42,3 +42,4 @@ pub mod counter;
 pub mod coord_compression;
 pub mod modint;
 pub mod permutation;
+pub mod kmp;
