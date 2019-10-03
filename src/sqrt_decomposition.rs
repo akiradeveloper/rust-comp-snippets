@@ -7,12 +7,12 @@ enum Bucket {
     Partial(usize, usize, usize),
 }
 #[snippet = "SqrtDecomposition"]
-struct SqrtDecomposition {
+struct Buckets {
     n: usize,
     d: usize,
 }
 #[snippet = "SqrtDecomposition"]
-impl SqrtDecomposition {
+impl Buckets {
     pub fn bucket(&self, i: usize) -> usize {
         i / self.d
     }
@@ -49,8 +49,8 @@ impl SqrtDecomposition {
     }
 }
 #[test]
-fn test_sqrt_composition() {
-    let sc = SqrtDecomposition {
+fn test_buckets() {
+    let sc = Buckets {
         n: 10,
         d: 3,
     };
