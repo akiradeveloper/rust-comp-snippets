@@ -16,6 +16,8 @@ impl KMP {
                 j = tbl[j as usize];
             }
             j+=1;
+
+            // ここは単にtbl[i+1]=jでもverify出来る
             if i+1<n && pat[i+1] == pat[j as usize] {
                 tbl[i+1] = tbl[j as usize];
             } else {
@@ -62,4 +64,14 @@ fn test_kmp() {
     let kmp = KMP::new(ww);
     dbg!(&kmp.tbl);
     assert_eq!(kmp.search(&ss), [0,2,4]);
+}
+
+#[bench] 
+fn bench_kmp(b: &mut test::Bencher) {
+    let mut p = vec![0];
+    let mut s = vec![0;1000000];
+    let kmp = KMP::new(p);
+    b.iter(||
+        kmp.search(&s)
+    );
 }
