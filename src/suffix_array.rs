@@ -1,6 +1,6 @@
 #[snippet = "SA"]
 struct SA {
-    // sのうち後ろからSA[i]個消したやつが辞書順i番目のsuffixである
+    // sのうち前からSA[i]個消したやつが辞書順i番目のsuffixである
     sa: Vec<usize>,
     s: Vec<usize>
 }
@@ -84,22 +84,64 @@ impl SA {
         }
         p
     }
-    fn lt_substr(&self, t: &[usize], si: usize, ti: usize) -> bool {
-        let sn = self.s.len();
+    // 文字列比較をする。バイナリサーチのために必要
+    // sの方が辞書順で前ならばtrue
+    fn lt_substr(s: &[usize], t: &[usize], si: usize, ti: usize) -> bool {
+        let mut si = si;
+        let mut ti = ti;
+        let sn = s.len();
         let tn = t.len();
-        false
+        while si < sn && ti < tn {
+            if s[si] < t[ti] {
+                return true;
+            }
+            if s[si] > t[ti] {
+                return false;
+            }
+            si+=1;
+            ti+=1;
+        }
+        si >= sn && ti < tn
     }
-    pub fn range(&self, t: &[usize]) -> (usize, usize) {
-        (0,0)
+    pub fn lower_bound(&self, t: &[usize]) -> usize {
+        let mut low: i64 = -1;
+        let mut high: i64 = self.sa.len() as i64; 
+        while high - low > 1 {
+            let mid = (low+high) / 2;
+            if Self::lt_substr(&self.s, t, self.sa[mid as usize], 0) { 
+                low = mid;
+            } else {
+                high = mid;
+            }
+        }
+        return high as usize
     }
 }
-#[test]
-fn test_sa() {
-    let mut s = "abracadabra";
+
+fn as_v(s: &str) -> Vec<usize> {
     let mut v = vec![];
     for c in s.chars() {
         v.push(c as usize);
     }
-    let mut sa = SA::new(v);
+    v
+}
+#[test]
+fn test_lt_substr() {
+    assert_eq!(SA::lt_substr(&as_v("abc"), &as_v("abd"), 0, 0), true);
+    assert_eq!(SA::lt_substr(&as_v("abd"), &as_v("abc"), 0, 0), false);
+    assert_eq!(SA::lt_substr(&as_v("abc"), &as_v("abcd"), 0, 0), true);
+    assert_eq!(SA::lt_substr(&as_v("abc"), &as_v("bcd"), 0, 0), true);
+    assert_eq!(SA::lt_substr(&as_v("abc"), &as_v("abc"), 0, 0), false);
+}
+#[test]
+fn test_sa() {
+    let mut s = "abracadabra";
+    let mut sa = SA::new(as_v(s));
     assert_eq!(sa.sa, [10,7,0,3,5,8,1,4,6,9,2]);
+
+    let x = sa.lower_bound(&as_v("rac"));
+    assert_eq!(sa.sa[x], 2);
+
+    let x = sa.lower_bound(&as_v("bra"));
+    assert_eq!(sa.sa[x], 8);
 }
