@@ -1,11 +1,11 @@
 #[snippet = "CoordCompression"]
 struct CoordCompression {
-    comp: std::collections::HashMap<i64,i64>,
-    dcmp: std::collections::HashMap<i64,i64>,
+    comp: std::collections::HashMap<i64,usize>,
+    dcmp: std::collections::HashMap<usize,i64>,
 }
 #[snippet = "CoordCompression"]
 impl CoordCompression {
-    fn new(xs: &[i64], start: i64) -> CoordCompression {
+    fn new(xs: &[i64], start: usize) -> CoordCompression {
         let mut xs = xs.to_owned();
         xs.sort();
         let mut comp = std::collections::HashMap::new();
@@ -22,10 +22,10 @@ impl CoordCompression {
             dcmp,
         }
     }
-    fn compress(&self, x: i64) -> i64 {
+    fn compress(&self, x: i64) -> usize {
         *self.comp.get(&x).unwrap()
     }
-    fn decompress(&self, x: i64) -> i64 {
+    fn decompress(&self, x: usize) -> i64 {
         *self.dcmp.get(&x).unwrap()
     }
 }
