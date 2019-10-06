@@ -5,7 +5,7 @@ struct CoordCompression {
 }
 #[snippet = "CoordCompression"]
 impl CoordCompression {
-    fn new(xs: &[i64], start: i64, step: i64) -> CoordCompression {
+    fn new(xs: &[i64], start: i64) -> CoordCompression {
         let mut xs = xs.to_owned();
         xs.sort();
         let mut comp = std::collections::HashMap::new();
@@ -15,7 +15,7 @@ impl CoordCompression {
             if comp.contains_key(&x) { continue; }
             comp.insert(x,acc);
             dcmp.insert(acc,x);
-            acc+=step;
+            acc+=1;
         }
         CoordCompression {
             comp,
@@ -32,9 +32,9 @@ impl CoordCompression {
 #[test]
 fn test_coord_compression() {
     let v = vec![-2,3,99999,1000];
-    let cc = CoordCompression::new(&v,0,2);
+    let cc = CoordCompression::new(&v,0);
     assert_eq!(cc.compress(-2),0);
-    assert_eq!(cc.compress(1000),4);
-    assert_eq!(cc.decompress(2), 3);
-    assert_eq!(cc.decompress(6),99999);
+    assert_eq!(cc.compress(1000),2);
+    assert_eq!(cc.decompress(1), 3);
+    assert_eq!(cc.decompress(3),99999);
 }
