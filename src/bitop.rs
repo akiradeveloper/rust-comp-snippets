@@ -76,3 +76,29 @@ fn test_bitpos() {
     }
     assert_eq!(v, [0,6,7]);
 }
+
+#[snippet = "next_boundary"]
+fn next_boundary(x: i64, p: i64) -> i64 {
+    let i = (x+p-1) / p;
+    p*i
+}
+#[test]
+fn test_next_boundary() {
+    assert_eq!(next_boundary(0, 3), 0);
+    assert_eq!(next_boundary(1, 3), 3);
+    assert_eq!(next_boundary(2, 3), 3);
+    assert_eq!(next_boundary(3, 3), 3);
+    assert_eq!(next_boundary(4, 3), 6);
+}
+
+#[snippet = "lsb"]
+fn lsb(x: i64) -> i64 {
+    x & (-x)
+}
+#[test]
+fn test_lsb() {
+    assert_eq!(lsb(3), 1);
+    assert_eq!(lsb(5), 1);
+    assert_eq!(lsb(6), 2);
+    assert_eq!(lsb(4), 4);
+}
