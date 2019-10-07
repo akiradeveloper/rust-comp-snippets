@@ -91,34 +91,3 @@ fn test_lexical_permutation() {
         }
     }
 }
-
-#[snippet = "all_masks"]
-struct AllMasks {
-    mask: i64,
-    smask: i64,
-}
-#[snippet = "all_masks"]
-impl Iterator for AllMasks {
-    type Item = i64;
-    fn next(&mut self) -> Option<Self::Item> {
-        let old = self.smask;
-        if old == 0 {
-            return None
-        }
-        self.smask = (self.smask-1) & self.mask;
-        return Some(old)
-    }
-}
-#[snippet = "all_masks"]
-fn all_masks(mask: i64) -> AllMasks {
-    AllMasks {
-        mask: mask,
-        smask: mask,
-    }
-}
-#[test]
-fn test_all_masks() {
-    for mask in all_masks(13) {
-        println!("{}",mask);
-    }
-}
