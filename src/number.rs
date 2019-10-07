@@ -360,6 +360,25 @@ fn test_prime_factors() {
     dbg!(prime_factors(15));
 }
 
+#[doc = "how many prime p found in n!"]
+fn prime_count(n: i64, p: i64, mo: i64) -> i64 {
+    let mut acc = 0;
+    for k in 1.. {
+        let d: i64 = modpow(p, k, std::i64::MAX);
+        if d > n { break; }
+        acc += n / d;
+        acc %= mo;
+    }
+    acc
+}
+#[test]
+fn test_prime_count() {
+    assert_eq!(prime_count(4, 2, std::i64::MAX), 3);
+    assert_eq!(prime_count(6, 2, std::i64::MAX), 4);
+    assert_eq!(prime_count(6, 3, std::i64::MAX), 2);
+    assert_eq!(prime_count(6, 5, std::i64::MAX), 1);
+}
+
 #[snippet = "bin_digits"]
 fn bin_digits(n: i64) -> Vec<bool> {
     if n == 0 { return vec![]; }
