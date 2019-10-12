@@ -20,6 +20,12 @@ pub fn manacher(s: &[usize]) -> Vec<usize> {
     r
 }
 #[test]
+fn test_manacher_even() {
+    let s = vec![1,1];
+    // 奇数長回文しか検出しない（長さ3でやっと半径2になる）
+    assert_eq!(manacher(&s), [1,1]);
+}
+#[test]
 fn test_manacher() {
     let s = vec![0,1,0,0,0,1,0,1,0];
     assert_eq!(manacher(&s), [1,2,1,4,1,2,3,2,1]);
