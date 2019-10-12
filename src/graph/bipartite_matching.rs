@@ -1,6 +1,7 @@
 use std::collections::HashSet;
 
 #[snippet = "bipartite_matching"]
+#[doc = "O(V(V+E))"]
 fn bipartite_matching(g_list: &[HashSet<usize>]) -> Vec<(usize,usize)> {
 
     fn dfs(v: usize, g_list: &[HashSet<usize>], used: &mut [bool], matching: &mut [Option<usize>]) -> bool {
@@ -38,9 +39,11 @@ fn bipartite_matching(g_list: &[HashSet<usize>]) -> Vec<(usize,usize)> {
     res
 }
 
+#[snippet = "bipartite_matching"]
 struct BipartiteMatching {
     g: Vec<HashSet<usize>>,
 }
+#[snippet = "bipartite_matching"]
 impl BipartiteMatching {
     fn new(n: usize) -> BipartiteMatching {
         BipartiteMatching {
