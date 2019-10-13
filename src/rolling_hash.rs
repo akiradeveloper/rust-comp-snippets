@@ -67,12 +67,15 @@ struct RoLiHa {
     hash: Vec<u64>,
 }
 #[snippet = "RoLiHa"]
+const ROLIHA_MASK30: u64 = (1<<30) - 1;
+#[snippet = "RoLiHa"]
+const ROLIHA_MASK31: u64 = (1<<31) - 1;
+#[snippet = "RoLiHa"]
+const ROLIHA_MOD: u64 = (1<<61) - 1;
+#[snippet = "RoLiHa"]
+const ROLIHA_P: u64 = ROLIHA_MOD * ((1<<3) - 1);
+#[snippet = "RoLiHa"]
 impl RoLiHa {
-    const MASK30: u64 = (1<<30) - 1;
-    const MASK31: u64 = (1<<31) - 1;
-    const MOD: u64 = (1<<61) - 1;
-    const P: u64 = Self::MOD * ((1<<3) - 1);
-
     fn new(s: &[u64]) -> Self {
         let mut randgen = Xorshift::new();
         let rand = randgen.rand(std::i64::MAX as u64);
@@ -97,22 +100,22 @@ impl RoLiHa {
 
     // [l,r)
     pub fn get(&self, l: usize, r: usize) -> u64 {
-        return Self::calcmod(self.hash[r] + Self::P - Self::mul(self.hash[l], self.powMemo[r-l]));
+        return Self::calcmod(self.hash[r] + ROLIHA_P - Self::mul(self.hash[l], self.powMemo[r-l]));
     }
 
     fn mul(l: u64, r: u64) -> u64 {
         let lu = l >> 31;
-        let ld = l & Self::MASK31;
+        let ld = l & ROLIHA_MASK31;
         let ru = r >> 31;
-        let rd = r & Self::MASK31;
+        let rd = r & ROLIHA_MASK31;
         let middle_bit = ld*ru + lu*rd;
-        ((lu*ru)<<1) + ld*rd + ((middle_bit & Self::MASK30) << 31) + (middle_bit >> 30)
+        ((lu*ru)<<1) + ld*rd + ((middle_bit & ROLIHA_MASK30) << 31) + (middle_bit >> 30)
     }
 
     fn calcmod(x: u64) -> u64 {
-        let mut x = (x & Self::MOD) + (x>>61);
-        if x > Self::MOD {
-            x -= Self::MOD;
+        let mut x = (x & ROLIHA_MOD) + (x>>61);
+        if x > ROLIHA_MOD {
+            x -= ROLIHA_MOD;
         }
         x
     }
