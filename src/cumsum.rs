@@ -1,20 +1,31 @@
 #[snippet = "cumsum1"]
 struct CumSum1 {
+    base: Vec<i64>,
     dp: Vec<i64>,
 }
 #[snippet = "cumsum1"]
 impl CumSum1 {
-    fn build(base: &[i64]) -> CumSum1 {
-        let n = base.len();
+    fn new(n: usize) -> CumSum1 {
+        CumSum1 {
+            base: vec![0; n],
+            dp: vec![],
+        }
+    }
+    fn add(&mut self, i: usize, x: i64) {
+        self.base[i] += x;
+    }
+    fn set(&mut self, i: usize, x: i64) {
+        self.base[i] = x;
+    }
+    fn build(&mut self) {
+        let n = self.base.len();
         let mut dp = vec![0; n+1];
         let mut acc = 0;
         for i in 0..n {
-            acc += base[i];
+            acc += self.base[i];
             dp[i+1] = acc;
         }
-        CumSum1 {
-            dp: dp,
-        }
+        self.dp = dp;
     }
     // [i,j)
     fn query(&self, i: usize, j: usize) -> i64 {
@@ -25,7 +36,11 @@ impl CumSum1 {
 #[test]
 fn test_cumsum1() {
     let x = vec![0,1,2,1];
-    let cs = CumSum1::build(&x);
+    let mut cs = CumSum1::new(4);
+    for i in 0..4 {
+        cs.set(i,x[i]);
+    }
+    cs.build();
     assert_eq!(cs.query(0,0), 0);
     assert_eq!(cs.query(0,1), 0);
     assert_eq!(cs.query(0,2), 1);
