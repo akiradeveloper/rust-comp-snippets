@@ -27,7 +27,6 @@ pub fn extgcd(a: i64, b: i64) -> (i64, i64, i64) {
         (gcd, y, x - (a / b) * y)
     }
 }
-
 #[test]
 fn test_extgcg() {
     let (gcd, x, y) = extgcd(4, 11);
@@ -63,7 +62,6 @@ pub fn modpow(x: i64, n: i64, m: i64) -> i64 {
     }
     res
 }
-
 #[test]
 fn test_modpow() {
     let m = 1_000_000_007;
@@ -92,11 +90,12 @@ fn factorial(a: i64, p: i64) -> i64 {
 
 // Knuth's algorithm
 #[snippet = "nCk"]
+#[doc = "referential impl. only for small numbers. O(b)"]
 fn nCk(a: i64, b: i64) -> i64 {
     if a < b { return 0; }
     let mut a = a;
     let mut r = 1;
-    for d in 1..b+1 {
+    for d in 1..b+1 { // O(b)
         r *= a;
         a -= 1;
         r /= d;
@@ -136,6 +135,43 @@ fn test_comb_table() {
     assert_eq!(nCk[5][5], 1);
 }
 
+#[doc = "referential impl. O(n)"]
+fn catalan(n: i64) -> i64 {
+    nCk(2*n,n) / (n+1)
+}
+#[test]
+fn test_catalan() {
+    assert_eq!(catalan(1), 1);
+    assert_eq!(catalan(2), 2);
+    assert_eq!(catalan(3), 5);
+}
+
+use crate::modint::Mod;
+#[doc = "O(N)"]
+fn catalan_table(n_max: usize) -> Vec<Mod> {
+    let mut tbl: Vec<Mod> = vec![0.into(); n_max+1];
+    let mut n1: Mod = 1.into();
+    let mut n2: Mod = 1.into();
+    let mut nf: Mod = 1.into();
+    for i in 0..n_max+1 {
+        let cur = n2 / (nf * n1);
+        tbl[i] = cur;
+        let i = i as i64;
+        n2 *= i * 2 + 1;
+        n2 *= i * 2 + 2;
+        nf *= i + 1;
+        n1 *= i + 2;
+    }
+    tbl
+}
+#[test]
+fn test_catalan_table() {
+    let tbl = catalan_table(20);
+    for i in 0..20 {
+        assert_eq!(tbl[i], catalan(i as i64).into());
+    }
+}
+
 #[snippet = "ModComb"]
 struct ModComb {
     fact: Vec<i64>,
@@ -171,6 +207,7 @@ impl ModComb {
     fn fact(&self, n: usize) -> i64 {
         self.fact[n]
     }
+    #[doc = "choose k numbers from 1..n"]
     fn nCk(&self, n: i64, k: i64) -> i64 {
         if n < k { return 0; }
         (self.nPk(n, k) * self.fact_inv[k as usize]) % self.p 
@@ -179,11 +216,12 @@ impl ModComb {
         if n < k { return 0; }
         self.fact[n as usize] * self.fact_inv[(n-k) as usize] % self.p
     }
+    #[doc = "split k into n number as x1+x2+...xn=k"]
     fn nHk(&self, n: i64, k: i64) -> i64 {
         if n==0 && k==0 { return 1 }
         self.nCk(n+k-1, k)
     }
-    // 区別できるnを区別出来ないkに分割
+    #[doc = "put n balls into k different boxes. In case of n=3,k+2 [[1,2],[3]]==[[3],[1,2]]"]
     fn nSk(&self, n: i64, k: i64) -> i64 {
         if n < k { return 0; }
         let mut res = 0;
