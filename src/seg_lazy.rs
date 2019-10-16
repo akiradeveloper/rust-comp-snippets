@@ -16,6 +16,7 @@ struct SEG<T: SEGImpl> {
     n: usize,
     data: Vec<T::Monoid>,
     lazy: Vec<T::OperatorMonoid>,
+    weight: Vec<usize>,
 }
 
 #[snippet = "SEG_LAZY"]
@@ -27,9 +28,29 @@ impl <T: SEGImpl> SEG<T> {
             n: m,
             data: vec![init; m*2],
             lazy: vec![T::om0(); m*2],
+            weight: Self::mk_weight(&vec![1;n]),
         }
     }
+    fn mk_weight(xs: &[usize]) -> Vec<usize> {
+        let n = xs.len();
+        let mut m = 1;
+        while m < n { m *= 2; }
+        let mut res = vec![0;2*m];
+        for i in 0..n {
+            res[m+i] = xs[i];
+        }
+        for k in (1..m).rev() {
+            let l = 2*k;
+            let r = 2*k+1;
+            res[k] = res[l]+res[r];
+        }
+        res
+    }
+    fn set_weight(&mut self, weight: &[usize]) {
+        self.weight = Self::mk_weight(weight);
+    }
     fn propagate(&mut self, k: usize, len: usize) {
+        let len = self.weight[k];
         if self.lazy[k] != T::om0() {
             if k < self.n {
                 self.lazy[2*k+0] = T::h(self.lazy[2*k+0], self.lazy[k]);
