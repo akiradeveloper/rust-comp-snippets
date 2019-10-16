@@ -21,18 +21,18 @@ impl<M: Monoid> SEG<M> {
         while m < n { m *= 2; }
         SEG {
             n: m,
-            buf: vec![M::id().clone(); 2 * m - 1],
+            buf: vec![M::id().clone(); 2 * m],
         }
     }
 
     #[allow(dead_code)]
     pub fn update(&mut self, k: usize, a: M::T) {
-        let mut k = k + self.n - 1;
+        let mut k = k + self.n;
         self.buf[k] = a;
 
-        while k > 0 {
-            k = (k-1) / 2;
-            self.buf[k] = M::op(&self.buf[k*2+1], &self.buf[k*2+2]);
+        while k > 1 {
+            k = k >> 1;
+            self.buf[k] = M::op(&self.buf[k*2], &self.buf[k*2+1]);
         }
     }
     
@@ -49,8 +49,8 @@ impl<M: Monoid> SEG<M> {
         if a <= l && r <= b {
             return self.buf[k].clone();
         } else {
-            let vl = self.do_query(a,b,k*2+1,l,(l+r)/2);
-            let vr = self.do_query(a,b,k*2+2,(l+r)/2,r);
+            let vl = self.do_query(a,b,k*2,l,(l+r)/2);
+            let vr = self.do_query(a,b,k*2+1,(l+r)/2,r);
             return M::op(&vl, &vr);
         }
     }
@@ -58,7 +58,7 @@ impl<M: Monoid> SEG<M> {
     #[allow(dead_code)]
     // [a,b)
     pub fn query(&self, a: usize, b: usize) -> M::T {
-        self.do_query(a,b,0,0,self.n)
+        self.do_query(a,b,1,0,self.n)
     }
 }
 
