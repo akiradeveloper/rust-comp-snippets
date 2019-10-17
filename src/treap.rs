@@ -104,11 +104,46 @@ struct Treap {
     rng: Xorshift,
     t: Option<Box<treap::Node>>,
 }
+#[snippet = "Treap"]
 impl Treap {
     fn new() -> Treap {
         Treap {
             rng: Xorshift::new(),
             t: None,
+        }
+    }
+    #[doc = "[l,r)"]
+    fn lower_bound(&mut self, l: usize, r: usize, v: i64) -> Option<usize> {
+        let lower = l as i64;
+        let upper = r as i64;
+
+        let mut lb = lower - 1; 
+        let mut ub = upper + 1;
+        while ub - lb > 1 {
+            let mid = (lb+ub)/2;
+            if self.get(mid as usize) > v {
+                ub = mid;
+            } else {
+                lb = mid;
+            }
+        }
+        let latter = ub;
+        if latter < 0 {
+            None
+        } else {
+            Some(latter as usize)
+        }
+    }
+    fn orderd_insert(&mut self, v: i64) {
+        if self.t.is_none() {
+            self.insert(0, v);
+        } else {
+            let n = self.len();
+            let ins_pos = match self.lower_bound(0, n, v) {
+                Some(x) => x,
+                None => 0
+            };
+            self.insert(ins_pos, v);
         }
     }
     fn insert(&mut self, k: usize, v: i64) {
@@ -169,4 +204,22 @@ fn test_treap() {
     tr.erase(1);
     assert_eq!(tr.sum(0, 1), 1);
     assert_eq!(tr.sum(1, 2), 3);
+}
+
+#[test]
+fn test_treap_ref() {
+    let mut rng = Xorshift::new();
+    let mut v = vec![];
+    let mut tr = Treap::new();
+    let n = 100000;
+    for _ in 0..n {
+        let x = rng.rand(1000) as i64;
+        v.push(x);
+        tr.orderd_insert(x);
+    }
+    v.sort();
+
+    for i in 0..n {
+        assert_eq!(tr.get(i), v[i]);
+    }
 }
