@@ -1,5 +1,5 @@
 #[snippet = "XorShift"]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 #[allow(dead_code)]
 pub struct Xorshift {
     seed: u64,

@@ -46,3 +46,4 @@ pub mod kmp;
 pub mod suffix_array;
 pub mod bitop;
 pub mod combination;
+pub mod treap;
