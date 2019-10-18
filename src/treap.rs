@@ -44,12 +44,15 @@ mod treap {
         t
     }
 
-    pub fn merge(l: Option<Box<Node>>, r: Option<Box<Node>>) -> Box<Node> {
+    pub fn merge(l: Option<Box<Node>>, r: Option<Box<Node>>) -> Option<Box<Node>> {
+        if l.is_none() && r.is_none() {
+            return None
+        }
         if l.is_none() {
-            return r.unwrap()
+            return r
         }
         if r.is_none() {
-            return l.unwrap()
+            return l
         }
 
         assert!(l.is_some() && r.is_some());
@@ -58,12 +61,12 @@ mod treap {
 
         if l.pri > r.pri {
             let old_rch = l.rch.take();
-            l.rch = Some(merge(old_rch, Some(r).into())).into();
-            update(l)
+            l.rch = merge(old_rch, Some(r).into());
+            update(l).into()
         } else {
             let old_lch = r.lch.take();
-            r.lch = Some(merge(Some(l).into(), old_lch)).into();
-            update(r)
+            r.lch = merge(Some(l).into(), old_lch);
+            update(r).into()
         }
     }
 
@@ -87,14 +90,14 @@ mod treap {
         }
     }
 
-    pub fn insert(t: Box<Node>, k: usize, v: i64, rand: u64) -> Box<Node> {
+    pub fn insert(t: Box<Node>, k: usize, v: i64, rand: u64) -> Option<Box<Node>> {
         let (l,r) = split(Some(t).into(), k);
         let newt = merge(l, Some(new_node(v, rand).into()));
-        let newt = merge(Some(newt).into(), r);
+        let newt = merge(newt, r);
         newt
     }
 
-    pub fn erase(t: Box<Node>, k: usize) -> Box<Node> {
+    pub fn erase(t: Box<Node>, k: usize) -> Option<Box<Node>> {
         // [0,k),[k,k+1)[k+1,n)
         let (t1, rest) = split(Some(t).into(), k);
         let (t2, t3) = split(rest, 1);
@@ -156,7 +159,7 @@ impl Treap {
             self.t = Some(treap::new_node(v, self.rng.next()).into());
         } else {
             let t = self.t.take().unwrap();
-            self.t = treap::insert(t, k, v, self.rng.next()).into();
+            self.t = treap::insert(t, k, v, self.rng.next());
         }
     }
     fn erase(&mut self, k: usize) {
@@ -183,7 +186,7 @@ impl Treap {
             let (a1, a2) = treap::split(t, l);
             let (b1, b2) = treap::split(a2, r-l);
             let res = treap::sum(&b1);
-            self.t = treap::merge(treap::merge(a1, b1).into(), b2).into();
+            self.t = treap::merge(treap::merge(a1, b1), b2);
             res
         }
     }
