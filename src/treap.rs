@@ -24,15 +24,15 @@ mod treap {
     }
 
     pub fn count(t: &Option<Box<Node>>) -> usize {
-        match t {
-            Some(x) => x.cnt,
+        match *t {
+            Some(ref x) => x.cnt,
             None => 0,
         }
     }
 
     pub fn sum(t: &Option<Box<Node>>) -> i64 {
-        match t {
-            Some(x) => x.sum,
+        match *t {
+            Some(ref x) => x.sum,
             None => 0,
         }
     }
@@ -73,12 +73,15 @@ mod treap {
         }
         let mut t = t.unwrap();
 
-        if k <= count(&t.lch) {
-            let s = split(t.lch, k);
+        let lcnt = count(&t.lch);
+        if k <= lcnt {
+            let old_lch = t.lch.take();
+            let s = split(old_lch, k);
             t.lch = s.1;
             (s.0, Some(update(t)).into())
         } else {
-            let s = split(t.rch, k - count(&t.lch) - 1);
+            let old_rch = t.rch;
+            let s = split(old_rch, k - lcnt - 1);
             t.rch = s.0;
             (Some(update(t)).into(), s.1)
         }
