@@ -57,10 +57,12 @@ mod treap {
         let mut r = r.unwrap();
 
         if l.pri > r.pri {
-            l.rch = Some(merge(l.rch, Some(r).into())).into();
+            let old_rch = l.rch.take();
+            l.rch = Some(merge(old_rch, Some(r).into())).into();
             update(l)
         } else {
-            r.lch = Some(merge(Some(l).into(), r.lch)).into();
+            let old_lch = r.lch.take();
+            r.lch = Some(merge(Some(l).into(), old_lch)).into();
             update(r)
         }
     }
