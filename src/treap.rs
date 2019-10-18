@@ -80,7 +80,7 @@ mod treap {
             t.lch = s.1;
             (s.0, Some(update(t)).into())
         } else {
-            let old_rch = t.rch;
+            let old_rch = t.rch.take();
             let s = split(old_rch, k - lcnt - 1);
             t.rch = s.0;
             (Some(update(t)).into(), s.1)
