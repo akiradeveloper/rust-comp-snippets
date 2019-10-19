@@ -114,47 +114,39 @@ struct Treap {
 }
 #[snippet = "Treap"]
 impl Treap {
-    fn new() -> Treap {
+    pub fn new() -> Treap {
         Treap {
             rng: Xorshift::new(),
             t: None,
         }
     }
     #[doc = "[l,r)"]
-    fn lower_bound(&mut self, l: usize, r: usize, v: i64) -> Option<usize> {
+    pub fn lower_bound(&mut self, l: usize, r: usize, v: i64) -> usize {
         let lower = l as i64;
         let upper = r as i64;
 
         let mut lb = lower - 1; 
-        let mut ub = upper + 1;
+        let mut ub = upper;
         while ub - lb > 1 {
             let mid = (lb+ub)/2;
-            if self.get(mid as usize) > v {
+            if self.get(mid as usize) >= v {
                 ub = mid;
             } else {
                 lb = mid;
             }
         }
-        let latter = ub;
-        if latter < 0 {
-            None
-        } else {
-            Some(latter as usize)
-        }
+        ub as usize
     }
-    fn orderd_insert(&mut self, v: i64) {
+    pub fn orderd_insert(&mut self, v: i64) {
         if self.t.is_none() {
             self.insert(0, v);
         } else {
             let n = self.len();
-            let ins_pos = match self.lower_bound(0, n, v) {
-                Some(x) => x,
-                None => 0
-            };
+            let ins_pos = self.lower_bound(0, n, v);
             self.insert(ins_pos, v);
         }
     }
-    fn insert(&mut self, k: usize, v: i64) {
+    pub fn insert(&mut self, k: usize, v: i64) {
         if self.t.is_none() {
             self.t = Some(treap::new_node(v, self.rng.next()).into());
         } else {
@@ -162,22 +154,22 @@ impl Treap {
             self.t = treap::insert(t, k, v, self.rng.next());
         }
     }
-    fn erase(&mut self, k: usize) {
+    pub fn erase(&mut self, k: usize) {
         if self.t.is_some() {
             let t = self.t.take().unwrap();
             self.t = treap::erase(t, k).into();
         }
     }
     #[doc = "split into [l,r)+[r,n)"]
-    fn split(self, k: usize) -> (Treap, Treap) {
+    pub fn split(self, k: usize) -> (Treap, Treap) {
         let (a, b) = treap::split(self.t, k);
         (Treap { rng: self.rng.clone(), t: a }, Treap { rng: self.rng.clone(), t: b })
     }
-    fn len(&self) -> usize {
+    pub fn len(&self) -> usize {
         treap::count(&self.t)
     }
     #[doc = "[l,r)"]
-    fn sum(&mut self, l: usize, r: usize) -> i64 {
+    pub fn sum(&mut self, l: usize, r: usize) -> i64 {
         if self.t.is_none() {
             return 0
         } else {
@@ -190,8 +182,34 @@ impl Treap {
             res
         }
     }
-    fn get(&mut self, k: usize) -> i64 {
+    pub fn get(&mut self, k: usize) -> i64 {
         self.sum(k, k+1)
+    }
+}
+
+#[test]
+fn test_treap_lower_bound() {
+    let mut rng = Xorshift::new();
+    let mut tr = Treap::new();
+    let mut v = vec![];
+    let n = 10000;
+    for i in 0..n {
+        let x = rng.rand(1000) as i64;
+
+        v.push(x);
+        v.sort();
+        let mut k1 = i;
+        for k in 0..i {
+            if v[k]==x {
+                k1 = k;
+                break;
+            }
+        }
+
+        tr.orderd_insert(x);
+        let k2 = tr.lower_bound(0,i,x);
+
+        assert_eq!(k2,k1);
     }
 }
 
