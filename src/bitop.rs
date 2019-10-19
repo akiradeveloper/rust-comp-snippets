@@ -104,6 +104,7 @@ fn test_lsb() {
 }
 
 #[snippet = "bin_digits"]
+#[doc = "O(|A|)"]
 fn bin_digits(n: i64) -> Vec<bool> {
     if n == 0 { return vec![]; }
     let logN = (n as f64).log2().floor() as usize;
@@ -134,12 +135,21 @@ fn test_bin_digits() {
 #[snippet = "range_decomposition"]
 #[doc = "decompose a number into range of form [X000...,X111...]"]
 fn range_decomposition(x: i64) -> Vec<(i64,i64)> {
-    let mut res = vec![];
+    let mut res = vec![(x,x)];
+    let mut cur = x;
+    let bd = bin_digits(x);
+    for i in 0..bd.len() {
+        if bd[i] {
+            let last = cur-1;
+            cur -= (1<<i);
+            res.push((cur,last));
+        }
+    }
+    res.sort();
     res
 }
 #[test]
 fn test_range_decomposition() {
     let mut res = range_decomposition(0b10101);
-    res.sort();
     assert_eq!(res, [(0b00000,0b1111),(0b10000,0b10011),(0b10100,0b10100),(0b10101,0b10101)]);
 }
