@@ -102,3 +102,44 @@ fn test_lsb() {
     assert_eq!(lsb(6), 2);
     assert_eq!(lsb(4), 4);
 }
+
+#[snippet = "bin_digits"]
+fn bin_digits(n: i64) -> Vec<bool> {
+    if n == 0 { return vec![]; }
+    let logN = (n as f64).log2().floor() as usize;
+    // dbg!(logN);
+    let mut res = vec![false; logN+1];
+    let mut n = n;
+    for k in (0..logN+1).rev() {
+        // dbg!(n, 1<<k);
+        if n >= 1<<k {
+            // dbg!(k);
+            res[k] = true;
+            n -= (1<<k);
+        }
+    }
+    res
+}
+#[test]
+fn test_bin_digits() {
+    assert_eq!(bin_digits(0), []);
+    assert_eq!(bin_digits(3), [true,true]);
+    assert_eq!(bin_digits(7), [true,true,true]);
+    assert_eq!(bin_digits(6), [false,true,true]);
+    assert_eq!(bin_digits(10), [false,true,false,true]);
+    assert_eq!(bin_digits(16), [false,false,false,false,true]);
+}
+
+
+#[snippet = "range_decomposition"]
+#[doc = "decompose a number into range of form [X000...,X111...]"]
+fn range_decomposition(x: i64) -> Vec<(i64,i64)> {
+    let mut res = vec![];
+    res
+}
+#[test]
+fn test_range_decomposition() {
+    let mut res = range_decomposition(0b10101);
+    res.sort();
+    assert_eq!(res, [(0b00000,0b1111),(0b10000,0b10011),(0b10100,0b10100),(0b10101,0b10101)]);
+}

@@ -228,30 +228,4 @@ fn test_prime_count() {
     assert_eq!(prime_count(6, 5, std::i64::MAX), 1);
 }
 
-#[snippet = "bin_digits"]
-fn bin_digits(n: i64) -> Vec<bool> {
-    if n == 0 { return vec![]; }
-    let logN = (n as f64).log2().floor() as usize;
-    // dbg!(logN);
-    let mut res = vec![false; logN+1];
-    let mut n = n;
-    for k in (0..logN+1).rev() {
-        // dbg!(n, 1<<k);
-        if n >= 1<<k {
-            // dbg!(k);
-            res[k] = true;
-            n -= (1<<k);
-        }
-    }
-    res
-}
-#[test]
-fn test_bin_digits() {
-    assert_eq!(bin_digits(0), []);
-    assert_eq!(bin_digits(3), [true,true]);
-    assert_eq!(bin_digits(7), [true,true,true]);
-    assert_eq!(bin_digits(6), [false,true,true]);
-    assert_eq!(bin_digits(10), [false,true,false,true]);
-    assert_eq!(bin_digits(16), [false,false,false,false,true]);
-}
 
