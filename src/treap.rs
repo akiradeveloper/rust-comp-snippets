@@ -70,6 +70,7 @@ mod treap {
         }
     }
 
+    // [0,k),[k,n]
     pub fn split(t: Option<Box<Node>>, k: usize) -> (Option<Box<Node>>, Option<Box<Node>>) {
         if t.is_none() {
             return (None.into(), None.into())
@@ -90,6 +91,7 @@ mod treap {
         }
     }
 
+    // split is fast but merge is slow
     pub fn insert(t: Box<Node>, k: usize, v: i64, rand: u64) -> Option<Box<Node>> {
         let (l,r) = split(Some(t).into(), k);
         let newt = merge(l, Some(new_node(v, rand).into()));

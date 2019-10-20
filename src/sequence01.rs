@@ -8,9 +8,10 @@ struct BinarySearch<F> {
 #[snippet = "BinarySearch"]
 impl <F: Fn(i64) -> bool> BinarySearch<F> {
     #[doc = "O(log(upper-lower))"]
-    fn lower_bound(&self) -> i64 {
+    pub fn lower_bound(&self) -> i64 {
         let lower = self.lower;
         let upper = self.upper;
+        assert!(lower<=upper);
 
         let mut lb = lower - 1; 
         let mut ub = upper + 1;
@@ -28,26 +29,7 @@ impl <F: Fn(i64) -> bool> BinarySearch<F> {
 }
 
 #[test]
-fn test_binary_search_generic_unique() {
-    let always_false = |i: i64| { false };
-    let bs0 = BinarySearch {
-        p: always_false,
-        lower: 0,
-        upper: 100000,
-    };
-    assert_eq!(bs0.lower_bound(), 100001);
-
-    let always_true = |i: i64| { true };
-    let bs1 = BinarySearch {
-        p: always_true,
-        lower: 0,
-        upper: 100000,
-    };
-    assert_eq!(bs1.lower_bound(), 0);
-}
-
-#[test]
-fn test_binary_search_generic_array_ref() {
+fn test_generic_binary_search() {
     let xs = vec![1,2,2,2,2,2,3,4,5];
     let p0 = |i: i64| { xs[i as usize] >= 2 };
     let bs0 = BinarySearch {
