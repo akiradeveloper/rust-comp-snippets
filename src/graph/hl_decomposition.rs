@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 struct HLDecomposition {
     n: usize,
     g: Vec<Vec<usize>>,
@@ -6,8 +8,8 @@ struct HLDecomposition {
     par: Vec<Option<usize>>,
     heavy_next: Vec<Option<usize>>,
     heavy_head: Vec<usize>,
-    heavy_id: Vec<usize>,
-    heavy_id_inv: Vec<usize>,
+    real_to_virt: Vec<usize>,
+    virt_to_real: Vec<usize>,
 }
 
 impl HLDecomposition {
@@ -21,8 +23,8 @@ impl HLDecomposition {
             par: vec![None; n],
             heavy_next: vec![None; n],
             heavy_head: vec![n; n],
-            heavy_id: vec![n; n],
-            heavy_id_inv: vec![n; n],
+            real_to_virt: vec![n; n],
+            virt_to_real: vec![n; n],
         }
     }
 
@@ -85,7 +87,25 @@ impl HLDecomposition {
     }
 
     fn bfs(&mut self, root: usize) {
-
+        let mut cur_virt_id = 0;
+        let mut q = VecDeque::new();
+        q.push_back(root);
+        // ヘビーパスの先頭から下っていく
+        while let Some(h) = q.pop_front() {
+            let mut cur0 = Some(h);
+            while cur0.is_some() {
+                let cur = cur0.unwrap();
+                self.real_to_virt[cur] = cur_virt_id;
+                self.virt_to_real[cur_virt_id] = cur;
+                cur_virt_id += 1;
+                self.heavy_head[cur] = h;
+                for v in self.g[cur].clone() {
+                    if Some(v) == self.par[cur] || Some(v) == self.heavy_next[cur] { continue; }
+                    q.push_back(v);
+                }
+                cur0 = self.heavy_next[cur];
+            }
+        }
     }
 }
 
@@ -100,5 +120,7 @@ fn test_hl_decomposition() {
     // dbg!(&hl.depth);
     // dbg!(&hl.par);
     // dbg!(&hl.subcnt);
-    dbg!(&hl.heavy_next);
+    // dbg!(&hl.heavy_next);
+    dbg!(&hl.real_to_virt);
+    dbg!(&hl.heavy_head);
 }
