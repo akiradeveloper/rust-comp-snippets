@@ -129,6 +129,50 @@ impl HLDecomposition {
             r = r0.unwrap();
         }
     }
+
+    pub fn vertex_decomposition(&self, u: usize, v: usize) -> Vec<(usize, usize)> {
+        let mut res = vec![];
+
+        let mut l = u;
+        let mut r = v;
+        loop {
+            if self.real_to_virt[l] > self.real_to_virt[r] {
+                std::mem::swap(&mut l, &mut r);
+            }
+            let p = (std::cmp::max(self.real_to_virt[self.heavy_head[r]], self.real_to_virt[l]), self.real_to_virt[r]);
+            res.push(p);
+            if self.heavy_head[l] != self.heavy_head[r] {
+                r = self.par[self.heavy_head[r]].unwrap();
+            } else { break; }
+        }
+
+        res
+    }
+
+    pub fn edge_decomposition(&self, u: usize, v: usize) -> Vec<(usize, usize)> {
+        let mut res = vec![];
+
+        let mut l = u;
+        let mut r = v;
+        loop {
+            if self.real_to_virt[l] > self.real_to_virt[r] {
+                std::mem::swap(&mut l, &mut r);
+            }
+            if self.heavy_head[l] != self.heavy_head[r] {
+                let p = (self.real_to_virt[self.heavy_head[r]], self.real_to_virt[r]);
+                res.push(p);
+                r = self.par[self.heavy_head[r]].unwrap();
+            } else {
+                if l != r {
+                    let p = (self.real_to_virt[l]+1, self.real_to_virt[r]);
+                    res.push(p);
+                }
+                break;
+            }
+        }
+
+        res
+    }
 }
 
 #[test]
@@ -154,4 +198,7 @@ fn test_hl_decomposition() {
         assert_eq!(hl.lca(u,v), lca);
         assert_eq!(hl.lca(v,u), lca);
     }
+
+    dbg!(hl.vertex_decomposition(8, 6));
+    dbg!(hl.edge_decomposition(8, 6));
 }
