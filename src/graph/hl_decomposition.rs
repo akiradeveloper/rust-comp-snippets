@@ -1,5 +1,6 @@
 use std::collections::VecDeque;
 
+#[snippet = "HLDecomposition"]
 struct HLDecomposition {
     n: usize,
     g: Vec<Vec<usize>>,
@@ -12,9 +13,10 @@ struct HLDecomposition {
     virt_to_real: Vec<usize>,
 }
 
+#[snippet = "HLDecomposition"]
 impl HLDecomposition {
 
-    fn new(n: usize) -> Self {
+    pub fn new(n: usize) -> Self {
         HLDecomposition {
             n: n,
             g: vec![vec![]; n],
@@ -28,11 +30,12 @@ impl HLDecomposition {
         }
     }
 
-    fn connect(&mut self, u: usize, v: usize) {
+    pub fn connect(&mut self, u: usize, v: usize) {
         self.g[u].push(v);
     }
 
-    fn build(&mut self, root: usize) {
+    #[doc = "O(N)"]
+    pub fn build(&mut self, root: usize) {
         self.dfs1(root);
         self.dfs2(root);
         self.bfs(root);
@@ -107,6 +110,25 @@ impl HLDecomposition {
             }
         }
     }
+
+    #[doc = "O(log N)"]
+    pub fn lca(&self, u: usize, v: usize) -> usize {
+        let mut l = u;
+        let mut r = v;
+        loop {
+            if self.real_to_virt[l] > self.real_to_virt[r] {
+                std::mem::swap(&mut l, &mut r);
+            }
+            // 同じヘビーパスの上に乗っている
+            // よって、vidの低い方がLCAと確定する
+            if self.heavy_head[l] == self.heavy_head[r] {
+                return l;
+            }
+            let r0 = self.par[self.heavy_head[r]];
+            assert!(r0.is_some());
+            r = r0.unwrap();
+        }
+    }
 }
 
 #[test]
@@ -117,10 +139,19 @@ fn test_hl_decomposition() {
         hl.connect(u,v);
     }
     hl.build(0);
-    // dbg!(&hl.depth);
-    // dbg!(&hl.par);
-    // dbg!(&hl.subcnt);
-    // dbg!(&hl.heavy_next);
-    dbg!(&hl.real_to_virt);
-    dbg!(&hl.heavy_head);
+
+    let lca_test = vec![
+        (0,0,0),
+        (8,10,0),
+        (8,12,0),
+        (4,5,1),
+        (2,7,0),
+        (3,7,3),
+        (10,12,6),
+        (2,12,2),
+    ];
+    for (u,v,lca) in lca_test {
+        assert_eq!(hl.lca(u,v), lca);
+        assert_eq!(hl.lca(v,u), lca);
+    }
 }
