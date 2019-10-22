@@ -36,6 +36,7 @@ impl HLDecomposition {
         self.bfs(root);
     }
 
+    // 部分木の大きさを計算する
     fn dfs1(&mut self, root: usize) {
         self.depth[root] = 0;
         self.par[root] = None;
@@ -53,8 +54,34 @@ impl HLDecomposition {
         cnt
     }
     
+    // ヘビーパスを探す
     fn dfs2(&mut self, root: usize) {
+        self.dfs2_sub(root, None);
+    }
+    fn dfs2_sub(&mut self, u: usize, par: Option<usize>) {
+        let mut maxv = 0;
+        let mut heavy_next = None;
 
+        let cld = self.g[u].clone();
+
+        // ヘビーパスを決める
+        for &v in &cld {
+            if Some(v) == par { continue; }
+            if self.subcnt[v] > maxv { 
+                maxv = self.subcnt[v];
+                heavy_next = Some(v);
+            }
+        }
+        // ヘビーパスがあるならそれを伸ばす
+        if let Some(hn) = heavy_next {
+            self.heavy_next[u] = Some(hn);
+            self.dfs2_sub(hn, Some(u));
+        }
+        // ライトパスはまたルートからやり直し
+        for &v in &cld {
+            if Some(v) == par || Some(v) == heavy_next { continue; }
+            self.dfs2_sub(v, Some(u));
+        }
     }
 
     fn bfs(&mut self, root: usize) {
@@ -70,7 +97,8 @@ fn test_hl_decomposition() {
         hl.connect(u,v);
     }
     hl.build(0);
-    dbg!(&hl.depth);
-    dbg!(&hl.par);
-    dbg!(&hl.subcnt);
+    // dbg!(&hl.depth);
+    // dbg!(&hl.par);
+    // dbg!(&hl.subcnt);
+    dbg!(&hl.heavy_next);
 }
