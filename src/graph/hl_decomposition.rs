@@ -124,9 +124,8 @@ impl HLDecomposition {
             if self.heavy_head[l] == self.heavy_head[r] {
                 return l;
             }
-            let r0 = self.par[self.heavy_head[r]];
-            assert!(r0.is_some());
-            r = r0.unwrap();
+            // 一つ上のヘビーパスに移る
+            r = self.par[self.heavy_head[r]].unwrap();
         }
     }
 
