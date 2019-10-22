@@ -11,3 +11,4 @@ pub mod bipartite_matching;
 pub mod cycle;
 pub mod traversal;
 pub mod rerooting;
+pub mod hl_decomposition;
