@@ -11,6 +11,7 @@ struct TopologicalSort<'a> {
 
 #[snippet = "TopologicalSort"]
 impl <'a> TopologicalSort<'a> {
+    #[doc = "directed graph. O(V+E)"]
     fn new(g: &'a [Vec<usize>]) -> Self {
         let n = g.len();
         let mut colors = vec![false; n];
@@ -21,11 +22,11 @@ impl <'a> TopologicalSort<'a> {
                 indeg[next] += 1;
             }
         }
-        Self {
-            g,
+        TopologicalSort {
+            g: g,
             Q: VecDeque::new(),
-            colors,
-            indeg,
+            colors: colors,
+            indeg: indeg,
             out: Vec::new(),
         }
     }
@@ -68,4 +69,16 @@ fn test_tsort() {
     let mut tsort = TopologicalSort::new(&conns);
     tsort.tsort();
     assert_eq!(tsort.out, [0,3,1,4,5,2]);
+}
+
+#[test]
+fn test_tsort_loop() {
+    let mut conns = vec![
+        vec![1],
+        vec![2],
+        vec![0]
+    ];
+    let mut tsort = TopologicalSort::new(&conns);
+    tsort.tsort();
+    assert_eq!(tsort.out, []);
 }
