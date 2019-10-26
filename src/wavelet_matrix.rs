@@ -353,6 +353,32 @@ impl WM {
         }
         res 
     }
+    pub fn rank_all(&self, l: usize, r: usize, x: u64) -> (usize, usize, usize) {
+        let mut cnt_lt = 0;
+        let mut cnt_gt = 0;
+        let mut s = l;
+        let mut e = r;
+        
+        for d in 0..64 {
+            let b = x & (1<<(63-d)) > 0;
+            let lcnt = self.mat[d].rank(b, s);
+            let rcnt = self.mat[d].rank(b, e);
+            let add = (e-s) - (rcnt-lcnt);
+            if b {
+                cnt_lt += add;
+            } else {
+                cnt_gt += add;
+            }
+            s = lcnt;
+            e = rcnt;
+            if b {
+                s += self.nzeros[d];
+                e += self.nzeros[d];
+            }
+        }
+
+        (cnt_lt, e-s, cnt_gt)
+    }
 }
 
 #[test]
@@ -400,6 +426,43 @@ fn test_wm_quantile() {
         v.sort();
         v.reverse();
         let ans = v[k-1];
+        assert_eq!(res, ans);
+    }
+}
+
+#[test]
+fn test_wm_rank_all() {
+    use crate::xorshift::Xorshift;
+    let mut rand = Xorshift::new();
+    let mut xs = vec![];
+    for _ in 0..1000 {
+        let x = rand.rand(1000);
+        xs.push(x);
+    }
+    let ref_impl = |l: usize, r: usize, x: u64| {
+        let mut lt = 0;
+        let mut gt = 0;
+        for i in l..r {
+            if xs[i] > x {
+                gt += 1;
+            }
+            else if xs[i] < x {
+                lt += 1;
+            }
+        }
+        (lt, r-l-(lt+gt), gt)
+    };
+    let wm = WM::new(xs.clone());
+    for _ in 0..1000 {
+        let x = rand.rand(1000);
+        let l = rand.rand(500);
+        let n = rand.rand(300) + 1;
+        let r = l+n;
+        let l = l as usize;
+        let r = r as usize;
+
+        let res = wm.rank_all(l as usize, r as usize, x);
+        let ans = ref_impl(l, r, x);
         assert_eq!(res, ans);
     }
 }
