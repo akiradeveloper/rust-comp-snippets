@@ -379,6 +379,11 @@ impl WM {
 
         (cnt_lt, e-s, cnt_gt)
     }
+    pub fn rangefreq(&self, l: usize, r: usize, min: u64, max: u64) -> usize {
+        let (cntlt_max,_,_) = self.rank_all(l, r, max);
+        let (cntlt_min,_,_) = self.rank_all(l, r, min);
+        cntlt_max - cntlt_min
+    }
 }
 
 #[test]
@@ -465,4 +470,15 @@ fn test_wm_rank_all() {
         let ans = ref_impl(l, r, x);
         assert_eq!(res, ans);
     }
+}
+
+#[test]
+fn test_wm_rangefreq() {
+    let xs = vec![0,7,2,1,4,3,6,7,2,5,0,4,7,2,6,3];
+    let wm = WM::new(xs);
+    assert_eq!(wm.rangefreq(0, 5, 1, 1), 0);
+    assert_eq!(wm.rangefreq(0, 5, 1, 2), 1);
+    assert_eq!(wm.rangefreq(0, 5, 1, 3), 2);
+    assert_eq!(wm.rangefreq(0, 5, 0, 3), 3);
+    assert_eq!(wm.rangefreq(1, 5, 0, 3), 2);
 }
