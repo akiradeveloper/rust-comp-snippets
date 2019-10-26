@@ -48,3 +48,5 @@ pub mod bitop;
 pub mod combination;
 pub mod treap;
 pub mod syakutori;
+pub mod macros;
+pub mod wavelet_matrix;

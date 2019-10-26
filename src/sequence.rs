@@ -1,4 +1,4 @@
-use super::lower_bound::BinarySearchCpp;
+use super::lower_bound::LowerBound;
 use super::fenwick::BIT;
 use std::cmp::{min, max};
 

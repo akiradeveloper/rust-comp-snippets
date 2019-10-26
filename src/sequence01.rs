@@ -1,9 +1,9 @@
 #[snippet = "BinarySearch"]
 #[doc = "lower,upper are inclusive range"]
-struct BinarySearch<F> {
-    p: F,
-    lower: i64,
-    upper: i64,
+pub struct BinarySearch<F> {
+    pub p: F,
+    pub lower: i64,
+    pub upper: i64,
 }
 #[snippet = "BinarySearch"]
 impl <F: Fn(i64) -> bool> BinarySearch<F> {

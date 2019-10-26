@@ -4,13 +4,13 @@ use std::cmp::Ordering;
 
 #[snippet = "lower_bound"]
 /// Equivalent to std::lowerbound and std::upperbound in c++
-pub trait BinarySearchCpp<T> {
+pub trait LowerBound<T> {
     fn lower_bound(&self, x: &T) -> usize;
     fn upper_bound(&self, x: &T) -> usize;
 }
 
 #[snippet = "lower_bound"]
-impl<T: Ord> BinarySearchCpp<T> for [T] {
+impl<T: Ord> LowerBound<T> for [T] {
     fn lower_bound(&self, x: &T) -> usize {
         let mut low = 0;
         let mut high = self.len();
