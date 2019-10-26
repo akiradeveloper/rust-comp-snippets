@@ -203,3 +203,12 @@ fn test_fid_select() {
         }
     }
 }
+
+#[test]
+fn test_fid_select_many_blocks() {
+    let mut fid = FID::new(10000);
+    fid.set(7777);
+    fid.build();
+    assert_eq!(fid.select1(0),7777);
+    assert_eq!(fid.select0(7777),7778);
+}
