@@ -12,7 +12,7 @@ impl std::fmt::Debug for FID {
         let mut s = String::new();
         let n = self.n;
         for i in 0..n {
-            if self.get(i) {
+            if self.access(i) {
                 s.push('1');
             } else {
                 s.push('0');
@@ -62,7 +62,7 @@ impl FID {
             self.block_rank1[i] = self.block_rank1[i-1] + Self::popcount(self.blocks[i-1]);
         }
     }
-    pub fn get(&self, k: usize) -> bool {
+    pub fn access(&self, k: usize) -> bool {
         let x = self.blocks[k>>6] & 1<<(k&0b111111);
         if x > 0 { true } else { false }
     }
@@ -75,6 +75,13 @@ impl FID {
     #[doc = "count 0s in [0,k)"]
     pub fn rank0(&self, k: usize) -> usize {
         k - self.rank1(k)
+    }
+    pub fn rank(&self, b: bool, k: usize) -> usize {
+        if b {
+            self.rank1(k)
+        } else {
+            self.rank0(k)
+        }
     }
     #[doc = "query the index of k-th 1 (0-indexed)"]
     pub fn select1(&self, k: usize) -> usize {
@@ -109,6 +116,13 @@ impl FID {
         remaining -= count0;
         assert!(remaining>0);
         (l<<6) | Self::kpopi(!self.blocks[l], remaining)
+    }
+    pub fn select(&self, b: bool, k: usize) -> usize {
+        if b {
+            self.select1(k)
+        } else {
+            self.select0(k)
+        }
     }
 }
 
@@ -230,11 +244,13 @@ fn test_fid_select_many_blocks() {
 
 struct WM {
     mat: Vec<FID>,
+    nzeros: Vec<usize>,
 }
 impl WM {
-    fn new(xs: Vec<u64>) -> WM {
+    pub fn new(xs: Vec<u64>) -> WM {
         let n = xs.len();
         let mut mat = vec![];
+        let mut nzeros = vec![];
         let mut cur = xs;
         for i in 0..64 {
             let mid = 1<<(63-i);
@@ -252,6 +268,8 @@ impl WM {
                     b.push(false);
                 }
             }
+            nzeros.push(left.len());
+
             left.append(&mut right);
             cur = left;
             let mut fid = FID::new(n);
@@ -262,19 +280,41 @@ impl WM {
             }
             mat.push(fid);
         }
-        // dbg!(&mat);
+        dbg!(&nzeros);
+        dbg!(&mat);
 
         WM {
             mat: mat,
+            nzeros: nzeros,
         }
+    }
+
+    pub fn access(&self, i: usize) -> u64 {
+        unimplemented!();
+    }
+    pub fn rank(&self, x: u64, i: usize) -> usize {
+        let mut s = 0;
+        let mut e = i;
+        for d in 0..64 {
+            let fid = &self.mat[d];
+            let b = x & (1<<(63-d)) > 0;
+            s = fid.rank(b, s);
+            e = fid.rank(b, e);
+            if b {
+                s += self.nzeros[d];
+                e += self.nzeros[d];
+            }
+        }
+        e-s
     }
 }
 
-//     0100101101011010,
-//     0101101110110011,
-//     0100100100110110
 #[test]
-fn test_wm_build() {
+fn test_wm_rank() {
     let xs = vec![0,7,2,1,4,3,6,7,2,5,0,4,7,2,6,3];
-    WM::new(xs);
+    let wm = WM::new(xs);
+    assert_eq!(wm.rank(2, 12), 2);
+    assert_eq!(wm.rank(7, 12), 2);
+    assert_eq!(wm.rank(7, 13), 3);
+    assert_eq!(wm.rank(7, 15), 3);
 }
