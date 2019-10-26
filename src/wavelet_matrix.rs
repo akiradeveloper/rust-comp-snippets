@@ -72,7 +72,7 @@ impl FID {
         let rest = self.blocks[k>>6] & mask;
         self.block_rank1[k>>6] + Self::popcount(rest)
     }
-    #[doc = "count 0s in [0,k)"]
+    #[doc = "count 0s in [0,k). O(1)"]
     pub fn rank0(&self, k: usize) -> usize {
         k - self.rank1(k)
     }
@@ -139,6 +139,24 @@ fn test_kpopi() {
 }
 
 #[test]
+fn test_fid_rank_debug() {
+    let xs = "0000010010001000000100001000000000000100000010000000100111010000001100000000010100000000000000000001000000000000101000000000000000000000011000000000001000000100000000100001000001000000000001000001000000000000000000000000000000000000000000001000000000100000110000000000000100000000100010010100000000000101001001100001000100000010100000000100000001000000000000000000010001000001010000001010001000000000000000000001010000000000100010000100000000100101000000000000100000000000000000000100000000000000000000001000100000010000000000000010011000100000000000000000000000000000000000010000000010000001000010000000000100001000000000001000000001110000000000000000010000000000100000000001010000010010110000000111010000011100000000010000100000100001000000100000000001010000000000000001000000100000000000100000000000000010000000001001000000000000001000100000100000000010010000000001010001000000100000100000000000000000011001000000010000000000111000000000010000000111000000000001010000000000100000000000101000000000";
+    assert!(xs.len()==1000);
+    let l = 355;
+    let r = 489;
+    let mut fid = FID::new(1000);
+    let mut i = 0;
+    for c in xs.chars() {
+        if c == '1' {
+            fid.set(i);
+        }
+        i += 1;
+    }
+    fid.build();
+    assert!(fid.rank1(l) <= fid.rank1(r));
+}
+
+#[test]
 fn test_fid_rank() {
     use crate::xorshift::Xorshift;
     use std::collections::HashSet;
@@ -182,7 +200,7 @@ fn test_fid_rank() {
 }
 
 #[test]
-fn test_fid_simple_select() {
+fn test_fid_select_simple() {
     let x = 0b1011010010;
     let mut fid = FID::new(10);
     for i in 0..10 {
@@ -278,20 +296,18 @@ impl WM {
                     fid.set(i);
                 }
             }
+            fid.build();
             mat.push(fid);
         }
-        dbg!(&nzeros);
-        dbg!(&mat);
+        // dbg!(&nzeros);
+        // dbg!(&mat);
 
         WM {
             mat: mat,
             nzeros: nzeros,
         }
     }
-
-    pub fn access(&self, i: usize) -> u64 {
-        unimplemented!();
-    }
+    #[doc = "O(64)"]
     pub fn rank(&self, x: u64, i: usize) -> usize {
         let mut s = 0;
         let mut e = i;
@@ -307,6 +323,36 @@ impl WM {
         }
         e-s
     }
+    #[doc = "k-th largest number in [l,r)"]
+    pub fn quantile(&self, l: usize, r: usize, k: usize) -> u64 {
+        let mut res = 0;
+        let mut k = k;
+        let mut s = l;
+        let mut e = r;
+        for d in 0..64 {
+            let msb = 1<<(63-d);
+            let fid = &self.mat[d];
+            // dbg!((s,e));
+            let ns = fid.rank1(s);
+            let ne = fid.rank1(e);
+            // dbg!((&fid,k,d,s,e,ns,ne));
+            let n1 = ne-ns;
+            if n1 >= k { // right
+                res |= msb;
+                s = ns;
+                e = ne;
+                s += self.nzeros[d];
+                e += self.nzeros[d];
+            } else { // left
+                // rank0(k)+rank1(k)=k
+                s = s - ns;
+                e = e - ne;
+                // 1側にn1個あるから、0側で大きい方k-n1個を探す
+                k -= n1;
+            }
+        }
+        res 
+    }
 }
 
 #[test]
@@ -317,4 +363,43 @@ fn test_wm_rank() {
     assert_eq!(wm.rank(7, 12), 2);
     assert_eq!(wm.rank(7, 13), 3);
     assert_eq!(wm.rank(7, 15), 3);
+}
+
+#[test]
+fn test_wm_quantile_simple() {
+    let xs = vec![0,7,2,1,4,3,6,7,2,5,0,4,7,2,6,3];
+    let wm = WM::new(xs);
+    assert_eq!(wm.quantile(4, 12, 3), 5);
+    assert_eq!(wm.quantile(12, 16, 2), 6);
+}
+
+#[test]
+fn test_wm_quantile() {
+    use crate::xorshift::Xorshift;
+    let mut rand = Xorshift::new();
+    let mut xs = vec![];
+    for _ in 0..1000 {
+        let x = rand.rand(300);
+        xs.push(x);
+    }
+    let wm = WM::new(xs.clone());
+    for i in 0..1000 {
+        let l = rand.rand(499);
+        let n = rand.rand(500)+1;
+        let k = rand.rand(n)+1;
+        let l = l as usize;
+        let n = n as usize;
+        let k = k as usize;
+        let r = l + n;
+        let res = wm.quantile(l, r, k);
+
+        let mut v = vec![];
+        for i in l..r {
+            v.push(xs[i]);
+        }
+        v.sort();
+        v.reverse();
+        let ans = v[k-1];
+        assert_eq!(res, ans);
+    }
 }
