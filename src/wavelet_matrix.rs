@@ -1,10 +1,25 @@
 use crate::sequence01::BinarySearch;
 
+#[derive(Clone)]
 struct FID {
     n: usize,
     n_blocks: usize,
     blocks: Vec<u64>,
     block_rank1: Vec<usize>,
+}
+impl std::fmt::Debug for FID {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut s = String::new();
+        let n = self.n;
+        for i in 0..n {
+            if self.get(i) {
+                s.push('1');
+            } else {
+                s.push('0');
+            }
+        }
+        write!(f, "{}", s)
+    }
 }
 impl FID {
     // O(1)
@@ -211,4 +226,55 @@ fn test_fid_select_many_blocks() {
     fid.build();
     assert_eq!(fid.select1(0),7777);
     assert_eq!(fid.select0(7777),7778);
+}
+
+struct WM {
+    mat: Vec<FID>,
+}
+impl WM {
+    fn new(xs: Vec<u64>) -> WM {
+        let n = xs.len();
+        let mut mat = vec![];
+        let mut cur = xs;
+        for i in 0..64 {
+            let mid = 1<<(63-i);
+            let mask = mid - 1;
+            let mut b = vec![];
+            let mut left = vec![];
+            let mut right = vec![];
+            for i in 0..n {
+                let x = cur[i];
+                if x >= mid {
+                    right.push(x & mask);
+                    b.push(true);
+                } else {
+                    left.push(x & mask);
+                    b.push(false);
+                }
+            }
+            left.append(&mut right);
+            cur = left;
+            let mut fid = FID::new(n);
+            for i in 0..n {
+                if b[i] {
+                    fid.set(i);
+                }
+            }
+            mat.push(fid);
+        }
+        // dbg!(&mat);
+
+        WM {
+            mat: mat,
+        }
+    }
+}
+
+//     0100101101011010,
+//     0101101110110011,
+//     0100100100110110
+#[test]
+fn test_wm_build() {
+    let xs = vec![0,7,2,1,4,3,6,7,2,5,0,4,7,2,6,3];
+    WM::new(xs);
 }
