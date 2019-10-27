@@ -8,7 +8,6 @@ struct FID {
     blocks: Vec<u64>,
     block_rank1: Vec<usize>,
 }
-#[snippet = "WaveletMatrix"]
 impl std::fmt::Debug for FID {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut s = String::new();
@@ -110,40 +109,40 @@ impl FID {
         };
         bs.lower_bound() as usize - 1
     }
-    #[doc = "query the index of k-th 0 (0-indexed)"]
-    pub fn select0_block_jump(&self, k: usize) -> usize {
-        let mut remaining = k+1;
-        let bs = BinarySearch {
-            lower: 0,
-            upper: (self.n_blocks-1) as i64,
-            p: |i: i64| {
-                let i = i as usize;
-                (i<<6) - self.block_rank1[i] >= remaining
-            }
-        };
-        let l = bs.lower_bound() as usize - 1;
-        let count0 = (l<<6) - self.block_rank1[l];
-        remaining -= count0;
-        assert!(remaining>0);
-        (l<<6) | Self::kpopi(!self.blocks[l], remaining)
-    }
-    #[doc = "query the index of k-th 1 (0-indexed)"]
-    pub fn select1_block_jump(&self, k: usize) -> usize {
-        let mut remaining = k+1; // remaining
-        let bs = BinarySearch {
-            lower: 0,
-            upper: (self.n_blocks-1) as i64,
-            p: |i: i64| {
-                let i = i as usize;
-                self.block_rank1[i] >= remaining
-            },
-        };
-        let l = bs.lower_bound() as usize - 1;
-        let count1 = self.block_rank1[l];
-        remaining -= count1;
-        assert!(remaining>0);
-        (l<<6) | Self::kpopi(self.blocks[l], remaining)
-    }
+    // #[doc = "query the index of k-th 0 (0-indexed)"]
+    // pub fn select0_block_jump(&self, k: usize) -> usize {
+    //     let mut remaining = k+1;
+    //     let bs = BinarySearch {
+    //         lower: 0,
+    //         upper: (self.n_blocks-1) as i64,
+    //         p: |i: i64| {
+    //             let i = i as usize;
+    //             (i<<6) - self.block_rank1[i] >= remaining
+    //         }
+    //     };
+    //     let l = bs.lower_bound() as usize - 1;
+    //     let count0 = (l<<6) - self.block_rank1[l];
+    //     remaining -= count0;
+    //     assert!(remaining>0);
+    //     (l<<6) | Self::kpopi(!self.blocks[l], remaining)
+    // }
+    // #[doc = "query the index of k-th 1 (0-indexed)"]
+    // pub fn select1_block_jump(&self, k: usize) -> usize {
+    //     let mut remaining = k+1; // remaining
+    //     let bs = BinarySearch {
+    //         lower: 0,
+    //         upper: (self.n_blocks-1) as i64,
+    //         p: |i: i64| {
+    //             let i = i as usize;
+    //             self.block_rank1[i] >= remaining
+    //         },
+    //     };
+    //     let l = bs.lower_bound() as usize - 1;
+    //     let count1 = self.block_rank1[l];
+    //     remaining -= count1;
+    //     assert!(remaining>0);
+    //     (l<<6) | Self::kpopi(self.blocks[l], remaining)
+    // }
     pub fn select(&self, b: bool, k: usize) -> usize {
         if b {
             self.select1(k)
@@ -272,10 +271,10 @@ fn test_fid_select() {
         let count0 = (j+1)-count1;
         if x & (1<<j) > 0 {
             assert_eq!(fid.select1(count1-1), j);
-            assert_eq!(fid.select1_block_jump(count1-1), j);
+            // assert_eq!(fid.select1_block_jump(count1-1), j);
         } else {
             assert_eq!(fid.select0(count0-1), j);
-            assert_eq!(fid.select0_block_jump(count0-1), j);
+            // assert_eq!(fid.select0_block_jump(count0-1), j);
         }
     }
 }
