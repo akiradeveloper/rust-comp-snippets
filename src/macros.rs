@@ -7,6 +7,26 @@ macro_rules! chmax {
         )+
     };
 }
+macro_rules! chmin {
+    ($x:expr, $($v:expr),+) => {
+        $(
+            $x = std::cmp::min($x,$v);
+        )+
+    };
+}
+macro_rules! max {
+    ($x:expr) => ( $x );
+    ($x:expr, $($xs:expr),+) => {
+        std::cmp::max($x, max!( $($xs),+ ))
+    };
+}
+macro_rules! min {
+    ($x:expr) => ( $x );
+    ($x:expr, $($xs:expr),+) => {
+        std::cmp::min($x, min!( $($xs),+ ))
+    };
+}
+
 #[test]
 fn test_chmax() {
     let mut dp = vec![0];
@@ -18,13 +38,6 @@ fn test_chmax() {
     assert_eq!(dp[0],3);
 }
 
-macro_rules! chmin {
-    ($x:expr, $($v:expr),+) => {
-        $(
-            $x = std::cmp::min($x,$v);
-        )+
-    };
-}
 #[test]
 fn test_chmin() {
     let mut dp = vec![5];
@@ -36,23 +49,11 @@ fn test_chmin() {
     assert_eq!(dp[0],1);
 }
 
-macro_rules! max {
-    ($x:expr) => ( $x );
-    ($x:expr, $($xs:expr),+) => {
-        std::cmp::max($x, max!( $($xs),+ ))
-    };
-}
 #[test]
 fn test_max() {
     assert_eq!(max!(1,2,3,4,-5), 4);
 }
 
-macro_rules! min {
-    ($x:expr) => ( $x );
-    ($x:expr, $($xs:expr),+) => {
-        std::cmp::min($x, min!( $($xs),+ ))
-    };
-}
 #[test]
 fn test_min() {
     assert_eq!(min!(1,2,3,4,-5), -5);
