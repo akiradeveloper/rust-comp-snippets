@@ -1,12 +1,14 @@
 use crate::sequence01::BinarySearch;
 
 #[derive(Clone)]
+#[snippet = "WaveletMatrix"]
 struct FID {
     n: usize,
     n_blocks: usize,
     blocks: Vec<u64>,
     block_rank1: Vec<usize>,
 }
+#[snippet = "WaveletMatrix"]
 impl std::fmt::Debug for FID {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut s = String::new();
@@ -21,6 +23,7 @@ impl std::fmt::Debug for FID {
         write!(f, "{}", s)
     }
 }
+#[snippet = "WaveletMatrix"]
 impl FID {
     // O(1)
     fn popcount(x: u64) -> usize {
@@ -286,10 +289,12 @@ fn test_fid_select_many_blocks() {
     assert_eq!(fid.select0(7777),7778);
 }
 
+#[snippet = "WaveletMatrix"]
 struct WM {
     mat: Vec<FID>,
     nzeros: Vec<usize>,
 }
+#[snippet = "WaveletMatrix"]
 impl WM {
     pub fn new(xs: Vec<u64>) -> WM {
         let n = xs.len();
@@ -531,4 +536,37 @@ fn test_wm_rangefreq() {
     assert_eq!(wm.rangefreq(0, 5, 1, 3), 2);
     assert_eq!(wm.rangefreq(0, 5, 0, 3), 3);
     assert_eq!(wm.rangefreq(1, 5, 0, 3), 2);
+}
+
+#[snippet = "WaveletMatrix"]
+struct WMI {
+    offset: i64,
+    wm: WM,
+}
+#[snippet = "WaveletMatrix"]
+impl WMI {
+    pub fn new(xs: Vec<i64>) -> WMI {
+        let offset = 1<<62;
+        let mut ys = vec![];
+        for x in xs {
+            ys.push((x+offset) as u64)
+        }
+        let wm = WM::new(ys);
+        WMI {
+            offset: offset,
+            wm: wm
+        }
+    }
+    pub fn rangefreq(&self, l: usize, r: usize, min: i64, max: i64) -> usize {
+        self.wm.rangefreq(l, r, (min+self.offset) as u64 , (max+self.offset) as u64)
+    }
+    pub fn quantile(&self, l: usize, r: usize, k: usize) -> i64 {
+        self.wm.quantile(l, r, k) as i64 - self.offset
+    }
+    pub fn rank(&self, x: i64, i: usize) -> usize {
+        self.wm.rank((x+self.offset) as u64, i)
+    }
+    pub fn select(&self, x: i64, k: usize) -> usize {
+        self.wm.select((x+self.offset) as u64, k)
+    }
 }
