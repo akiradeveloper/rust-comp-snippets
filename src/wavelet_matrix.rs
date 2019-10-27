@@ -333,7 +333,7 @@ impl WM {
             nzeros: nzeros,
         }
     }
-    #[doc = "counting x in v[0,i) O(64)"]
+    #[doc = "counting x in v[0,i) O(1)"]
     pub fn rank(&self, x: u64, i: usize) -> usize {
         let mut s = 0;
         let mut e = i;
@@ -348,6 +348,18 @@ impl WM {
             }
         }
         e-s
+    }
+    #[doc = "the position of k-th x (0-indexed). O(logn)"]
+    pub fn select(&self, x: u64, k: usize) -> usize {
+        let bs = BinarySearch {
+            lower: 0,
+            upper: (self.mat[0].n - 1) as i64,
+            p: |i: i64| {
+                let cnt = self.rank(x, i as usize);
+                cnt >= k+1
+            },
+        };
+        bs.lower_bound() as usize - 1
     }
     #[doc = "k-th largest number in [l,r)"]
     pub fn quantile(&self, l: usize, r: usize, k: usize) -> u64 {
@@ -405,7 +417,7 @@ impl WM {
 
         (cnt_lt, e-s, cnt_gt)
     }
-    #[doc = "counting numbers in range [min,max) in v[l,r)"]
+    #[doc = "counting numbers in range [min,max) in v[l,r). O(1)"]
     pub fn rangefreq(&self, l: usize, r: usize, min: u64, max: u64) -> usize {
         let (cntlt_max,_,_) = self.rank_all(l, r, max);
         let (cntlt_min,_,_) = self.rank_all(l, r, min);
@@ -421,6 +433,17 @@ fn test_wm_rank() {
     assert_eq!(wm.rank(7, 12), 2);
     assert_eq!(wm.rank(7, 13), 3);
     assert_eq!(wm.rank(7, 15), 3);
+}
+
+#[test]
+fn test_wm_select() {
+    let xs = vec![0,7,2,1,4,3,6,7,2,5,0,4,7,2,6,3];
+    let wm = WM::new(xs);
+    assert_eq!(wm.select(2, 0), 2);
+    assert_eq!(wm.select(2, 1), 8);
+    assert_eq!(wm.select(2, 2), 13);
+    assert_eq!(wm.select(0, 0), 0);
+    assert_eq!(wm.select(0, 1), 10);
 }
 
 #[test]
