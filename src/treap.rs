@@ -105,6 +105,19 @@ mod treap {
         let (t2, t3) = split(rest, 1);
         merge(t1, t3)
     }
+
+    pub fn bisect(t: &Option<Box<Node>>, v: i64) -> usize {
+        match *t {
+            None => 0,
+            Some(ref n) => {
+                if v <= n.v {
+                    bisect(&n.lch, v)
+                } else {
+                    count(&n.lch) + 1 + bisect(&n.rch, v)
+                }
+            }
+        }
+    }
 }
 
 use crate::xorshift::Xorshift;
@@ -124,20 +137,12 @@ impl Treap {
     }
     #[doc = "[l,r)"]
     pub fn lower_bound(&mut self, l: usize, r: usize, v: i64) -> usize {
-        let lower = l as i64;
-        let upper = r as i64;
-
-        let mut lb = lower - 1; 
-        let mut ub = upper;
-        while ub - lb > 1 {
-            let mid = (lb+ub)/2;
-            if self.get(mid as usize) >= v {
-                ub = mid;
-            } else {
-                lb = mid;
-            }
-        }
-        ub as usize
+        let t = self.t.take();
+        let (lt, t) = treap::split(t, l);
+        let (t, rt) = treap::split(t, r-l);
+        let idx = treap::count(&lt) + treap::bisect(&t, v);
+        self.t = treap::merge(lt, treap::merge(t, rt));
+        idx
     }
     pub fn orderd_insert(&mut self, v: i64) {
         if self.t.is_none() {
