@@ -2,14 +2,14 @@
 struct SuffixArray {
     // sのうち前からSA[i]個消したやつが辞書順i番目のsuffixである
     sa: Vec<usize>,
-    s: Vec<usize>
+    s: Vec<u64>
 }
 #[snippet = "SuffixArray"]
 impl SuffixArray {
     #[doc = "O(nlogn)"]
-    fn new(s: Vec<usize>) -> Self {
+    pub fn new(s: Vec<u64>) -> Self {
         let mut s = s;
-        s.push('$' as usize);
+        s.push('$' as u64);
         let mut sa = Self::sort_cyclic_shifts(&s);
         sa.remove(0);
         s.remove(s.len()-1);
@@ -18,22 +18,22 @@ impl SuffixArray {
             s: s
         }
     }
-    fn sort_cyclic_shifts(s: &[usize]) -> Vec<usize> {
+    fn sort_cyclic_shifts(s: &[u64]) -> Vec<usize> {
         let n = s.len();
         const alphabet: usize = 256;
         let mut p = vec![0;n];
         let mut c = vec![0;n];
-        let mut cnt = vec![0;std::cmp::max(alphabet,n)];
+        let mut cnt = vec![0; std::cmp::max(alphabet,n)];
 
         for i in 0..n {
-            cnt[s[i]] += 1;
+            cnt[s[i] as usize] += 1;
         }
         for i in 1..alphabet {
             cnt[i] += cnt[i-1];
         }
         for i in 0..n {
-            cnt[s[i]] -= 1;
-            p[cnt[s[i]]] = i;
+            cnt[s[i] as usize] -= 1;
+            p[cnt[s[i] as usize]] = i;
         }
         c[p[0]] = 0;
         let mut classes = 1;
@@ -88,7 +88,7 @@ impl SuffixArray {
     // 文字列比較をする。バイナリサーチのために必要
     // sの方が辞書順で前ならばtrue
     // O(m)
-    fn lt_substr(s: &[usize], t: &[usize], si: usize, ti: usize) -> bool {
+    fn lt_substr(s: &[u64], t: &[u64], si: usize, ti: usize) -> bool {
         let mut si = si;
         let mut ti = ti;
         let sn = s.len();
@@ -106,7 +106,7 @@ impl SuffixArray {
         si >= sn && ti < tn
     }
     #[doc = "find the rightmost match of the string t to s. O(mlogn) where n=|s|,m=|t|"]
-    pub fn lower_bound(&self, t: &[usize]) -> usize {
+    pub fn lower_bound(&self, t: &[u64]) -> usize {
         let mut low: i64 = -1;
         let mut high: i64 = self.sa.len() as i64; 
         while high - low > 1 {
@@ -121,10 +121,10 @@ impl SuffixArray {
     }
 }
 
-fn as_v(s: &str) -> Vec<usize> {
+fn as_v(s: &str) -> Vec<u64> {
     let mut v = vec![];
     for c in s.chars() {
-        v.push(c as usize);
+        v.push(c as u64);
     }
     v
 }
