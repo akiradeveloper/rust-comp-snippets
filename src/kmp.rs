@@ -1,12 +1,12 @@
 #[snippet = "KMP"]
 struct KMP {
-    pat: Vec<i64>,
+    pat: Vec<u64>,
     tbl: Vec<i64>
 }
 #[snippet = "KMP"]
 impl KMP {
     #[doc = "O(K)"]
-    fn new(pat: Vec<i64>) -> Self {
+    fn new(pat: Vec<u64>) -> Self {
         let n = pat.len();
         let mut tbl = vec![0; n+1];
         tbl[0] = -1;
@@ -30,7 +30,7 @@ impl KMP {
         }
     }
     #[doc = "O(N)"]
-    fn search(&self, s: &[i64]) -> Vec<usize> {
+    fn search(&self, s: &[u64]) -> Vec<usize> {
         let mut res = vec![];
         let mut head: i64 = 0;
         let mut j: i64 = 0;
@@ -53,12 +53,12 @@ fn test_kmp() {
     let w = "aba";
     let mut ss = vec![];
     for c in s.chars() {
-        let n = (c as i64) - 'a' as i64;
+        let n = (c as u64) - 'a' as u64;
         ss.push(n);
     }
     let mut ww = vec![];
     for c in w.chars() {
-        let n = (c as i64) - 'a' as i64;
+        let n = (c as u64) - 'a' as u64;
         ww.push(n);
     }
     let kmp = KMP::new(ww);
