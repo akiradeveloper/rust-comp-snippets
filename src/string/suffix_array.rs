@@ -1,18 +1,19 @@
-#[snippet = "SA"]
-struct SA {
+#[snippet = "SuffixArray"]
+struct SuffixArray {
     // sのうち前からSA[i]個消したやつが辞書順i番目のsuffixである
     sa: Vec<usize>,
     s: Vec<usize>
 }
-#[snippet = "SA"]
-impl SA {
+#[snippet = "SuffixArray"]
+impl SuffixArray {
+    #[doc = "O(nlogn)"]
     fn new(s: Vec<usize>) -> Self {
         let mut s = s;
         s.push('$' as usize);
         let mut sa = Self::sort_cyclic_shifts(&s);
         sa.remove(0);
         s.remove(s.len()-1);
-        SA {
+        SuffixArray {
             sa: sa,
             s: s
         }
@@ -86,6 +87,7 @@ impl SA {
     }
     // 文字列比較をする。バイナリサーチのために必要
     // sの方が辞書順で前ならばtrue
+    // O(m)
     fn lt_substr(s: &[usize], t: &[usize], si: usize, ti: usize) -> bool {
         let mut si = si;
         let mut ti = ti;
@@ -103,6 +105,7 @@ impl SA {
         }
         si >= sn && ti < tn
     }
+    #[doc = "find the rightmost match of the string t to s. O(mlogn) where n=|s|,m=|t|"]
     pub fn lower_bound(&self, t: &[usize]) -> usize {
         let mut low: i64 = -1;
         let mut high: i64 = self.sa.len() as i64; 
@@ -127,16 +130,16 @@ fn as_v(s: &str) -> Vec<usize> {
 }
 #[test]
 fn test_lt_substr() {
-    assert_eq!(SA::lt_substr(&as_v("abc"), &as_v("abd"), 0, 0), true);
-    assert_eq!(SA::lt_substr(&as_v("abd"), &as_v("abc"), 0, 0), false);
-    assert_eq!(SA::lt_substr(&as_v("abc"), &as_v("abcd"), 0, 0), true);
-    assert_eq!(SA::lt_substr(&as_v("abc"), &as_v("bcd"), 0, 0), true);
-    assert_eq!(SA::lt_substr(&as_v("abc"), &as_v("abc"), 0, 0), false);
+    assert_eq!(SuffixArray::lt_substr(&as_v("abc"), &as_v("abd"), 0, 0), true);
+    assert_eq!(SuffixArray::lt_substr(&as_v("abd"), &as_v("abc"), 0, 0), false);
+    assert_eq!(SuffixArray::lt_substr(&as_v("abc"), &as_v("abcd"), 0, 0), true);
+    assert_eq!(SuffixArray::lt_substr(&as_v("abc"), &as_v("bcd"), 0, 0), true);
+    assert_eq!(SuffixArray::lt_substr(&as_v("abc"), &as_v("abc"), 0, 0), false);
 }
 #[test]
-fn test_sa() {
-    let mut s = "abracadabra";
-    let mut sa = SA::new(as_v(s));
+fn test_suffix_array() {
+    let s = "abracadabra";
+    let sa = SuffixArray::new(as_v(s));
     assert_eq!(sa.sa, [10,7,0,3,5,8,1,4,6,9,2]);
 
     let x = sa.lower_bound(&as_v("rac"));
@@ -144,4 +147,10 @@ fn test_sa() {
 
     let x = sa.lower_bound(&as_v("bra"));
     assert_eq!(sa.sa[x], 8);
+
+    let x = sa.lower_bound(&as_v("abra"));
+    assert_eq!(sa.sa[x], 7);
+
+    let x = sa.lower_bound(&as_v("abr"));
+    assert_eq!(sa.sa[x], 7);
 }

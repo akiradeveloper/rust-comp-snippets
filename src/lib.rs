@@ -8,6 +8,7 @@
 extern crate rand;
 extern crate test;
 
+pub mod string;
 pub mod binary_heap;
 pub mod lower_bound;
 pub mod binary_search;
@@ -28,9 +29,6 @@ pub mod sequence;
 pub mod sequence01;
 pub mod sqrt_decomposition;
 pub mod number;
-pub mod rolling_hash;
-pub mod manacher;
-pub mod z_algorithm;
 pub mod cumsum;
 pub mod skiplist;
 pub mod xorshift;
@@ -42,8 +40,6 @@ pub mod counter;
 pub mod coord_compression;
 pub mod modint;
 pub mod permutation;
-pub mod kmp;
-pub mod suffix_array;
 pub mod bitop;
 pub mod combination;
 pub mod treap;
