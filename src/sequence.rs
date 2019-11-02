@@ -186,3 +186,41 @@ fn vec_min<T: Ord + Clone>(xs: &[T]) -> T {
     }
     v.clone()
 }
+
+#[snippet = "neighbour_table"]
+pub fn neighbour_table(xs: &[usize]) -> (Vec<Option<usize>>, Vec<Option<usize>>) {
+    let n = xs.len();
+    let mut m = 0;
+    for i in 0..n {
+        m = max(m, xs[i]);
+    }
+    m += 1;
+    let mut next = vec![None; m];
+    let mut cur = 0;
+    for i in 0..n {
+        let x = xs[i];
+        next[cur] = Some(x);
+        cur = x;
+    }
+    let mut prev = vec![None; m];
+    let mut cur = m-1;
+    for i in (0..n).rev() {
+        let x = xs[i];
+        prev[cur] = Some(x);
+        cur = x;
+    }
+
+    (prev, next)
+}
+#[test]
+fn test_neighbour_table() {
+    let xs = vec![1,5,3,6,9];
+    let (prev, next) = neighbour_table(&xs);
+    assert_eq!(prev[1], None);
+    assert_eq!(prev[5], Some(1));
+    assert_eq!(prev[3], Some(5));
+    assert_eq!(next[1], Some(5));
+    assert_eq!(next[5], Some(3));
+    assert_eq!(next[3], Some(6));
+    assert_eq!(next[9], None);
+}
