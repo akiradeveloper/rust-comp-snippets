@@ -46,3 +46,4 @@ pub mod treap;
 pub mod syakutori;
 pub mod macros;
 pub mod wavelet_matrix;
+pub mod num;

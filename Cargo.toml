@@ -5,5 +5,5 @@ authors = ["Akira Hayakawa <ruby.wktk@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-cargo-snippet = "0.2"
+cargo-snippet = { path = "../cargo-snippet" }
 rand = "0.4"

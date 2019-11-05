@@ -123,7 +123,7 @@ fn bin_digits(n: i64) -> Vec<bool> {
 }
 #[test]
 fn test_bin_digits() {
-    assert_eq!(bin_digits(0), []);
+    assert_eq!(bin_digits(0).len(), 0);
     assert_eq!(bin_digits(3), [true,true]);
     assert_eq!(bin_digits(7), [true,true,true]);
     assert_eq!(bin_digits(6), [false,true,true]);

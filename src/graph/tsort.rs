@@ -80,5 +80,5 @@ fn test_tsort_loop() {
     ];
     let mut tsort = TopologicalSort::new(&conns);
     tsort.tsort();
-    assert_eq!(tsort.out, []);
+    assert_eq!(tsort.out.len(), 0);
 }
