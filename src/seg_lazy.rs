@@ -144,7 +144,7 @@ impl SEGImpl for MIN_RUQ {
         std::i64::MAX
     }
     fn om0() -> Self::OperatorMonoid {
-        0
+        std::i64::MAX
     }
     fn f(x: Self::Monoid, y: Self::Monoid) -> Self::Monoid {
         std::cmp::min(x, y)
