@@ -6,11 +6,11 @@ struct HLDecomposition {
     g: Vec<Vec<usize>>,
     subcnt: Vec<usize>,
     depth: Vec<usize>,
-    par: Vec<Option<usize>>,
+    pub par: Vec<Option<usize>>,
     heavy_next: Vec<Option<usize>>,
     heavy_head: Vec<usize>,
     real_to_virt: Vec<usize>,
-    virt_to_real: Vec<usize>,
+    pub virt_to_real: Vec<usize>,
 }
 
 #[snippet = "HLDecomposition"]
@@ -129,6 +129,24 @@ impl HLDecomposition {
         }
     }
 
+    #[doc = "returns virtual heavy paths [l,n). O(N)"]
+    pub fn decompose(&self) -> Vec<(usize, usize)> {
+        let mut vhead = vec![self.n; self.n];
+        for i in 0..self.n {
+            vhead[i] = self.real_to_virt[self.heavy_head[i]];
+        }
+        let mut hs = std::collections::HashMap::new();
+        for x in vhead {
+            *hs.entry(x).or_insert(0) += 1;
+        }
+        let mut res = vec![];
+        for (k,v) in hs {
+            res.push((k,v));
+        }
+        res
+    }
+
+    #[doc = "returns a list of virtual ids. O(logN)"]
     pub fn vertex_decomposition(&self, u: usize, v: usize) -> Vec<(usize, usize)> {
         let mut res = vec![];
 
@@ -148,6 +166,7 @@ impl HLDecomposition {
         res
     }
 
+    #[doc = "returns a list of virtual edges. An edge is represented by the child. O(logN)"]
     pub fn edge_decomposition(&self, u: usize, v: usize) -> Vec<(usize, usize)> {
         let mut res = vec![];
 
@@ -171,6 +190,10 @@ impl HLDecomposition {
         }
 
         res
+    }
+
+    pub fn distance(&self, u: usize, v: usize) -> usize {
+        self.depth[u] + self.depth[v] - 2 * self.depth[self.lca(u,v)]
     }
 }
 
@@ -198,6 +221,7 @@ fn test_hl_decomposition() {
         assert_eq!(hl.lca(v,u), lca);
     }
 
+    dbg!(hl.decompose());
     dbg!(hl.vertex_decomposition(8, 6));
     dbg!(hl.edge_decomposition(8, 6));
 }
