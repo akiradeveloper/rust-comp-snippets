@@ -28,12 +28,12 @@ fn test_partition_dp() {
 
 // Knuth's algorithm
 #[snippet = "nCk"]
-#[doc = "referential impl. only for small numbers. O(b)"]
-fn nCk(a: i64, b: i64) -> i64 {
-    if a < b { return 0; }
-    let mut a = a;
-    let mut r = 1;
-    for d in 1..b+1 { // O(b)
+#[doc = "O(b)"]
+fn nCk(a: i64, b: i64) -> Mod {
+    if a < b { return 0.into(); }
+    let mut a: Mod = a.into();
+    let mut r: Mod = 1.into();
+    for d in 1..(b+1) { // O(b)
         r *= a;
         a -= 1;
         r /= d;
@@ -42,11 +42,11 @@ fn nCk(a: i64, b: i64) -> i64 {
 }
 #[test]
 fn test_knuth_nCk() {
-    assert_eq!(nCk(1,2), 0);
-    assert_eq!(nCk(5,0), 1);
-    assert_eq!(nCk(5,1), 5);
-    assert_eq!(nCk(5,2), 10);
-    assert_eq!(nCk(5,5), 1);
+    assert_eq!(nCk(1,2), 0.into());
+    assert_eq!(nCk(5,0), 1.into());
+    assert_eq!(nCk(5,1), 5.into());
+    assert_eq!(nCk(5,2), 10.into());
+    assert_eq!(nCk(5,5), 1.into());
 }
 
 #[snippet = "comb_table"]
@@ -73,18 +73,19 @@ fn test_comb_table() {
     assert_eq!(nCk[5][5], 1);
 }
 
-#[doc = "referential impl. O(n)"]
-fn catalan(n: i64) -> i64 {
+#[doc = "O(n)"]
+fn catalan(n: i64) -> Mod {
     nCk(2*n,n) / (n+1)
 }
 #[test]
 fn test_catalan() {
-    assert_eq!(catalan(1), 1);
-    assert_eq!(catalan(2), 2);
-    assert_eq!(catalan(3), 5);
+    assert_eq!(catalan(1), 1.into());
+    assert_eq!(catalan(2), 2.into());
+    assert_eq!(catalan(3), 5.into());
 }
 
 use crate::modint::Mod;
+
 #[doc = "O(N)"]
 fn catalan_table(n_max: usize) -> Vec<Mod> {
     let mut tbl: Vec<Mod> = vec![0.into(); n_max+1];
