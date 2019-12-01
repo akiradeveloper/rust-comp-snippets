@@ -116,6 +116,46 @@ fn test_run_length_compression() {
     assert_eq!(run_length_compression(&vec![2,3,3,3,2,2]), vec![(2,1),(3,3),(2,2)]);
 }
 
+#[snippet = "group_by_relevance"]
+pub fn group_by_relevance<T, F: Fn(&T,&T) -> bool>(xs: Vec<T>, f: F) -> Vec<Vec<T>> {
+    let mut res = vec![];
+
+    if xs.len() == 1 {
+        res.push(xs);
+        return res
+    }
+
+    let mut xs = xs;
+    let n = xs.len();
+    let mut l = 0;
+    let mut sep = vec![];
+    for i in 0..n-1 {
+        if !f(&xs[i], &xs[i+1]) {
+            sep.push(i+1-l);
+            l = i+1;
+        }
+    }
+    sep.push(n-l);
+
+    xs.reverse();
+    sep.reverse();
+
+    for len in sep {
+        let mut cur = vec![];
+        for _ in 0..len {
+            cur.push(xs.pop().unwrap());
+        }
+        res.push(cur);
+    }
+
+    res
+}
+#[test]
+fn test_group_by_relevance() {
+    assert_eq!(group_by_relevance(vec![1,2,3,1,2,3], |&a,&b| { a<b }), vec![vec![1,2,3],vec![1,2,3]]);
+    assert_eq!(group_by_relevance(vec![3,2,1,3,2,1], |&a,&b| { a<b }), vec![vec![3],vec![2],vec![1,3],vec![2],vec![1]]);
+}
+
 #[snippet = "group_fold"]
 #[doc = "fold elems in to groups by f"]
 pub fn group_fold<T, F: Fn(&T) -> G, G: Eq+Clone>(xs: Vec<T>, f: F) -> Vec<Vec<T>> {

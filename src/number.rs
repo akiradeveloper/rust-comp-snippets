@@ -1,4 +1,37 @@
 /// https://github.com/hatoo/competitive-rust-snippets
+ 
+#[snippet = "ceil"]
+fn ceil(x: i64, a: i64) -> i64 {
+    let y = x/a;
+    if x%a == 0 {
+        a*y
+    } else {
+        a*(y+1)
+    }
+}
+#[snippet = "floor"]
+fn floor(x: i64, a: i64) -> i64 {
+    let y = x/a;
+    a*y
+}
+
+#[snippet = "into_digits"]
+fn into_digits(b: i64, n: i64) -> Vec<i64> {
+    let mut r = vec![];
+    let mut n = n;
+    while n>0 {
+        let v = n % b;
+        r.push(v);
+        n -= v;
+        n /= b;
+    }
+    r
+}
+#[test]
+fn test_into_digits() {
+    assert_eq!(into_digits(2, 6), [0,1,1]);
+    assert_eq!(into_digits(10, 21), [1,2]);
+}
 
 #[snippet = "gcd"]
 #[allow(dead_code)]
