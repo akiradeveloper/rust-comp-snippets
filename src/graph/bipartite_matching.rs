@@ -1,5 +1,53 @@
 use std::collections::HashSet;
 
+#[snippet = "is_bigraph"]
+pub fn is_bigraph(g: &[Vec<usize>]) -> Option<Vec<bool>> {
+    struct Rec<'a> {
+        g: &'a [Vec<usize>],
+        color: Vec<i8>,
+    }
+    impl <'a> Rec<'a> {
+        fn solve(&mut self, u: usize, color: i8) -> bool {
+            self.color[u] = color;
+
+            let mut ok = true;
+            for i in 0..self.g[u].len() {
+                let v = self.g[u][i];
+                if self.color[v] == 0 {
+                    if !self.solve(v, -1*color) {
+                        ok = false
+                    }
+                } else {
+                    if self.color[v] == color {
+                        ok = false
+                    }
+                }
+            }
+            ok
+        }
+    }
+
+    let n = g.len();
+    let mut rec = Rec {
+        g: g,
+        color: vec![0;n],
+    };
+    let ok = rec.solve(0, 1);
+    if !ok {
+        return None
+    }
+    let mut res = vec![];
+    for i in 0..n {
+        if rec.color[i] == 1 {
+            res.push(true)
+        } else {
+            res.push(false)
+        }
+    }
+    Some(res)
+}
+
+
 #[snippet = "bipartite_matching"]
 #[doc = "O(V(V+E))"]
 fn bipartite_matching(g_list: &[HashSet<usize>]) -> Vec<(usize,usize)> {
