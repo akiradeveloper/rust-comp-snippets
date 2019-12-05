@@ -91,3 +91,51 @@ fn test_lexical_permutation() {
         }
     }
 }
+
+#[snippet = "cyclic_permutation"]
+#[doc = "allows both 0/1-indexd. O(nlogn)"]
+pub fn cyclic_permutation(a: &[usize], b: &[usize]) -> Vec<Vec<usize>> {
+    let mut ab = vec![];
+    let mut next = std::collections::HashMap::new();
+    let n = a.len();
+    for i in 0..n {
+        next.insert(a[i], b[i]);
+        ab.push((a[i], b[i]));
+    }
+    ab.sort();
+    ab.reverse();
+
+    let mut res = vec![];
+
+    let mut visited = vec![false; n+1];
+    loop {
+        if ab.is_empty() {
+            break
+        }
+        let (head, _) = ab.pop().unwrap();
+        if visited[head] {
+            continue
+        }
+        let mut chain = vec![];
+        let mut a = head;
+        loop {
+            chain.push(a);
+            visited[a] = true;
+            let b = next.get(&a).cloned().unwrap();
+            if b == head {
+                break
+            }
+            a = b;
+        }
+        res.push(chain)
+    }
+
+    res
+}
+
+#[test]
+fn test_cyclic_permutation() {
+    assert_eq!(cyclic_permutation(&[0,1,2,3,4], &[2,0,3,1,4]), vec![vec![0,2,3,1], vec![4]]);
+    assert_eq!(cyclic_permutation(&[0,1,2,3,4], &[2,0,1,4,3]), vec![vec![0,2,1], vec![3,4]]);
+    assert_eq!(cyclic_permutation(&[1,2,3,4,5], &[3,1,2,5,4]), vec![vec![1,3,2], vec![4,5]]);
+}
