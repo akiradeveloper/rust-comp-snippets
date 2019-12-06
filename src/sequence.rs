@@ -138,7 +138,6 @@ pub fn group_by_relevance<T, F: Fn(&T,&T) -> bool>(xs: Vec<T>, f: F) -> Vec<Vec<
     sep.push(n-l);
 
     xs.reverse();
-    sep.reverse();
 
     for len in sep {
         let mut cur = vec![];
@@ -154,6 +153,7 @@ pub fn group_by_relevance<T, F: Fn(&T,&T) -> bool>(xs: Vec<T>, f: F) -> Vec<Vec<
 fn test_group_by_relevance() {
     assert_eq!(group_by_relevance(vec![1,2,3,1,2,3], |&a,&b| { a<b }), vec![vec![1,2,3],vec![1,2,3]]);
     assert_eq!(group_by_relevance(vec![3,2,1,3,2,1], |&a,&b| { a<b }), vec![vec![3],vec![2],vec![1,3],vec![2],vec![1]]);
+    assert_eq!(group_by_relevance(vec![1,1,2,2,3,3], |&x,&y| { x == y }), vec![vec![1,1],vec![2,2],vec![3,3]]);
 }
 
 #[snippet = "group_fold"]
