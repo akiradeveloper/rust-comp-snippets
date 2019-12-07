@@ -1,3 +1,4 @@
+#[snippet = "LCA"]
 struct LCA <'a> {
     root: usize,
     tree: &'a [Vec<usize>],
@@ -15,9 +16,9 @@ impl <'a> LCA<'a> {
             log_n = 1;
         }
         assert!(log_n > 0);
-        Self {
-            root,
-            tree,
+        LCA {
+            root: root,
+            tree: tree,
             parent: vec![vec![None; n]; log_n],
             depth: vec![0; n],
         }
