@@ -116,10 +116,10 @@ impl SEGImpl for MAX_RUQ {
         std::cmp::max(x, y)
     }
     fn g(x: Self::Monoid, y: Self::OperatorMonoid, len: usize) -> Self::Monoid {
-        y
+        std::cmp::max(x, y)
     }
     fn h(x: Self::OperatorMonoid, y: Self::OperatorMonoid) -> Self::OperatorMonoid {
-        y
+        std::cmp::max(x, y)
     }
 }
 #[test]
@@ -150,10 +150,10 @@ impl SEGImpl for MIN_RUQ {
         std::cmp::min(x, y)
     }
     fn g(x: Self::Monoid, y: Self::OperatorMonoid, len: usize) -> Self::Monoid {
-        y
+        std::cmp::min(x, y)
     }
     fn h(x: Self::OperatorMonoid, y: Self::OperatorMonoid) -> Self::OperatorMonoid {
-        y
+        std::cmp::min(x, y)
     }
 }
 #[test]

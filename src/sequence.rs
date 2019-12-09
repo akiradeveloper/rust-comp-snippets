@@ -264,3 +264,44 @@ fn test_neighbour_table() {
     assert_eq!(next[3], Some(6));
     assert_eq!(next[9], None);
 }
+
+#[snippet = "split_sequence"]
+#[derive(Debug)]
+pub enum SplitComp<T> {
+    Seq(Vec<T>),
+    Splitter(T),
+}
+#[snippet = "split_sequence"]
+pub fn split_sequence<T, F: Fn(&T) -> bool>(xs: Vec<T>, splitter: F) -> Vec<SplitComp<T>> {
+    let mut res = vec![];
+    let mut xs = xs;
+    xs.reverse();
+    let mut cur = vec![];
+    while !xs.is_empty() {
+        let x = xs.pop().unwrap();
+        let b = splitter(&x);
+        if b {
+            if cur.len() > 0 {
+                res.push(SplitComp::Seq(cur));
+            }
+            res.push(SplitComp::Splitter(x));
+            cur = vec![];
+        } else {
+            cur.push(x);
+        }
+    }
+    if cur.len() > 0 {
+        res.push(SplitComp::Seq(cur));
+    }
+    res
+}
+
+#[test]
+fn test_split_sequence() {
+    let mut t1 = vec![1,2,3,4];
+    dbg!(split_sequence(t1, |&x| { x == 2 }));
+    let mut t2 = vec![1,2,3,4];
+    dbg!(split_sequence(t2, |&x| { x == 1 }));
+    let mut t3 = vec![1,3,2,4,1];
+    dbg!(split_sequence(t3, |&x| { x >= 3 }));
+}
