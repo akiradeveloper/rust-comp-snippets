@@ -34,7 +34,7 @@ mod skiplist {
         connect_stat: Cell<usize>,
     }
     impl Skiplist<usize> {
-        fn print_graph(&self) {
+        pub fn print_graph(&self) {
             for level in (0..self.height()).rev() {
                 let mut line=vec![];
                 let mut cur = self.left_sentinel.clone();
@@ -251,6 +251,36 @@ mod skiplist {
                 b: self.right_sentinel.clone(),
             }
         }
+        pub fn is_empty(&self) -> bool {
+            let mut it = self.iter();
+            let mut l = 0;
+            for _ in it {
+                l += 1;
+            }
+            l == 0
+        }
+        #[doc = "O(n)"]
+        pub fn pop(&mut self) -> Option<T> {
+            if self.is_empty() {
+                None
+            } else {
+                let mut it = self.iter();
+                let x = it.next().unwrap();
+                self.remove(&x);
+                Some(x)
+            }
+        }
+        #[doc = "O(n)"]
+        pub fn pop_back(&mut self) -> Option<T> {
+            if self.is_empty() {
+                None
+            } else {
+                let mut it = self.iter().rev();
+                let x = it.next().unwrap();
+                self.remove(&x);
+                Some(x)
+            }
+        }
     }
     pub struct Range<T> {
         forward: bool,
@@ -440,6 +470,22 @@ fn test_skiplist_debug2() {
     s.remove(&9);
     assert_eq!(s.find(&9),false);
     assert_eq!(s.find(&0),true);
+}
+#[test]
+fn test_skiplist_pop() {
+    let mut s = Skiplist::new();
+    for _ in 0..1000 {
+        assert!(s.is_empty());
+        s.insert(2);
+        s.insert(1);
+        s.insert(3);
+        assert!(!s.is_empty());
+        assert_eq!(s.pop(), Some(1));
+        assert!(!s.is_empty());
+        assert_eq!(s.pop_back(), Some(3));
+        assert!(!s.is_empty());
+        assert_eq!(s.pop_back(), Some(2));
+    }
 }
 #[test]
 fn test_skiplist_compare_ref_insert_and_find() {
