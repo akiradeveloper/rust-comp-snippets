@@ -353,297 +353,7 @@ mod skiplist {
             x_next.borrow_mut().prev[level] = Some(y.clone());
         }
     }
-    #[test]
-    fn test_iter() {
-        let mut sl = Skiplist::new();
-        for i in 1..6 {
-            sl.insert(i);
-        }
-        for x in sl.iter() {
-            println!("{}",x);
-        }
-        // for x in sl.iter().rev() {
-        //     println!("{}",x);
-        // }
-        for x in sl.ge_iter(&2) {
-            println!("{}",x);
-        }
-        // for x in sl.ge_iter(&2).rev() {
-        //     println!("{}",x);
-        // }
-        for x in sl.le_iter(&2) {
-            println!("{}",x);
-        }
-        // for x in sl.le_iter(&2).rev() {
-        //     println!("{}",x);
-        // }
-    }
-    #[test]
-    fn test_pick_height() {
-        let mut sl = Skiplist::<i64>::new();
-        let mut cnt = vec![0;60];
-        for _ in 0..1_000 {
-            cnt[sl.pick_height()] += 1;
-        }
-        println!("{:?}",cnt);
-    }
-    #[test]
-    fn test_insert() {
-        let mut s = Skiplist::new();
-        assert_eq!(s.find(&10), false);
-        s.insert(10);
-        assert_eq!(s.find(&8), false);
-        assert_eq!(s.find(&10), true);
-    }
-    #[test]
-    fn test_debug0() {
-        let mut s = Skiplist::new();
-        let mut data = vec![920,265,659];
-        for x in data {
-            s.insert(x);
-            assert!(s.find(&x));
-        }
-        s.insert(660);
-        dbg!(&s);
-        assert!(s.find(&660));
-    }
-    #[test]
-    fn test_debug1() {
-        let mut s = Skiplist::new();
-        s.insert(0);
-        assert!(s.find(&0));
-        s.insert(5);
-        assert!(s.find(&5));
-    }
-    #[test]
-    fn test_debug2() {
-        let mut s = Skiplist::new();
-        s.insert(0);
-        s.insert(5);
-        s.print_graph();
-        s.insert(9);
-        s.print_graph();
-        assert_eq!(s.find(&5),true);
-        s.remove(&4);
-        assert_eq!(s.find(&5),true);
-        s.remove(&5);
-        s.print_graph();
-        assert_eq!(s.find(&5),false);
-        s.remove(&9);
-        s.print_graph();
-        assert_eq!(s.find(&9),false);
-        assert_eq!(s.find(&0),true);
-    }
-    #[test]
-    fn test_compare_reference_insert_and_find() {
-        use rand::{Rng, SeedableRng, StdRng};
-        let mut rng = StdRng::from_seed(&[3, 2, 1]); 
-        let mut ts = BTreeSet::new();
-        let mut sl = Skiplist::new();
-
-        let size = 10000;
-        let mut data1 = vec![];
-        for _ in 0..size {
-            let x = rng.next_u64()%size;
-            data1.push(x as usize);
-        }
-        let mut data2 = vec![];
-        for _ in 0..size {
-            let x = rng.next_u64()%size;
-            data2.push(x as usize);
-        }
-        let mut data3 = vec![];
-        for _ in 0..size {
-            let x = rng.next_u64()%size;
-            data3.push(x as usize);
-        }
-        println!("insert and find phase");
-        for x in data1 {
-            // dbg!(x);
-            ts.insert(x);
-            sl.insert(x);
-            assert_eq!(sl.find(&x), ts.contains(&x));
-            // sl.print_graph();
-        }
-        sl.print_graph();
-        println!("find phase");
-        for x in data2 {
-            assert_eq!(sl.find(&x), ts.contains(&x));
-        }
-        println!("remove phase");
-        for x in data3 {
-            assert_eq!(sl.remove(&x), ts.remove(&x));
-            assert_eq!(sl.find(&x), ts.contains(&x));
-        }
-    }
-    #[test]
-    fn test_skiplist_stat() {
-        use rand::{Rng, SeedableRng, StdRng};
-        let size = 1000;
-        let mut rng = StdRng::from_seed(&[3, 2, 1]);
-        let mut s = Skiplist::new();
-        println!("insert");
-        for _ in 0..size {
-            s.insert(rng.next_u64());
-        }
-        s.show_stat();
-        s.reset_stat();
-        println!("connect");
-        for _ in 0..size {
-            s.find(&rng.next_u64());
-        }
-        s.show_stat();
-    }
-    #[bench]
-    fn bench_skiplist_insert_random(b: &mut test::Bencher) {
-        use rand::{Rng, SeedableRng, StdRng};
-        let size = 10000;
-        let mut s = Skiplist::new();
-        let mut rng = StdRng::from_seed(&[3, 2, 1]);
-        b.iter(||
-            for _ in 0..size {
-                s.insert(rng.next_u64());
-            }
-        );
-    }
-    #[bench]
-    fn bench_skiplist_find_random(b: &mut test::Bencher) {
-        use rand::{Rng, SeedableRng, StdRng};
-        let size = 10000;
-        let mut s = Skiplist::new();
-        let mut rng = StdRng::from_seed(&[3, 2, 1]);
-        for _ in 0..size {
-            s.insert(rng.next_u64());
-        }
-        b.iter(||
-            for _ in 0..size {
-                s.find(&rng.next_u64());
-            }
-        );
-    }
-    #[bench]
-    fn bench_skiplist_insert_forward(b: &mut test::Bencher) {
-        let mut s = Skiplist::new();
-        let size = 10000;
-        let mut data = vec![];
-        for i in 0..size {
-            data.push(i);
-        }
-        b.iter(||
-            for &x in &data {
-                s.insert(x);
-            }
-        );
-    }
-    #[bench]
-    fn bench_skiplist_insert_reverse(b: &mut test::Bencher) {
-        let mut s = Skiplist::new();
-        let size = 10000;
-        let mut data = vec![];
-        for i in 0..size {
-            data.push(i);
-        }
-        data.reverse();
-        b.iter(||
-            for &x in &data {
-                s.insert(x);
-            }
-        );
-    }
-    #[bench]
-    fn bench_skiplist_connect_simple(b: &mut test::Bencher) {
-        let left=Rc::new(RefCell::new(SkipNode::new(0,2)));
-        let right=Rc::new(RefCell::new(SkipNode::new(10000000,2)));
-        for l in 0..2 {
-            left.borrow_mut().next[l]=Some(right.clone());
-            right.borrow_mut().prev[l]=Some(left.clone());
-        }
-        let mut data = vec![];
-        for i in 0..10000 {
-            let n=Rc::new(RefCell::new(SkipNode::new(i+1,2)));
-            data.push(n)
-        }
-        b.iter(||
-            for n in &data {
-                for l in 0..2 {
-                    SkipNode::connect(&left, n, l);
-                }
-            }
-        )
-    }
-    #[bench]
-    fn bench_skiplist_connect_random(b: &mut test::Bencher) {
-        use rand::{Rng, SeedableRng, StdRng};
-        let mut rng = StdRng::from_seed(&[3, 2, 1]);
-
-        let left=Rc::new(RefCell::new(SkipNode::new(0,2)));
-        let right=Rc::new(RefCell::new(SkipNode::new(10000000,2)));
-        for l in 0..2 {
-            left.borrow_mut().next[l]=Some(right.clone());
-            right.borrow_mut().prev[l]=Some(left.clone());
-        }
-        let mut prev_cands = vec![left.clone()];
-        let mut data = vec![];
-        for i in 0..10000 {
-            let n=Rc::new(RefCell::new(SkipNode::new(i+1,2)));
-            let i=rng.next_u64() as usize % prev_cands.len();
-            let prev = prev_cands[i].clone();
-            data.push((prev,n.clone()));
-            prev_cands.push(n.clone());
-        }
-        b.iter(||
-            for (prev,n) in &data {
-                for l in 0..2 {
-                    SkipNode::connect(&prev, &n, l);
-                }
-            }
-        )
-    }
-    #[bench]
-    fn bench_skiplist_alloc_new_node(b: &mut test::Bencher) {
-        b.iter(||
-            for _ in 0..10000 {
-                Rc::new(RefCell::new(SkipNode::new(0,2)));
-            }
-        )
-    }
-    #[bench]
-    fn bench_skiplist_pick_height(b: &mut test::Bencher) {
-        let mut sl=Skiplist::<i64>::new();
-        b.iter(||
-            for _ in 0..10000 {
-                sl.pick_height();
-            }
-        )
-    }
-    #[bench]
-    fn bench_btree_insert_random(b: &mut test::Bencher) {
-        use rand::{Rng, SeedableRng, StdRng};
-        let size = 10000;
-        let mut s = BTreeSet::new();
-        let mut rng = StdRng::from_seed(&[3, 2, 1]);
-        b.iter(||
-            for _ in 0..size {
-                s.insert(rng.next_u64());
-            }
-        );
-    }
-    #[bench]
-    fn bench_btree_find_random(b: &mut test::Bencher) {
-        use rand::{Rng, SeedableRng, StdRng};
-        let size = 10000;
-        let mut s = BTreeSet::new();
-        let mut rng = StdRng::from_seed(&[3, 2, 1]);
-        for _ in 0..size {
-            s.insert(rng.next_u64());
-        }
-        b.iter(||
-            for _ in 0..size {
-                s.contains(&rng.next_u64());
-            }
-        );
-    }
-
+ 
 
     use std::collections::HashMap;
     pub struct Multiset<T> {
@@ -683,19 +393,189 @@ mod skiplist {
             &self.sl
         }
     }
-    #[test]
-    fn test_multiset() {
-        let mut s = Multiset::new();
-        assert_eq!(s.counting(&1),0);
-        s.insert(1);
-        assert_eq!(s.counting(&1),1);
-        s.insert(1);
-        assert_eq!(s.counting(&1),2);
-        assert!(s.remove(&1));
-        assert_eq!(s.unwrap().ge_iter(&1).next().unwrap(),1);
-        assert_eq!(s.counting(&1),1);
-        assert!(s.remove(&1));
-        assert_eq!(s.counting(&1),0);
-        assert_eq!(s.unwrap().ge_iter(&1).next(),None);
+}
+
+use skiplist::*;
+use std::collections::BTreeSet;
+
+#[test]
+fn test_skiplist_insert() {
+    let mut s = Skiplist::new();
+    assert_eq!(s.find(&10), false);
+    s.insert(10);
+    assert_eq!(s.find(&8), false);
+    assert_eq!(s.find(&10), true);
+}
+#[test]
+fn test_skiplist_debug0() {
+    let mut s = Skiplist::new();
+    let mut data = vec![920,265,659];
+    for x in data {
+        s.insert(x);
+        assert!(s.find(&x));
     }
+    s.insert(660);
+    dbg!(&s);
+    assert!(s.find(&660));
+}
+#[test]
+fn test_skiplist_debug1() {
+    let mut s = Skiplist::new();
+    s.insert(0);
+    assert!(s.find(&0));
+    s.insert(5);
+    assert!(s.find(&5));
+}
+#[test]
+fn test_skiplist_debug2() {
+    let mut s = Skiplist::new();
+    s.insert(0);
+    s.insert(5);
+    s.insert(9);
+    assert_eq!(s.find(&5),true);
+    s.remove(&4);
+    assert_eq!(s.find(&5),true);
+    s.remove(&5);
+    assert_eq!(s.find(&5),false);
+    s.remove(&9);
+    assert_eq!(s.find(&9),false);
+    assert_eq!(s.find(&0),true);
+}
+#[test]
+fn test_skiplist_compare_ref_insert_and_find() {
+    use rand::{Rng, SeedableRng, StdRng};
+    let mut rng = StdRng::from_seed(&[3, 2, 1]); 
+    let mut ts = BTreeSet::new();
+    let mut sl = Skiplist::new();
+
+    let size = 10000;
+    let mut data1 = vec![];
+    for _ in 0..size {
+        let x = rng.next_u64()%size;
+        data1.push(x as usize);
+    }
+    let mut data2 = vec![];
+    for _ in 0..size {
+        let x = rng.next_u64()%size;
+        data2.push(x as usize);
+    }
+    let mut data3 = vec![];
+    for _ in 0..size {
+        let x = rng.next_u64()%size;
+        data3.push(x as usize);
+    }
+    println!("insert and find phase");
+    for x in data1 {
+        ts.insert(x);
+        sl.insert(x);
+        assert_eq!(sl.find(&x), ts.contains(&x));
+    }
+    println!("find phase");
+    for x in data2 {
+        assert_eq!(sl.find(&x), ts.contains(&x));
+    }
+    println!("remove phase");
+    for x in data3 {
+        assert_eq!(sl.remove(&x), ts.remove(&x));
+        assert_eq!(sl.find(&x), ts.contains(&x));
+    }
+}
+#[bench]
+fn bench_skiplist_insert_random(b: &mut test::Bencher) {
+    use rand::{Rng, SeedableRng, StdRng};
+    let size = 10000;
+    let mut s = Skiplist::new();
+    let mut rng = StdRng::from_seed(&[3, 2, 1]);
+    b.iter(||
+        for _ in 0..size {
+            s.insert(rng.next_u64());
+        }
+    );
+}
+#[bench]
+fn bench_skiplist_find_random(b: &mut test::Bencher) {
+    use rand::{Rng, SeedableRng, StdRng};
+    let size = 10000;
+    let mut s = Skiplist::new();
+    let mut rng = StdRng::from_seed(&[3, 2, 1]);
+    for _ in 0..size {
+        s.insert(rng.next_u64());
+    }
+    b.iter(||
+        for _ in 0..size {
+            s.find(&rng.next_u64());
+        }
+    );
+}
+#[bench]
+fn bench_skiplist_insert_forward(b: &mut test::Bencher) {
+    let mut s = Skiplist::new();
+    let size = 10000;
+    let mut data = vec![];
+    for i in 0..size {
+        data.push(i);
+    }
+    b.iter(||
+        for &x in &data {
+            s.insert(x);
+        }
+    );
+}
+#[bench]
+fn bench_skiplist_insert_reverse(b: &mut test::Bencher) {
+    let mut s = Skiplist::new();
+    let size = 10000;
+    let mut data = vec![];
+    for i in 0..size {
+        data.push(i);
+    }
+    data.reverse();
+    b.iter(||
+        for &x in &data {
+            s.insert(x);
+        }
+    );
+}
+#[bench]
+fn bench_btree_insert_random(b: &mut test::Bencher) {
+    use rand::{Rng, SeedableRng, StdRng};
+    let size = 10000;
+    let mut s = BTreeSet::new();
+    let mut rng = StdRng::from_seed(&[3, 2, 1]);
+    b.iter(||
+        for _ in 0..size {
+            s.insert(rng.next_u64());
+        }
+    );
+}
+#[bench]
+fn bench_btree_find_random(b: &mut test::Bencher) {
+    use rand::{Rng, SeedableRng, StdRng};
+    let size = 10000;
+    let mut s = BTreeSet::new();
+    let mut rng = StdRng::from_seed(&[3, 2, 1]);
+    for _ in 0..size {
+        s.insert(rng.next_u64());
+    }
+    b.iter(||
+        for _ in 0..size {
+            s.contains(&rng.next_u64());
+        }
+    );
+}
+
+#[test]
+fn test_multiset() {
+    let mut s = Multiset::new();
+    assert_eq!(s.counting(&1),0);
+    s.insert(1);
+    assert_eq!(s.counting(&1),1);
+    s.insert(1);
+    assert_eq!(s.counting(&1),2);
+    assert!(s.remove(&1));
+    assert_eq!(s.unwrap().ge_iter(&1).next().unwrap(),1);
+    assert_eq!(s.counting(&1),1);
+    assert!(s.remove(&1));
+    assert_eq!(s.counting(&1),0);
+    assert_eq!(s.unwrap().ge_iter(&1).next(),None);
 }

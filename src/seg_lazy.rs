@@ -116,10 +116,10 @@ impl SEGImpl for MAX_RUQ {
         std::cmp::max(x, y)
     }
     fn g(x: Self::Monoid, y: Self::OperatorMonoid, len: usize) -> Self::Monoid {
-        std::cmp::max(x, y)
+        y
     }
     fn h(x: Self::OperatorMonoid, y: Self::OperatorMonoid) -> Self::OperatorMonoid {
-        std::cmp::max(x, y)
+        y
     }
 }
 #[test]
@@ -132,6 +132,8 @@ fn test_MAX_RUQ() {
     seg.update(1, 5, 20);
     assert_eq!(seg.query(0, 3), 20);
     assert_eq!(seg.query(0, 1), 10);
+    seg.update(0, 1, 5);
+    assert_eq!(seg.query(0, 1), 5);
 }
 
 #[snippet = "SEG_LAZY_MIN_RUQ"]
@@ -150,10 +152,10 @@ impl SEGImpl for MIN_RUQ {
         std::cmp::min(x, y)
     }
     fn g(x: Self::Monoid, y: Self::OperatorMonoid, len: usize) -> Self::Monoid {
-        std::cmp::min(x, y)
+        y
     }
     fn h(x: Self::OperatorMonoid, y: Self::OperatorMonoid) -> Self::OperatorMonoid {
-        std::cmp::min(x, y)
+        y
     }
 }
 #[test]
