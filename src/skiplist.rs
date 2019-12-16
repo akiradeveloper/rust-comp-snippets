@@ -488,6 +488,16 @@ fn test_skiplist_pop() {
     }
 }
 #[test]
+fn test_skiplist_pair() {
+    let mut s = Skiplist::new();
+    s.insert((10,true));
+    s.insert((10,false));
+    s.insert((11,false));
+    assert_eq!(s.pop(), Some((10,false)));
+    assert_eq!(s.pop(), Some((10,true)));
+    assert_eq!(s.pop(), Some((11,false)));
+}
+#[test]
 fn test_skiplist_compare_ref_insert_and_find() {
     use rand::{Rng, SeedableRng, StdRng};
     let mut rng = StdRng::from_seed(&[3, 2, 1]); 
