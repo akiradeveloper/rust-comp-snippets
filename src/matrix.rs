@@ -18,7 +18,21 @@ impl Matrix {
     fn n(&self) -> usize {
         self.v[0].len()
     }
-    fn pow(&self, k: u64, m: i64) -> Self {
+    fn mul_rem(&self, other: &Self, mo: i64) -> Self {
+        let mut r = vec![vec![0; other.n()]; self.m()];
+        for i in 0..self.m() {
+            for j in 0..self.n() {
+                let mut v = 0;
+                for k in 0..self.n() {
+                    v += (self.v[i][k] * other.v[k][j]) % mo;
+                    v %= mo;
+                }
+                r[i][j] = v;
+            }
+        }
+        Matrix { v: r }
+    }
+    fn pow(&self, k: u64, mo: i64) -> Self {
         assert!(self.m() == self.n());
         let mut k = k;
         let mut x = Self::identity(self.m());
@@ -26,10 +40,10 @@ impl Matrix {
         while k > 0 {
             if k & 1 > 0 {
                 x = y.clone() * x;
-                x %= m;
+                x %= mo;
             }
-            y = y.clone() * y.clone();
-            y %= m;
+            y = y.mul_rem(&y, mo);
+            y %= mo;
             k >>= 1;
         }
         x
