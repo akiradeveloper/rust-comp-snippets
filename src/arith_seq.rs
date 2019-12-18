@@ -28,7 +28,9 @@ impl ArithSeq {
     }
     #[doc = "[a+bi, a+bj] <= [l, r]"]
     pub fn range(&self, l: i64, u: i64) -> Option<(i64, i64)> {
-        assert!(l<=u);
+        if l > u {
+            return None
+        }
         let x = self.next(l);
         let y = self.prev(u);
         if x > y {
@@ -77,6 +79,12 @@ fn test_arith_seq_next() {
     assert_eq!(x.next(3), 4);
     assert_eq!(x.next(4), 4);
     assert_eq!(x.next(5), 7);
+
+    let x = ArithSeq {
+        a: 8,
+        b: 1,
+    };
+    assert_eq!(x.next(1), 1);
 }
 
 #[test]
@@ -112,4 +120,10 @@ fn test_arith_seq_range() {
     assert_eq!(x.range(0,5), Some((1,2)));
     assert_eq!(x.range(0,4), Some((1,2)));
     assert_eq!(x.range(-3,5), Some((-2,3)));
+
+    let x = ArithSeq {
+        a: 8,
+        b: 1,
+    };
+    assert_eq!(x.range(1,9), Some((1,9)));
 }
