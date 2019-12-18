@@ -261,4 +261,3 @@ fn test_prime_count() {
     assert_eq!(prime_count(6, 5, std::i64::MAX), 1);
 }
 
-
