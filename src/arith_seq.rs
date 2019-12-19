@@ -17,7 +17,7 @@ impl ArithSeq {
             self.a - self.b * i
         }
     }
-    #[doc = "a+bi <= y"]
+    #[doc = "a+bi <= x"]
     pub fn prev(&self, x: i64) -> i64 {
         let next = self.next(x);
         if next == x {
@@ -26,7 +26,7 @@ impl ArithSeq {
             next - self.b
         }
     }
-    #[doc = "[a+bi, a+bj] <= [l, r]"]
+    #[doc = "[a+bi, n] <= [l, u]"]
     pub fn range(&self, l: i64, u: i64) -> Option<(i64, i64)> {
         if l > u {
             return None
