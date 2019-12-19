@@ -32,6 +32,7 @@ impl HLDecomposition {
 
     pub fn connect(&mut self, u: usize, v: usize) {
         self.g[u].push(v);
+        self.g[v].push(u);
     }
 
     #[doc = "O(N)"]
@@ -129,8 +130,8 @@ impl HLDecomposition {
         }
     }
 
-    #[doc = "returns virtual heavy paths [l,n). O(N)"]
-    pub fn decompose(&self) -> Vec<(usize, usize)> {
+    #[doc = "returns a list of [l,r]. O(N)"]
+    pub fn vertex_decomposition(&self) -> Vec<(usize, usize)> {
         let mut vhead = vec![self.n; self.n];
         for i in 0..self.n {
             vhead[i] = self.real_to_virt[self.heavy_head[i]];
@@ -141,13 +142,28 @@ impl HLDecomposition {
         }
         let mut res = vec![];
         for (k,v) in hs {
-            res.push((k,v));
+            res.push((k,k+v-1));
         }
         res
     }
 
-    #[doc = "returns a list of virtual ids. O(logN)"]
-    pub fn vertex_decomposition(&self, u: usize, v: usize) -> Vec<(usize, usize)> {
+    #[doc = "return a list of [l,r]. edge is represented by the child with lower virtual id. O(N)"]
+    pub fn edge_decomposition(&self) -> Vec<(usize,usize)> {
+        let V = self.vertex_decomposition();
+        let mut res = vec![];
+        for (u,v) in V {
+            let u = if u==0 {
+                1
+            } else {
+                u
+            };
+            res.push((u,v));
+        }
+        res
+    }
+
+    #[doc = "O(logN)"]
+    pub fn vertex_decomposition_between(&self, u: usize, v: usize) -> Vec<(usize, usize)> {
         let mut res = vec![];
 
         let mut l = u;
@@ -166,8 +182,8 @@ impl HLDecomposition {
         res
     }
 
-    #[doc = "returns a list of virtual edges. An edge is represented by the child. O(logN)"]
-    pub fn edge_decomposition(&self, u: usize, v: usize) -> Vec<(usize, usize)> {
+    #[doc = "O(logN)"]
+    pub fn edge_decomposition_between(&self, u: usize, v: usize) -> Vec<(usize, usize)> {
         let mut res = vec![];
 
         let mut l = u;
@@ -200,7 +216,7 @@ impl HLDecomposition {
 #[test]
 fn test_hl_decomposition() {
     let mut hl = HLDecomposition::new(13);
-    let es = vec![(0,1),(0,2),(0,3),(1,4),(1,5),(4,8),(4,9),(2,6),(6,10),(6,11),(6,12),(3,7)];
+    let es = vec![(0,1),(0,2),(0,3),(1,4),(1,5),(8,4),(4,9),(6,2),(6,10),(6,11),(6,12),(3,7)];
     for (u,v) in es {
         hl.connect(u,v);
     }
@@ -221,7 +237,9 @@ fn test_hl_decomposition() {
         assert_eq!(hl.lca(v,u), lca);
     }
 
-    dbg!(hl.decompose());
-    dbg!(hl.vertex_decomposition(8, 6));
-    dbg!(hl.edge_decomposition(8, 6));
+    dbg!(hl.vertex_decomposition());
+    dbg!(hl.edge_decomposition());
+    dbg!(hl.vertex_decomposition_between(8, 6));
+    dbg!(hl.edge_decomposition_between(8, 6));
+    dbg!(hl.edge_decomposition_between(10, 7));
 }
