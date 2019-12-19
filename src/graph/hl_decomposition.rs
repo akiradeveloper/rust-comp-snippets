@@ -147,7 +147,7 @@ impl HLDecomposition {
         res
     }
 
-    #[doc = "return a list of [l,r]. edge is represented by the child with lower virtual id. O(N)"]
+    #[doc = "return a list of [l,r]. edge is represented by the child with larger virtual id. O(N)"]
     pub fn edge_decomposition(&self) -> Vec<(usize,usize)> {
         let V = self.vertex_decomposition();
         let mut res = vec![];
