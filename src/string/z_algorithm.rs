@@ -1,4 +1,4 @@
-#[doc = "z[i] is the common prefix length between s and s[i..]. O(N)"]
+#[doc = "z[i] is the common prefix length between s[0..] and s[i..]. O(N)"]
 #[snippet = "z_algorithm"]
 pub fn z_algorithm(s: &[u64]) -> Vec<usize> {
     let mut z = vec![0; s.len()];

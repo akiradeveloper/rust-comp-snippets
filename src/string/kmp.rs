@@ -25,11 +25,11 @@ impl KMP {
             }
         }
         KMP {
-            pat,
+            pat: pat,
             tbl: tbl,
         }
     }
-    #[doc = "O(N)"]
+    #[doc = "Find all the appearance of the pattern string. O(N)"]
     fn search(&self, s: &[u64]) -> Vec<usize> {
         let mut res = vec![];
         let mut head: i64 = 0;

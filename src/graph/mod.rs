@@ -8,7 +8,6 @@ pub mod scc;
 pub mod lca;
 pub mod mst;
 pub mod bipartite_matching;
-pub mod cycle;
-pub mod traversal;
+pub mod cycle_detection;
 pub mod rerooting;
 pub mod hl_decomposition;
