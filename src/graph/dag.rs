@@ -22,7 +22,7 @@ impl LongestDistance {
         let mut maxv = 0;
         for j in 0..self.ing[i].len() {
             let from = self.ing[i][j];
-            chmax!(maxv, self.solve(from) + 1);
+            maxv = std::cmp::max(maxv, self.solve(from) + 1);
         }
         self.dp[i] = Some(maxv);
         return maxv;

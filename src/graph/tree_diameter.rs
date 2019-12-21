@@ -1,7 +1,7 @@
 // Verified with GRA_5_A
 
-#[snippet = "tree_diameter"]
 #[derive(Clone, Copy)]
+#[snippet = "tree_diameter"]
 pub struct Edge {
     dst: usize,
     weight: i64,
