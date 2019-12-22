@@ -1,5 +1,6 @@
 /// minimum spanning tree
 
+#[snippet = "prim"]
 mod prim {
     /// O(V^2)
     fn prim(cost: &[Vec<u64>]) -> u64 {
@@ -36,6 +37,7 @@ mod prim {
     }
 }
 
+#[snippet = "kraskal"]
 mod kraskal {
     use crate::union_find;
 
@@ -70,6 +72,7 @@ mod kraskal {
     fn test_kraskal() {}
 }
 
+#[snippet = "chu_liu_edmonds"]
 mod chu_liu_edmonds {
     use crate::graph::scc;
     #[derive(Debug,Clone,Copy)]
