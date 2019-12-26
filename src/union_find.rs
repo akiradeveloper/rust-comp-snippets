@@ -8,8 +8,13 @@ impl UnionFind {
     pub fn new(n: usize) -> UnionFind {
         UnionFind {
             par: (0..n).collect::<Vec<usize>>(),
-            rank: vec![0; n],
+            rank: vec![1; n],
         }
+    }
+
+    pub fn size(&mut self, x: usize) -> usize {
+        let y = self.root(x);
+        self.rank[y]
     }
 
     pub fn same(&mut self, x: usize, y: usize) -> bool {
@@ -37,10 +42,7 @@ impl UnionFind {
         }
         assert!(self.rank[a] >= self.rank[b]);
 
-        if self.rank[a] == self.rank[b] {
-            self.rank[a] += 1;
-        }
-
+        self.rank[a] += self.rank[b];
         self.par[b] = a;
         return true
     }
@@ -55,14 +57,20 @@ fn test_union_find() {
     assert_eq!(s.same(3,4), false);
     assert_eq!(s.same(1,4), true);
     assert_eq!(s.same(3,2), true);
+    assert_eq!(s.size(1), 2);
+    assert_eq!(s.size(0), 1);
 
     s.merge(1,3);
     assert_eq!(s.same(2,4), true);
     assert_eq!(s.same(3,0), false);
+    assert_eq!(s.size(0), 1);
+    assert_eq!(s.size(1), 4);
+    assert_eq!(s.size(2), 4);
 
     s.merge(0,4);
     assert_eq!(s.same(0,2), true);
     assert_eq!(s.same(3,0), true);
+    assert_eq!(s.size(0), 5);
 }
 
 #[snippet = "WeighedUnionFind"]
