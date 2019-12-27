@@ -19,12 +19,16 @@ impl Matrix {
         self.v[0].len()
     }
     fn mul_rem(&self, other: &Self, mo: i64) -> Self {
-        let mut r = vec![vec![0; other.n()]; self.m()];
-        for i in 0..self.m() {
-            for j in 0..self.n() {
+        assert!(self.n() == other.m());
+        let K = self.n();
+        let M = self.m();
+        let N = other.n();
+        let mut r = vec![vec![0; N]; M];
+        for i in 0..M {
+            for j in 0..N {
                 let mut v = 0;
-                for k in 0..self.n() {
-                    v += (self.v[i][k] * other.v[k][j]) % mo;
+                for k in 0..K {
+                    v += self.v[i][k] * other.v[k][j] % mo;
                     v %= mo;
                 }
                 r[i][j] = v;
@@ -79,11 +83,15 @@ impl std::ops::Sub for Matrix {
 impl std::ops::Mul for Matrix {
     type Output = Self;
     fn mul(self, other: Self) -> Self {
-        let mut r = vec![vec![0; other.n()]; self.m()];
-        for i in 0..self.m() {
-            for j in 0..self.n() {
+        assert!(self.n() == other.m());
+        let K = self.n();
+        let M = self.m();
+        let N = other.n();
+        let mut r = vec![vec![0; N]; M];
+        for i in 0..M {
+            for j in 0..N {
                 let mut v = 0;
-                for k in 0..self.n() {
+                for k in 0..K {
                     v += self.v[i][k] * other.v[k][j];
                 }
                 r[i][j] = v;
@@ -158,6 +166,23 @@ fn test_matrix_mul() {
         v: vec![vec![5,6],vec![7,8]]
     };
     let c = a*b;
+    dbg!(c.v);
+}
+#[test]
+fn test_matrix_mul_vec() {
+    let a = Matrix {
+        v: vec![
+            vec![1,2],
+            vec![3,4],
+        ]
+    };
+    let b = Matrix {
+        v: vec![
+            vec![5],
+            vec![6],
+        ]
+    };
+    let c = a * b;
     dbg!(c.v);
 }
 #[test]
