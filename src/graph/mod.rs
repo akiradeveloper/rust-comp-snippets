@@ -13,4 +13,4 @@ pub mod rerooting;
 pub mod hl_decomposition;
 pub mod tree_diameter;
 pub mod dag;
-pub mod tree_depth_table;
+pub mod mktree;
