@@ -38,3 +38,63 @@ pub fn mktree(g: &[Vec<usize>], root: usize) -> Tree {
         parent: par,
     }
 }
+
+#[snippet = "SubTree"]
+struct SubTree {
+    memo: Vec<Option<usize>>,
+    g: Vec<Vec<usize>>,
+}
+#[snippet = "SubTree"]
+impl SubTree {
+    pub fn new(g: Vec<Vec<usize>>) -> SubTree {
+        let n = g.len();
+        SubTree {
+            memo: vec![None;n],
+            g: g,
+        }
+    }
+    fn rec(&mut self, v: usize, pa: Option<usize>) -> usize {
+        if let Some(x) = self.memo[v] {
+            return x;
+        }
+        let mut tot = 1;
+        for i in 0..self.g[v].len() {
+            let u = self.g[v][i];
+            if let Some(x) = pa {
+                if x == u {
+                    continue;
+                }
+            }
+            tot += self.rec(u, Some(v));
+        }
+        self.memo[v] = Some(tot);
+        tot
+    }
+    pub fn dfs(&mut self, root: usize) {
+        self.rec(root, None);
+    }
+    pub fn get(&self, v: usize) -> usize {
+        self.memo[v].unwrap()
+    }
+}
+#[test]
+fn test_subtree() {
+    let e = vec![
+        (0,1),
+        (1,2),
+        (2,3),
+        (0,4),
+    ];
+    let mut g = vec![vec![];5];
+    for (a,b) in e {
+        g[a].push(b);
+        g[b].push(a);
+    }
+    let mut st = SubTree::new(g);
+    st.dfs(0);
+    assert_eq!(st.get(3), 1);
+    assert_eq!(st.get(4), 1);
+    assert_eq!(st.get(0), 5);
+    assert_eq!(st.get(1), 3);
+    assert_eq!(st.get(2), 2);
+}
