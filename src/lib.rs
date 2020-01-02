@@ -47,3 +47,6 @@ pub mod wavelet_matrix;
 pub mod btree;
 pub mod arith_seq;
 pub mod grundy;
+pub mod complex;
+pub mod fft;
+pub mod karatsuba;

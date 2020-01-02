@@ -1,128 +1,136 @@
 #[snippet = "Matrix"]
-#[derive(Clone)]
-pub struct Matrix {
-    v: Vec<Vec<i64>>,
-}
-#[snippet = "Matrix"]
-impl Matrix {
-    fn identity(n: usize) -> Self {
-        let mut v = vec![vec![0;n];n];
-        for i in 0..n {
-            v[i][i] = 1;
+pub mod matrix {
+    #[derive(Clone)]
+    pub struct Matrix {
+        pub v: Vec<Vec<i64>>,
+    }
+    #[snippet = "Matrix"]
+    impl Matrix {
+        pub fn identity(n: usize) -> Self {
+            let mut v = vec![vec![0;n];n];
+            for i in 0..n {
+                v[i][i] = 1;
+            }
+            Matrix { v: v }
         }
-        Matrix { v: v }
-    }
-    fn m(&self) -> usize {
-        self.v.len()
-    }
-    fn n(&self) -> usize {
-        self.v[0].len()
-    }
-    fn mul_rem(&self, other: &Self, mo: i64) -> Self {
-        assert!(self.n() == other.m());
-        let K = self.n();
-        let M = self.m();
-        let N = other.n();
-        let mut r = vec![vec![0; N]; M];
-        for i in 0..M {
-            for j in 0..N {
-                let mut v = 0;
-                for k in 0..K {
-                    v += self.v[i][k] * other.v[k][j] % mo;
-                    v %= mo;
+        pub fn m(&self) -> usize {
+            self.v.len()
+        }
+        pub fn n(&self) -> usize {
+            self.v[0].len()
+        }
+        pub fn mul_rem(&self, other: &Self, mo: i64) -> Self {
+            assert!(self.n() == other.m());
+            let K = self.n();
+            let M = self.m();
+            let N = other.n();
+            let mut r = vec![vec![0; N]; M];
+            for i in 0..M {
+                for j in 0..N {
+                    let mut v = 0;
+                    for k in 0..K {
+                        v += self.v[i][k] * other.v[k][j] % mo;
+                        v %= mo;
+                    }
+                    r[i][j] = v;
                 }
-                r[i][j] = v;
             }
+            Matrix { v: r }
         }
-        Matrix { v: r }
-    }
-    fn pow(&self, k: u64, mo: i64) -> Self {
-        assert!(self.m() == self.n());
-        let mut k = k;
-        let mut x = Self::identity(self.m());
-        let mut y = self.clone();
-        while k > 0 {
-            if k & 1 > 0 {
-                x = y.clone() * x;
-                x %= mo;
-            }
-            y = y.mul_rem(&y, mo);
-            y %= mo;
-            k >>= 1;
-        }
-        x
-    }
-}
-#[snippet = "Matrix"]
-impl std::ops::Add for Matrix {
-    type Output = Self;
-    fn add(self, other: Self) -> Self {
-        let mut r = self.v.clone();
-        for i in 0..self.m() {
-            for j in 0..self.n() {
-                r[i][j] += other.v[i][j];
-            }
-        }
-        Matrix { v: r }
-    }
-}
-#[snippet = "Matrix"]
-impl std::ops::Sub for Matrix {
-    type Output = Self;
-    fn sub(self, other: Self) -> Self {
-        let mut r = self.v.clone();
-        for i in 0..self.m() {
-            for j in 0..self.n() {
-                r[i][j] -= other.v[i][j];
-            }
-        }
-        Matrix { v: r }
-    }
-}
-#[snippet = "Matrix"]
-impl std::ops::Mul for Matrix {
-    type Output = Self;
-    fn mul(self, other: Self) -> Self {
-        assert!(self.n() == other.m());
-        let K = self.n();
-        let M = self.m();
-        let N = other.n();
-        let mut r = vec![vec![0; N]; M];
-        for i in 0..M {
-            for j in 0..N {
-                let mut v = 0;
-                for k in 0..K {
-                    v += self.v[i][k] * other.v[k][j];
+        pub fn pow(&self, k: u64, mo: i64) -> Self {
+            assert!(self.m() == self.n());
+            let mut k = k;
+            let mut x = Self::identity(self.m());
+            let mut y = self.clone();
+            while k > 0 {
+                if k & 1 > 0 {
+                    x = y.clone() * x;
+                    x %= mo;
                 }
-                r[i][j] = v;
+                y = y.mul_rem(&y, mo);
+                y %= mo;
+                k >>= 1;
             }
-        }
-        Matrix { v: r }
-    }
-}
-#[snippet = "Matrix"]
-impl std::ops::Rem<i64> for Matrix {
-    type Output = Self;
-    fn rem(self, mo: i64) -> Self {
-        let mut r = self.v.clone();
-        for i in 0..self.m() {
-            for j in 0..self.n() {
-                r[i][j] %= mo;
-            }
-        }
-        Matrix { v: r }
-    }
-}
-#[snippet = "Matrix"]
-impl std::ops::RemAssign<i64> for Matrix {
-    fn rem_assign(&mut self, mo: i64) {
-        for i in 0..self.m() {
-            for j in 0..self.n() {
-                self.v[i][j] %= mo;
-            }
+            x
         }
     }
+
+    use std::ops::*;
+
+    #[snippet = "Matrix"]
+    impl Add for Matrix {
+        type Output = Self;
+        fn add(self, other: Self) -> Self {
+            let mut r = self.v.clone();
+            for i in 0..self.m() {
+                for j in 0..self.n() {
+                    r[i][j] += other.v[i][j];
+                }
+            }
+            Matrix { v: r }
+        }
+    }
+    #[snippet = "Matrix"]
+    impl Sub for Matrix {
+        type Output = Self;
+        fn sub(self, other: Self) -> Self {
+            let mut r = self.v.clone();
+            for i in 0..self.m() {
+                for j in 0..self.n() {
+                    r[i][j] -= other.v[i][j];
+                }
+            }
+            Matrix { v: r }
+        }
+    }
+    #[snippet = "Matrix"]
+    impl Mul for Matrix {
+        type Output = Self;
+        fn mul(self, other: Self) -> Self {
+            assert!(self.n() == other.m());
+            let K = self.n();
+            let M = self.m();
+            let N = other.n();
+            let mut r = vec![vec![0; N]; M];
+            for i in 0..M {
+                for j in 0..N {
+                    let mut v = 0;
+                    for k in 0..K {
+                        v += self.v[i][k] * other.v[k][j];
+                    }
+                    r[i][j] = v;
+                }
+            }
+            Matrix { v: r }
+        }
+    }
+    #[snippet = "Matrix"]
+    impl Rem<i64> for Matrix {
+        type Output = Self;
+        fn rem(self, mo: i64) -> Self {
+            let mut r = self.v.clone();
+            for i in 0..self.m() {
+                for j in 0..self.n() {
+                    r[i][j] %= mo;
+                }
+            }
+            Matrix { v: r }
+        }
+    }
+    #[snippet = "Matrix"]
+    impl RemAssign<i64> for Matrix {
+        fn rem_assign(&mut self, mo: i64) {
+            for i in 0..self.m() {
+                for j in 0..self.n() {
+                    self.v[i][j] %= mo;
+                }
+            }
+        }
+    }
 }
+
+#[snippet = "matrix"]
+pub type Matrix = matrix::Matrix;
 
 #[test]
 fn test_matrix_add() {
