@@ -1,6 +1,35 @@
 use crate::complex::Complex;
 
 #[snippet = "fft"]
+pub fn convolve(a: &[f64], b: &[f64]) -> Vec<f64> {
+    let n = a.len() + b.len() - 1;
+    let mut m = 1;
+    while m < n {
+        m *= 2;
+    }
+    let mut x = vec![Complex::new(0.,0.); m];
+    for i in 0..a.len() {
+        x[i] = Complex::new(a[i], 0.);
+    }
+    let mut y = vec![Complex::new(0.,0.); m];
+    for i in 0..b.len() {
+        y[i] = Complex::new(b[i], 0.);
+    }
+    let X = fast_fourier_transform(&x, false);
+    let Y = fast_fourier_transform(&y, false);
+    let mut Z = vec![Complex::new(0.,0.); m];
+    for i in 0..m {
+        Z[i] = X[i] * Y[i];
+    }
+    let z = fast_fourier_transform(&Z, true);
+    let mut ret = vec![0.; m];
+    for i in 0..m {
+        ret[i] = z[i].x;
+    }
+    ret
+}
+
+#[snippet = "fft"]
 pub fn fast_fourier_transform(arr: &[Complex], inv: bool) -> Vec<Complex> {
     let n = arr.len();
     assert!(n.count_ones() == 1, "the length of array is not square");
