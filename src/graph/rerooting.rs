@@ -1,10 +1,10 @@
 #[snippet = "ReRooting"]
 trait Foldable {
-    type Sum: Copy;
-    type T: Copy;
+    type Sum: Copy + std::fmt::Debug;
+    type T: Copy + std::fmt::Debug;
     fn identity() -> Self::Sum;
-    fn merge(x: Self::Sum, y: Self::Sum) -> Self::Sum;
-    fn fold(acc: Self::Sum, x: Self::T) -> Self::Sum;
+    fn f(x: Self::Sum, y: Self::Sum) -> Self::Sum;
+    fn g(acc: Self::Sum, x: Self::T) -> Self::Sum;
 }
 #[snippet = "ReRooting"]
 #[derive(Clone, Copy)]
@@ -46,33 +46,34 @@ impl <F: Foldable> ReRooting<F> {
     fn dfs_sub(&mut self, u: usize, par: Option<usize>) {
         for i in 0..self.g[u].len() {
             let e = self.g[u][i];
-            if Some(e.to) == par {
-                continue;
-            }
+            if Some(e.to) == par { continue; }
             self.dfs_sub(e.to, Some(u));
-            self.subdp[u] = F::merge(self.subdp[u], F::fold(self.subdp[e.to], e.data));
+            self.subdp[u] = F::f(self.subdp[u], F::g(self.subdp[e.to], e.data));
         }
     }
     fn dfs_all(&mut self, u: usize, par: Option<usize>, top: F::Sum) {
         let mut buf = F::identity();
         for i in 0..self.g[u].len() {
             let e = &mut self.g[u][i];
+            // 左累積
             e.ndp = buf;
-            e.dp = F::fold(if Some(e.to) == par { top } else { self.subdp[e.to] }, e.data);
-            buf = F::merge(buf, e.dp);
+            e.dp = F::g(if Some(e.to) == par { top } else { self.subdp[e.to] }, e.data);
+            buf = F::f(buf, e.dp);
         }
         self.dp[u] = buf;
+        // 右累積
         buf = F::identity();
         for i in (0..self.g[u].len()).rev() {
             let e = self.g[u][i];
             if Some(e.to) != par {
-                self.dfs_all(e.to, Some(u), F::merge(e.ndp, buf));
+                self.dfs_all(e.to, Some(u), F::f(e.ndp, buf));
             }
             let e = &mut self.g[u][i];
-            e.ndp = F::merge(e.ndp, buf);
-            buf = F::merge(buf, e.dp);
+            e.ndp = F::f(e.ndp, buf);
+            buf = F::f(buf, e.dp);
         }
     }
+    #[doc = "O(n)"]
     pub fn build(&mut self) -> Vec<F::Sum> {
         self.dfs_sub(0, None);
         self.dfs_all(0, None, F::identity());
