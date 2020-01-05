@@ -1,86 +1,81 @@
 #[snippet = "ReRooting"]
 trait Foldable {
-    type T: Clone + std::fmt::Debug;
-    fn identity() -> Self::T;
-    fn fold(acc: &Self::T, x: &Self::T) -> Self::T;
+    type Sum: Copy;
+    type T: Copy;
+    fn identity() -> Self::Sum;
+    fn merge(x: Self::Sum, y: Self::Sum) -> Self::Sum;
+    fn fold(acc: Self::Sum, x: Self::T) -> Self::Sum;
+}
+#[snippet = "ReRooting"]
+#[derive(Clone, Copy)]
+struct Edge<T, Sum> {
+    to: usize,
+    data: T,
+    dp: Sum,
+    ndp: Sum,
 }
 #[snippet = "ReRooting"]
 struct ReRooting<F: Foldable> {
-    g: Vec<Vec<usize>>,
-    dp: Vec<Vec<F::T>>,
+    subdp: Vec<F::Sum>,
+    dp: Vec<F::Sum>,
+    g: Vec<Vec<Edge<F::T, F::Sum>>>,
 }
 #[snippet = "ReRooting"]
-impl<F: Foldable> ReRooting<F> {
-    fn merge(a: &F::T, b: &F::T) -> F::T {
-        let mut acc = F::identity();
-        acc = F::fold(&acc, a);
-        acc = F::fold(&acc, b);
-        acc
-    }
-
-    fn new(g: Vec<Vec<usize>>) -> Self {
-        let mut dp = vec![];
-        for u in 0..g.len() {
-            dp.push(vec![F::identity(); g[u].len()]);
-        }
+impl <F: Foldable> ReRooting<F> {
+    pub fn new(n: usize) -> ReRooting<F> {
         ReRooting {
-            g: g,
-            dp: dp,
+            subdp: vec![F::identity(); n],
+            dp: vec![F::identity(); n],
+            g: vec![vec![]; n],
         }
     }
-
-    fn dfs1(&mut self, par: Option<usize>, u: usize) -> F::T {
-        let mut ret = F::identity();
+    pub fn connect(&mut self, u: usize, v: usize, d: F::T, e: F::T) {
+        self.g[u].push(Edge {
+            to: v,
+            data: d,
+            dp: F::identity(),
+            ndp: F::identity(),
+        });
+        self.g[v].push(Edge {
+            to: u,
+            data: e,
+            dp: F::identity(),
+            ndp: F::identity(),
+        });
+    }
+    fn dfs_sub(&mut self, u: usize, par: Option<usize>) {
         for i in 0..self.g[u].len() {
-            let v = self.g[u][i];
-            if Some(v) == par { continue; } 
-
-            let r = self.dfs1(Some(u), v);
-            self.dp[u][i] = r.clone();
-            ret = F::fold(&ret, &r);
-        }
-        ret
-    }
-
-    fn dfs2(&mut self, par: Option<usize>, u: usize, u2par: F::T) {
-        let n = self.g[u].len();
-        let mut prefix = vec![F::identity(); n];
-        let mut suffix = vec![F::identity(); n];
-        for i in 0..n {
-            let v = self.g[u][i];
-            if Some(v) == par {
-                self.dp[u][i] = u2par.clone();
+            let e = self.g[u][i];
+            if Some(e.to) == par {
+                continue;
             }
-        }
-        for i in 0..n {
-            let l = if i>0 { prefix[i-1].clone() } else { F::identity() };
-            prefix[i] = F::fold(&l, &self.dp[u][i]);
-        }
-        for i in (0..n).rev() {
-            let r = if i < n-1 { suffix[i+1].clone() } else { F::identity() };
-            suffix[i] = F::fold(&r, &self.dp[u][i]);
-        }
-        for i in 0..n {
-            let v = self.g[u][i];
-            if Some(v) == par { continue; }
-            
-            // 枝iを除いた値を計算する
-            let l = if i>0 { prefix[i-1].clone() } else { F::identity() };
-            let r = if i<n-1 { suffix[i+1].clone() } else { F::identity() };
-            self.dfs2(Some(u), v, Self::merge(&l, &r));
+            self.dfs_sub(e.to, Some(u));
+            self.subdp[u] = F::merge(self.subdp[u], F::fold(self.subdp[e.to], e.data));
         }
     }
-
-    pub fn dfs(&mut self, u: usize) {
-        let p = self.dfs1(None, u);
-        self.dfs2(None, u, p);
-    }
-
-    pub fn solve(&self, u: usize) -> F::T {
-        let mut acc = F::identity();
-        for d in &self.dp[u] {
-            acc = F::fold(&acc, d);
+    fn dfs_all(&mut self, u: usize, par: Option<usize>, top: F::Sum) {
+        let mut buf = F::identity();
+        for i in 0..self.g[u].len() {
+            let e = &mut self.g[u][i];
+            e.ndp = buf;
+            e.dp = F::fold(if Some(e.to) == par { top } else { self.subdp[e.to] }, e.data);
+            buf = F::merge(buf, e.dp);
         }
-        acc
+        self.dp[u] = buf;
+        buf = F::identity();
+        for i in (0..self.g[u].len()).rev() {
+            let e = self.g[u][i];
+            if Some(e.to) != par {
+                self.dfs_all(e.to, Some(u), F::merge(e.ndp, buf));
+            }
+            let e = &mut self.g[u][i];
+            e.ndp = F::merge(e.ndp, buf);
+            buf = F::merge(buf, e.dp);
+        }
+    }
+    pub fn build(&mut self) -> Vec<F::Sum> {
+        self.dfs_sub(0, None);
+        self.dfs_all(0, None, F::identity());
+        self.dp.clone()
     }
 }
