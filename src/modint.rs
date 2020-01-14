@@ -13,7 +13,7 @@ pub mod modular {
  
     impl Mod {
         pub fn new(v: i64) -> Mod {
-            Mod(v % M)
+            Mod((v+M) % M)
         }
  
         pub fn pow(self, mut r: i64) -> Mod {
