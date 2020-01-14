@@ -119,10 +119,10 @@ impl Imosu {
     }
     #[doc = "[i0,i1)~[j0,j1)"]
     pub fn add(&mut self, i0: usize, i1: usize, j0: usize, j1: usize, x: i64) {
-        self.dp[i0][j0] = x;
-        self.dp[i0][j1] = -x;
-        self.dp[i1][j0] = -x;
-        self.dp[i1][j1] = x;
+        self.dp[i0][j0] += x;
+        self.dp[i0][j1] += -x;
+        self.dp[i1][j0] += -x;
+        self.dp[i1][j1] += x;
     }
     pub fn build(&mut self) {
         // right sweep
