@@ -17,11 +17,9 @@ impl Vector2D {
             c
         }
     }
-
     pub fn dot(self, other: Vector2D) -> f64 {
         Self::add(self.0 * other.0, self.1 * other.1)
     }
-
     pub fn det(self, other: Vector2D) -> f64 {
         Self::add(self.0 * other.1, -self.1 * other.0)
     }
@@ -32,15 +30,19 @@ impl Vector2D {
         let l = self.len();
         Vector2D(self.0 / l, self.1 / l)
     }
+    #[doc = "orthogonal vector"]
     pub fn normal(self) -> Vector2D {
         Vector2D(self.1, -self.0)
+    }
+    #[doc = "bisection of the angle"]
+    pub fn bisect(self, other: Vector2D) -> Vector2D {
+        (self.unit() + other.unit()).unit()
     }
 }
 
 #[snippet = "Vector2D"]
 impl std::ops::Add for Vector2D {
     type Output = Vector2D;
-
     fn add(self, rhs: Vector2D) -> Self::Output {
         Vector2D(Vector2D::add(self.0, rhs.0), Vector2D::add(self.1, rhs.1))
     }
@@ -49,7 +51,6 @@ impl std::ops::Add for Vector2D {
 #[snippet = "Vector2D"]
 impl std::ops::Sub for Vector2D {
     type Output = Vector2D;
-
     fn sub(self, rhs: Vector2D) -> Self::Output {
         Vector2D(Vector2D::add(self.0, -rhs.0), Vector2D::add(self.1, -rhs.1))
     }
@@ -58,7 +59,6 @@ impl std::ops::Sub for Vector2D {
 #[snippet = "Vector2D"]
 impl std::ops::Mul<f64> for Vector2D {
     type Output = Vector2D;
-
     fn mul(self, rhs: f64) -> Self::Output {
         Vector2D(rhs * self.0, rhs * self.1)
     }
@@ -67,7 +67,6 @@ impl std::ops::Mul<f64> for Vector2D {
 #[snippet = "Vector2D"]
 impl std::ops::Div<f64> for Vector2D {
     type Output = Vector2D;
-
     fn div(self, rhs: f64) -> Self::Output {
         Vector2D(self.0 / rhs, self.1 / rhs)
     }
@@ -217,4 +216,31 @@ fn test_convex_hull() {
     idx.sort();
 
     assert_eq!(&idx, &[0, 1, 2, 3]);
+}
+
+#[snippet = "Line2D"]
+#[derive(Clone, Copy, Debug)]
+pub struct Line2D {
+    p: Vector2D,
+    d: Vector2D,
+}
+#[snippet = "Line2D"]
+impl Line2D {
+    pub fn intersection(a: Line2D, b: Line2D) -> Vector2D {
+        let n = b.d.normal();
+        dbg!(n);
+        let x = n.dot(b.p - a.p) / n.dot(a.d);
+        a.p + a.d * x
+    }
+}
+
+#[test]
+fn test_intersection() {
+    let m = Line2D { p: Vector2D(0.,0.), d: Vector2D(1.,1.) };
+    let l1 = Line2D { p: Vector2D(0.,2.), d: Vector2D(1.,0.) };
+    let l2 = Line2D { p: Vector2D(0.,2.), d: Vector2D(1.,-1.) };
+    let p1 = Line2D::intersection(m, l1);
+    let p2 = Line2D::intersection(m, l2);
+    assert_eq!(p1, Vector2D(2.,2.));
+    assert_eq!(p2, Vector2D(1.,1.));
 }
