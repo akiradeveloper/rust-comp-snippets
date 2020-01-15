@@ -35,8 +35,8 @@ impl Vector2D {
         Vector2D(self.1, -self.0)
     }
     #[doc = "bisection of the angle"]
-    pub fn bisect(self, other: Vector2D) -> Vector2D {
-        (self.unit() + other.unit()).unit()
+    pub fn bisect(a: Vector2D, b: Vector2D) -> Vector2D {
+        (a.unit() + b.unit()).unit()
     }
 }
 
@@ -69,6 +69,55 @@ impl std::ops::Div<f64> for Vector2D {
     type Output = Vector2D;
     fn div(self, rhs: f64) -> Self::Output {
         Vector2D(self.0 / rhs, self.1 / rhs)
+    }
+}
+
+#[snippet = "Circle"]
+pub struct Circle {
+    center: Vector2D,
+    radius: f64,
+}
+
+#[snippet = "Circle"]
+impl Circle {
+    pub fn inner_circle(a: Vector2D, b: Vector2D, c: Vector2D) -> Circle {
+        let a_bisect = Line2D {
+            p: a,
+            d: Vector2D::bisect(a-b, a-c),
+        };
+        let b_bisect = Line2D {
+            p: b,
+            d: Vector2D::bisect(b-a, b-c),
+        };
+
+        let center = Line2D::intersection(a_bisect, b_bisect);
+        let ab = Line2D {
+            p: a,
+            d: b-a,
+        };
+        let radius = ab.distance(center);
+        Circle {
+            center: center,
+            radius: radius,
+        }
+    }
+    pub fn outer_circle(a: Vector2D, b: Vector2D, c: Vector2D) -> Circle {
+        let ubn = Line2D {
+             p: (a+b) / 2.,
+             d: (a-b).normal()
+        };
+        let vbn = Line2D {
+            p: (b+c) / 2.,
+            d: (b-c).normal(),
+        };
+
+        let center = Line2D::intersection(ubn, vbn);
+        let radius = (a - center).len();
+
+        Circle {
+            center: center,
+            radius: radius,
+        }
     }
 }
 
@@ -231,6 +280,14 @@ impl Line2D {
         dbg!(n);
         let x = n.dot(b.p - a.p) / n.dot(a.d);
         a.p + a.d * x
+    }
+    pub fn distance(self, a: Vector2D) -> f64 {
+        let perpendicular = Line2D {
+            p: a,
+            d: self.d.unit(),
+        };
+        let q = Self::intersection(self, perpendicular);
+        (a-q).len()
     }
 }
 
