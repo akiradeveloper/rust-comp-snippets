@@ -119,6 +119,28 @@ impl Circle {
             radius: radius,
         }
     }
+    pub fn outer_circle_stable(x: Vector2D, y: Vector2D, z: Vector2D) -> Option<Circle> {
+        let a = (y-z).len();
+        let a2 = a*a;
+        let b = (x-z).len();
+        let b2 = b*b;
+        let c = (x-y).len();
+        let c2 = c*c;
+
+        let eps = 1e-9;
+        if a+b-c < eps { return None }
+        if b+c-a < eps { return None } 
+        if c+a-b < eps { return None }
+
+        let X = x*(a2*(b2+c2-a2)) + y*(b2*(c2+a2-b2)) + z*(c2*(a2+b2-c2));
+        let Y = a2*(b2+c2-a2) + b2*(c2+a2-b2) + c2*(a2+b2-c2);
+        let center = X / Y;
+        let radius = (x-center).len();
+        Some(Circle {
+            center: center,
+            radius: radius
+        })
+    }
 }
 
 use crate::total::Total;
