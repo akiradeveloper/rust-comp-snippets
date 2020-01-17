@@ -3,7 +3,7 @@ pub mod modular {
     const M: i64 = 1_000_000_007;
  
     #[derive(Debug, Clone, Copy, Default, PartialOrd, Ord, PartialEq, Eq)]
-    pub struct Mod(i64);
+    pub struct Mod(pub i64);
  
     impl ::std::fmt::Display for Mod {
         fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
