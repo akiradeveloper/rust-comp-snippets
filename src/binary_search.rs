@@ -4,7 +4,7 @@ struct BinarySearch<F> {
     f: F,
 }
 impl <F: Fn(f64) -> bool> BinarySearch<F> {
-    const eps: f64 = 0.000001;
+    const eps: f64 = 1e-9;
     fn new(lb: f64, ub: f64, f: F) -> BinarySearch<F> {
         BinarySearch {
             lb: lb,

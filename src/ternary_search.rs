@@ -3,7 +3,7 @@
 fn ternary_search<F: Fn(f64) -> f64>(f: F, l: f64, r: f64) -> f64 {
     let mut l = l;
     let mut r = r;
-    let eps = 0.00000000001;
+    let eps = 1e-9;
     while r-l > eps {
         let m1 = (2.0*l+r)/3.0;
         let m2 = (l+2.0*r)/3.0;
