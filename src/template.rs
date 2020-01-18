@@ -7,8 +7,6 @@ use std::cmp::{max, min, Ordering};
 #[allow(unused_imports)]
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
 #[allow(unused_imports)]
-use std::io::{stdin, stdout, BufWriter, Write};
-#[allow(unused_imports)]
 use std::iter::FromIterator;
 
 #[macro_export]
@@ -56,12 +54,10 @@ macro_rules! dvec {
     };
 }
 
-#[allow(unused_macros)]
-macro_rules! debug {
-    ($($a:expr),*) => {
-        eprintln!(concat!($(stringify!($a), " = {:?}, "),*), $($a),*);
-    }
-}
+/// main
+
+#[allow(unused_imports)]
+use std::io::{stdin, stdout, BufWriter, Write};
 
 // ref: tanakh <https://qiita.com/tanakh/items/0ba42c7ca36cd29d0ac8>
 // diff: using Parser

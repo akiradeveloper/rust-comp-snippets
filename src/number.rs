@@ -69,9 +69,7 @@ fn test_extgcg() {
     // dbg!(gcd, x, y);
 }
 
-/// ax=b(mod m)
-/// ay=1 (mod m) -> y=a^{-1}
-/// x=yb (mod m)
+#[doc = "ay=1 (mod m) -> y=a^{-1}"]
 #[snippet = "mod_inverse"]
 pub fn mod_inverse(a: i64, m: i64) -> i64 {
     let (_, x, _) = extgcd(a, m);
