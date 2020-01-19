@@ -134,20 +134,20 @@ pub fn factor_table(max_n: usize) -> Vec<usize> {
             }
         }
     }
-
     res
 }
 #[test]
 fn test_factor_table() {
     let n = 1000;
     let table = factor_table(n);
-    for i in 2..n + 1 {
-        assert_eq!(i % table[i], 0);
+    for i in 2..n+1 {
+        let max_factor = table[i];
+        assert_eq!(i % max_factor, 0);
     }
 }
 
-#[snippet = "eratosthenes"]
 #[doc = "O(N log log N)"]
+#[snippet = "eratosthenes"]
 fn eratosthenes(n_max: usize) -> Vec<usize> {
     let mut res = vec![];
     let mut v = vec![0; n_max+1];
@@ -207,9 +207,9 @@ fn is_prime(n: i64) -> bool {
     res
 }
 
-// O(root(N))
-#[snippet = "prime_factors"]
-fn prime_factors(n: i64) -> std::collections::HashMap<i64, i64> {
+#[doc = "O(root(N))"]
+#[snippet = "prime_decomposition"]
+fn prime_decomposition(n: i64) -> std::collections::HashMap<i64, i64> {
     fn root_int(n: i64) -> i64 {
         let mut d = 1;
         while d * d <= n {
@@ -234,14 +234,15 @@ fn prime_factors(n: i64) -> std::collections::HashMap<i64, i64> {
     m
 }
 #[test]
-fn test_prime_factors() {
-    dbg!(prime_factors(6));
-    dbg!(prime_factors(12));
-    dbg!(prime_factors(15));
+fn test_prime_decomposition() {
+    dbg!(prime_decomposition(6));
+    dbg!(prime_decomposition(12));
+    dbg!(prime_decomposition(15));
 }
 
-#[doc = "how many prime p found in n!"]
-fn prime_count(n: i64, p: i64, mo: i64) -> i64 {
+#[doc = "O(n). how many prime p found in n!"]
+#[snippet = "factorial_prime_count"]
+fn factorial_prime_count(n: i64, p: i64, mo: i64) -> i64 {
     let mut acc = 0;
     for k in 1.. {
         let d: i64 = modpow(p, k, std::i64::MAX);
@@ -253,8 +254,8 @@ fn prime_count(n: i64, p: i64, mo: i64) -> i64 {
 }
 #[test]
 fn test_prime_count() {
-    assert_eq!(prime_count(4, 2, std::i64::MAX), 3);
-    assert_eq!(prime_count(6, 2, std::i64::MAX), 4);
-    assert_eq!(prime_count(6, 3, std::i64::MAX), 2);
-    assert_eq!(prime_count(6, 5, std::i64::MAX), 1);
+    assert_eq!(factorial_prime_count(4, 2, std::i64::MAX), 3);
+    assert_eq!(factorial_prime_count(6, 2, std::i64::MAX), 4);
+    assert_eq!(factorial_prime_count(6, 3, std::i64::MAX), 2);
+    assert_eq!(factorial_prime_count(6, 5, std::i64::MAX), 1);
 }
