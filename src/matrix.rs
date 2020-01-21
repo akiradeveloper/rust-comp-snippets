@@ -4,7 +4,6 @@ pub mod matrix {
     pub struct Matrix {
         pub v: Vec<Vec<i64>>,
     }
-    #[snippet = "Matrix"]
     impl Matrix {
         pub fn identity(n: usize) -> Self {
             let mut v = vec![vec![0;n];n];
@@ -57,7 +56,6 @@ pub mod matrix {
 
     use std::ops::*;
 
-    #[snippet = "Matrix"]
     impl Add for Matrix {
         type Output = Self;
         fn add(self, other: Self) -> Self {
@@ -70,7 +68,6 @@ pub mod matrix {
             Matrix { v: r }
         }
     }
-    #[snippet = "Matrix"]
     impl Sub for Matrix {
         type Output = Self;
         fn sub(self, other: Self) -> Self {
@@ -83,7 +80,6 @@ pub mod matrix {
             Matrix { v: r }
         }
     }
-    #[snippet = "Matrix"]
     impl Mul for Matrix {
         type Output = Self;
         fn mul(self, other: Self) -> Self {
@@ -104,7 +100,6 @@ pub mod matrix {
             Matrix { v: r }
         }
     }
-    #[snippet = "Matrix"]
     impl Rem<i64> for Matrix {
         type Output = Self;
         fn rem(self, mo: i64) -> Self {
@@ -117,7 +112,6 @@ pub mod matrix {
             Matrix { v: r }
         }
     }
-    #[snippet = "Matrix"]
     impl RemAssign<i64> for Matrix {
         fn rem_assign(&mut self, mo: i64) {
             for i in 0..self.m() {
