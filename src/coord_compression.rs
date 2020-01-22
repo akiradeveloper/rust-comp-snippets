@@ -18,8 +18,8 @@ impl CoordCompression {
             acc+=1;
         }
         CoordCompression {
-            comp,
-            dcmp,
+            comp: comp,
+            dcmp: dcmp,
         }
     }
     fn compress(&self, x: i64) -> usize {
