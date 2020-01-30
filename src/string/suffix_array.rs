@@ -106,7 +106,7 @@ impl SuffixArray {
         si >= sn && ti < tn
     }
     #[doc = "find the rightmost match of the string t to s. O(mlogn) where n=|s|,m=|t|"]
-    pub fn lower_bound(&self, t: &[u64]) -> usize {
+    fn lower_bound(&self, t: &[u64]) -> usize {
         let mut low: i64 = -1;
         let mut high: i64 = self.sa.len() as i64; 
         while high - low > 1 {
@@ -118,6 +118,10 @@ impl SuffixArray {
             }
         }
         return high as usize
+    }
+
+    pub fn right_most_index(&self, t: &[u64]) -> usize {
+        self.sa[self.lower_bound(t)]
     }
 }
 
@@ -142,15 +146,8 @@ fn test_suffix_array() {
     let sa = SuffixArray::new(as_v(s));
     assert_eq!(sa.sa, [10,7,0,3,5,8,1,4,6,9,2]);
 
-    let x = sa.lower_bound(&as_v("rac"));
-    assert_eq!(sa.sa[x], 2);
-
-    let x = sa.lower_bound(&as_v("bra"));
-    assert_eq!(sa.sa[x], 8);
-
-    let x = sa.lower_bound(&as_v("abra"));
-    assert_eq!(sa.sa[x], 7);
-
-    let x = sa.lower_bound(&as_v("abr"));
-    assert_eq!(sa.sa[x], 7);
+    assert_eq!(sa.right_most_index(&as_v("rac")), 2);
+    assert_eq!(sa.right_most_index(&as_v("bra")), 8);
+    assert_eq!(sa.right_most_index(&as_v("abra")), 7);
+    assert_eq!(sa.right_most_index(&as_v("abr")), 7);
 }

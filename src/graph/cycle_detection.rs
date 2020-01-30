@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 // verified: GRL_4_A
-#[doc = "detect cycle detection. O(E)"]
+#[doc = "directed. O(E)"]
 #[snippet = "cycle_detection_directed"]
 pub fn cycle_detection_directed(g: &[Vec<usize>]) -> bool {
     let n = g.len();

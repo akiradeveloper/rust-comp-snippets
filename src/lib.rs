@@ -8,7 +8,6 @@
 extern crate rand;
 extern crate test;
 
-pub mod dict;
 pub mod string;
 pub mod lower_bound;
 pub mod binary_search;

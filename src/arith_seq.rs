@@ -5,6 +5,13 @@ struct ArithSeq {
 }
 #[snippet = "ArithSeq"]
 impl ArithSeq {
+    pub fn new(a: i64, b: i64) -> ArithSeq {
+        assert!(b>0);
+        ArithSeq {
+            a: a,
+            b: b,
+        }
+    }
     #[doc = "a+bi >= x"]
     pub fn next(&self, x: i64) -> i64 {
         if x >= self.a {

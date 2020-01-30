@@ -116,14 +116,14 @@ mod dinic {
     #[doc = "direct flow graph. O(EV^2)"]
     #[snippet = "dinic"]
     impl Network {
-        fn new(n: usize) -> Network {
+        pub fn new(n: usize) -> Network {
             Network {
                 g: vec![vec![]; n],
                 level: vec![None; n],
                 iter: vec![0; n],
             }
         }
-        fn add_edge(&mut self, from: usize, to: usize, cap: i64) {
+        pub fn add_edge(&mut self, from: usize, to: usize, cap: i64) {
             assert!(cap>=0);
 
             let from_rev = self.g[to].len();

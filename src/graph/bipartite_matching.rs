@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 
+#[doc = "undirected. paint the vertices in two colors. if impossible return None."]
 #[snippet = "is_bigraph"]
 pub fn is_bigraph(g: &[Vec<usize>]) -> Option<Vec<bool>> {
     struct Rec<'a> {
@@ -51,7 +52,6 @@ pub fn is_bigraph(g: &[Vec<usize>]) -> Option<Vec<bool>> {
 #[snippet = "bipartite_matching"]
 #[doc = "O(V(V+E))"]
 fn bipartite_matching(g_list: &[HashSet<usize>]) -> Vec<(usize,usize)> {
-
     fn dfs(v: usize, g_list: &[HashSet<usize>], used: &mut [bool], matching: &mut [Option<usize>]) -> bool {
         used[v] = true;
         for &u in &g_list[v] {
@@ -64,7 +64,6 @@ fn bipartite_matching(g_list: &[HashSet<usize>]) -> Vec<(usize,usize)> {
         }
         false
     }
-
     let n = g_list.len();
     let mut matching = vec![None; n];
     for v in 0..n {
@@ -91,19 +90,20 @@ fn bipartite_matching(g_list: &[HashSet<usize>]) -> Vec<(usize,usize)> {
 struct BipartiteMatching {
     g: Vec<HashSet<usize>>,
 }
+#[doc = "find the pair of vertices which is maximum possible."]
 #[snippet = "bipartite_matching"]
 impl BipartiteMatching {
-    fn new(n: usize) -> BipartiteMatching {
+    pub fn new(n: usize) -> BipartiteMatching {
         BipartiteMatching {
             g: vec![HashSet::new(); n],
         }
     }
-    fn connect(&mut self, u: usize, v: usize) {
+    pub fn connect(&mut self, u: usize, v: usize) {
         assert!(u != v);
         self.g[u].insert(v);
         self.g[v].insert(u);
     }
-    fn run(&self) -> Vec<(usize, usize)> {
+    pub fn solve(&self) -> Vec<(usize, usize)> {
         bipartite_matching(&self.g)
     }
 }
@@ -114,5 +114,13 @@ fn test_bipartite_matching() {
     bpm.connect(0,2);
     bpm.connect(0,3);
     bpm.connect(1,2);
-    dbg!(bpm.run());
+    dbg!(bpm.solve());
+}
+#[test]
+fn test_bipartite_matching_impossible() {
+    let mut bpm = BipartiteMatching::new(3);
+    bpm.connect(0,1);
+    bpm.connect(1,2);
+    bpm.connect(2,0);
+    dbg!(bpm.solve());
 }

@@ -1,8 +1,8 @@
 /// minimum spanning tree
 
-#[snippet = "prim"]
 mod prim {
     /// O(V^2)
+    #[snippet = "prim"]
     fn prim(cost: &[Vec<u64>]) -> u64 {
         let n = cost.len();
         let inf = 1<<60;
@@ -37,7 +37,6 @@ mod prim {
     }
 }
 
-#[snippet = "kraskal"]
 mod kraskal {
     use crate::union_find;
 
@@ -72,11 +71,14 @@ mod kraskal {
     fn test_kraskal() {}
 }
 
-#[snippet = "chu_liu_edmonds"]
 mod chu_liu_edmonds {
     use crate::graph::scc;
+
+    #[snippet = "chu_liu_edmonds"]
     #[derive(Debug,Clone,Copy)]
     struct Edge(usize, u64);
+
+    #[snippet = "chu_liu_edmonds"]
     fn min_edge(edges: &[Edge]) -> &Edge {
         let mut r = &edges[0];
         for e in edges {
@@ -86,7 +88,9 @@ mod chu_liu_edmonds {
         }
         r
     }
+    #[snippet = "chu_liu_edmonds"]
     static NULL_EDGE: &'static Edge = &Edge(1<<40, 0);
+    #[snippet = "chu_liu_edmonds"]
     fn chu_liu_edmonds(in_g: &[Vec<Edge>], root: usize) -> u64 {
         // dbg!(&in_g);
         let mut min_in_g: Vec<&Edge> = vec![];

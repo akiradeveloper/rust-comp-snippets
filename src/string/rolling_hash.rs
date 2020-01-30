@@ -2,7 +2,6 @@
  
 #[snippet = "RollingHash"]
 #[allow(dead_code)]
-/// Rolling hash algorithm
 pub struct RollingHash {
     hash_pow_list: Vec<(u64, Vec<(u64, u64)>)>,
 }
@@ -76,6 +75,7 @@ const ROLIHA_MOD: u64 = (1<<61) - 1;
 const ROLIHA_P: u64 = ROLIHA_MOD * ((1<<3) - 1);
 #[snippet = "RoLiHa"]
 impl RoLiHa {
+    #[doc = "caution: the value should not contain 0"]
     fn new(s: &[u64]) -> Self {
         let mut randgen = Xorshift::new();
         let rand = randgen.rand(std::i64::MAX as u64);

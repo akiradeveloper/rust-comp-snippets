@@ -1,4 +1,22 @@
 #[snippet = "ConvexHullTrick"]
+#[derive(Clone,Copy)]
+struct Line {
+    a: i64,
+    b: i64
+}
+#[snippet = "ConvexHullTrick"]
+impl Line {
+    pub fn new(a: i64, b: i64) -> Line {
+        Line {
+            a: a,
+            b: b,
+        }
+    }
+    pub fn y(&self, x: i64) -> i64 {
+        self.a*x + self.b
+    }
+}
+#[snippet = "ConvexHullTrick"]
 struct ConvexHullTrick {
     lines: Vec<(i64, i64)>,
 }
@@ -17,19 +35,20 @@ impl ConvexHullTrick {
         }
         (l3.1 - l2.1) * (l2.0 - l1.0) >= (l2.1 - l1.1) * (l3.0 - l2.0)
     }
-    pub fn add(&mut self, a: i64, b: i64) {
-        let line = (a,b);
+    #[doc = "add a line f(x)=ax+b"]
+    pub fn add(&mut self, line: Line) {
+        let line = (line.a, line.b);
         while self.lines.len() >= 2 && Self::check(self.lines[self.lines.len()-2], self.lines[self.lines.len()-1], line) {
             self.lines.pop();
         }
         self.lines.push(line);
     }
-    fn f(&self, i: usize, x: i64) -> i64 {
+    pub fn f(&self, i: usize, x: i64) -> i64 {
         let line = self.lines[i];
         line.0 * x + line.1
     }
-    #[doc = "min: l>=r, max: l<=r"]
-    pub fn get<F: Fn(i64,i64)->bool>(&self, x: i64, comp: F) -> i64 {
+    #[doc = "lower: l>=r, upper: l<=r"]
+    fn get<F: Fn(i64,i64)->bool>(&self, x: i64, comp: F) -> Line {
         let mut low: i64 = -1;
         let mut high: i64 = (self.lines.len() - 1) as i64;
         while high - low > 1 {
@@ -40,26 +59,30 @@ impl ConvexHullTrick {
                 high = mid;
             }
         }
-        self.f(high as usize, x)
+        let (a,b) = self.lines[high as usize];
+        Line { a: a, b: b }
+    }
+    pub fn get_upper(&self, x: i64) -> Line {
+        self.get(x, |l,r| { l<=r })
+    }
+    pub fn get_lower(&self, x: i64) -> Line {
+        self.get(x, |l,r| { l>=r })
     }
 }
 
 #[test]
 fn test_convex_hull_trick() {
     let mut cht = ConvexHullTrick::new();
-    let cmp = |l:i64,r:i64| {
-        l>=r
-    };
-    cht.add(2,0);
-    assert_eq!(cht.get(-2, cmp), -4);
-    assert_eq!(cht.get(2, cmp), 4);
-    cht.add(0,-1);
-    assert_eq!(cht.get(-2, cmp), -4);
-    assert_eq!(cht.get(2, cmp), -1);
-    cht.add(1,1);
-    assert_eq!(cht.get(-2, cmp), -4);
-    assert_eq!(cht.get(2, cmp), -1);
-    cht.add(-1,0);
-    assert_eq!(cht.get(-2, cmp), -4);
-    assert_eq!(cht.get(2, cmp), -2);
+    cht.add(Line::new(2,0));
+    assert_eq!(cht.get_lower(-2).y(-2), -4);
+    assert_eq!(cht.get_lower(2).y(2), 4);
+    cht.add(Line::new(0,-1));
+    assert_eq!(cht.get_lower(-2).y(-2), -4);
+    assert_eq!(cht.get_lower(2).y(2), -1);
+    cht.add(Line::new(1,1));
+    assert_eq!(cht.get_lower(-2).y(-2), -4);
+    assert_eq!(cht.get_lower(2).y(2), -1);
+    cht.add(Line::new(-1,0));
+    assert_eq!(cht.get_lower(-2).y(-2), -4);
+    assert_eq!(cht.get_lower(2).y(2), -2);
 }

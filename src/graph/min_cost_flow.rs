@@ -14,13 +14,13 @@ mod bellman_ford {
 
     #[doc = "directed flow graph. O(FV^2)"]
     impl Network {
-        fn new(n: usize) -> Network {
+        pub fn new(n: usize) -> Network {
             Network {
                 g: vec![vec![]; n],
             }
         }
         /// allows negative costs
-        fn add_edge(&mut self, from: usize, to: usize, cap: i64, cost: i64) {
+        pub fn add_edge(&mut self, from: usize, to: usize, cap: i64, cost: i64) {
             let from_rev = self.g[to].len();
             let to_rev = self.g[from].len();
             self.g[from].push(Edge {
@@ -41,7 +41,7 @@ mod bellman_ford {
             self.g.len()
         }
 
-        fn min_cost_flow(&mut self, s: usize, t: usize, f: i64) -> Option<i64> {
+        pub fn min_cost_flow(&mut self, s: usize, t: usize, f: i64) -> Option<i64> {
             let mut res = 0;
             let mut prevv = vec![0; self.n()];
             let mut preve = vec![0; self.n()];
@@ -133,13 +133,13 @@ mod dijkstra {
 
     #[doc = "directed flow graph. non-negative cost. O(FElogV)"]
     impl Network {
-        fn new(n: usize) -> Network {
+        pub fn new(n: usize) -> Network {
             Network {
                 g: vec![vec![]; n],
             }
         }
     
-        fn add_edge(&mut self, from: usize, to: usize, cap: i64, cost: i64) {
+        pub fn add_edge(&mut self, from: usize, to: usize, cap: i64, cost: i64) {
             assert!(cost>=0);
             let from_rev = self.g[to].len();
             let to_rev = self.g[from].len();
@@ -161,7 +161,7 @@ mod dijkstra {
             self.g.len()
         }
 
-        fn min_cost_flow(&mut self, s: usize, t: usize, f: i64) -> Option<i64> {
+        pub fn min_cost_flow(&mut self, s: usize, t: usize, f: i64) -> Option<i64> {
             let mut res = 0;
             let mut total_flow = f;
             let mut prevv = vec![0; self.n()];
