@@ -11,6 +11,6 @@ pub mod bipartite_matching;
 pub mod cycle_detection;
 pub mod rerooting;
 pub mod hl_decomposition;
+pub mod tree;
 pub mod tree_diameter;
-pub mod dag;
-pub mod mktree;
+pub mod tree_extraction;

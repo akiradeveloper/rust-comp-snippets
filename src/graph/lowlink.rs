@@ -8,8 +8,8 @@ fn minmax(p: (usize, usize)) -> (usize, usize) {
 }
 
 #[snippet = "Lowlink"]
-struct LowLink<'a> {
-    g: &'a [Vec<usize>],
+struct LowLink {
+    g: Vec<Vec<usize>>,
     used: Vec<bool>,
     ord: Vec<usize>,
     low: Vec<usize>,
@@ -19,9 +19,9 @@ struct LowLink<'a> {
 
 #[snippet = "Lowlink"]
 #[doc = "find articulation points and bridges at the same time"]
-impl <'a> LowLink<'a> {
-    #[doc = "g: undirected adjacency graph"]
-    fn new(g: &'a [Vec<usize>]) -> LowLink {
+impl LowLink {
+    #[doc = "undirected"]
+    fn new(g: Vec<Vec<usize>>) -> LowLink {
         let n = g.len();
         let mut used = vec![false; n];
         let mut ord = vec![0; n];
@@ -50,7 +50,8 @@ impl <'a> LowLink<'a> {
         self.low[u] = self.ord[u];
         let mut is_articulation = false;
         let mut cnt = 0;
-        for &v in &self.g[u] {
+        for i in 0..self.g[u].len() {
+            let v = self.g[u][i];
             if !self.used[v] {
                cnt += 1; 
                k = self.do_build(v, k, Some(u));
@@ -83,7 +84,7 @@ fn test_lowlink() {
         vec![3,4,5,7],
         vec![5,6],
     ];
-    let mut lowlink = LowLink::new(&g);
+    let mut lowlink = LowLink::new(g);
     lowlink.build();
     assert_eq!(lowlink.articulation, [3,6]);
     assert_eq!(lowlink.bridge, [(3,6),(4,6)]);

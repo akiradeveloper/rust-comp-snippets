@@ -1,8 +1,8 @@
 use std::collections::VecDeque;
 
 #[snippet = "SCC"]
-pub struct SCC<'a> {
-    g: &'a [Vec<usize>],
+pub struct SCC {
+    g: Vec<Vec<usize>>,
     r_g: Vec<Vec<usize>>,
     post_order: VecDeque<usize>,
     used: Vec<bool>,
@@ -11,9 +11,9 @@ pub struct SCC<'a> {
 
 #[snippet = "SCC"]
 #[doc = "nodes that communicates each others are contracted into one node"]
-impl <'a> SCC<'a> {
-    #[doc = "g: directed adjacency graph"]
-    pub fn new(g: &'a [Vec<usize>]) -> Self {
+impl SCC {
+    #[doc = "directed"]
+    pub fn new(g: Vec<Vec<usize>>) -> Self {
         let n = g.len();
         let mut r_g = vec![vec![]; n];
         for u in 0..n {
@@ -85,7 +85,7 @@ fn test_scc() {
         vec![9],
         vec![],
     ];
-    let mut scc = SCC::new(&g);
+    let mut scc = SCC::new(g);
     scc.build();
 
     assert_eq!(scc.order, [0,1,2,2,2,3,3,3,4,6,6,5]);

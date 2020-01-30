@@ -7,11 +7,11 @@ pub struct Edge {
     weight: i64,
 }
 #[snippet = "tree_diameter"]
-pub struct FindFurthestPair<'a> {
-    g: &'a [Vec<Edge>]
+pub struct FindFurthestPair {
+    g: Vec<Vec<Edge>>
 }
 #[snippet = "tree_diameter"]
-impl <'a> FindFurthestPair<'a> {
+impl FindFurthestPair {
     pub fn find(&self, v: usize) -> (usize, i64) {
         self.find_rec(None, v)
     }
@@ -30,9 +30,10 @@ impl <'a> FindFurthestPair<'a> {
     }
 }
 #[snippet = "tree_diameter"]
-pub fn tree_diameter(g: &[Vec<Edge>]) -> i64 {
+#[doc = "undirected"]
+pub fn tree_diameter(tree: Vec<Vec<Edge>>) -> i64 {
     let ffp = FindFurthestPair {
-        g: g,
+        g: tree,
     };
     let (v, _) = ffp.find(0);
     let (_, d) = ffp.find(v);

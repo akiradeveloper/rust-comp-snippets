@@ -101,7 +101,7 @@ mod chu_liu_edmonds {
             min_out_g[e.0].push(to);
         }
 
-        let mut scc = scc::SCC::new(&min_out_g);
+        let mut scc = scc::SCC::new(min_out_g);
         scc.build();
 
         // dbg!(&min_in_g);

@@ -1,8 +1,9 @@
 use std::collections::VecDeque;
 
+#[doc = "if there is a loop len(out) will be 0"]
 #[snippet = "TopologicalSort"]
-struct TopologicalSort<'a> {
-    g: &'a [Vec<usize>],
+struct TopologicalSort {
+    g: Vec<Vec<usize>>,
     colors: Vec<bool>,
     indeg: Vec<u32>,
     Q: VecDeque<usize>,
@@ -10,9 +11,9 @@ struct TopologicalSort<'a> {
 }
 
 #[snippet = "TopologicalSort"]
-impl <'a> TopologicalSort<'a> {
-    #[doc = "directed graph. O(V+E)"]
-    fn new(g: &'a [Vec<usize>]) -> Self {
+impl TopologicalSort {
+    #[doc = "g = directed"]
+    pub fn new(g: Vec<Vec<usize>>) -> Self {
         let n = g.len();
         let mut colors = vec![false; n];
         let mut indeg = vec![0; n];
@@ -46,7 +47,8 @@ impl <'a> TopologicalSort<'a> {
 
         }
     }
-    fn tsort(&mut self) {
+    #[doc = "O(V+E)"]
+    pub fn tsort(&mut self) {
         let n = self.g.len();
         for u in 0..n {
             if self.indeg[u] == 0 && self.colors[u] == false {
@@ -66,7 +68,7 @@ fn test_tsort() {
         vec![5],
         vec![2],
     ];
-    let mut tsort = TopologicalSort::new(&conns);
+    let mut tsort = TopologicalSort::new(conns);
     tsort.tsort();
     assert_eq!(tsort.out, [0,3,1,4,5,2]);
 }
@@ -78,7 +80,7 @@ fn test_tsort_loop() {
         vec![2],
         vec![0]
     ];
-    let mut tsort = TopologicalSort::new(&conns);
+    let mut tsort = TopologicalSort::new(conns);
     tsort.tsort();
     assert_eq!(tsort.out.len(), 0);
 }

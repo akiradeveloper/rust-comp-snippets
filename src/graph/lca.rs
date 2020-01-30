@@ -1,15 +1,13 @@
 #[snippet = "LCA"]
-struct LCA <'a> {
-    root: usize,
-    tree: &'a [Vec<usize>],
+struct LCA {
+    tree: Vec<Vec<usize>>,
     parent: Vec<Vec<Option<usize>>>,
     depth: Vec<usize>,
 }
 
 #[snippet = "LCA"]
-#[doc = "compute LCA in directed adjacency graph"]
-impl <'a> LCA<'a> {
-    fn new(root: usize, tree: &'a [Vec<usize>]) -> Self {
+impl LCA {
+    pub fn new(tree: Vec<Vec<usize>>) -> Self {
         let n = tree.len();
         let mut log_n = (n as f64).log2().ceil() as usize;
         if log_n == 0 {
@@ -17,7 +15,6 @@ impl <'a> LCA<'a> {
         }
         assert!(log_n > 0);
         LCA {
-            root: root,
             tree: tree,
             parent: vec![vec![None; n]; log_n],
             depth: vec![0; n],
@@ -34,8 +31,7 @@ impl <'a> LCA<'a> {
             }
         }
     }
-    fn build(&mut self) {
-        let root = self.root;
+    pub fn build(&mut self, root: usize) {
         self.dfs(root, None, 0);
 
         let mut k = 0;
@@ -48,7 +44,7 @@ impl <'a> LCA<'a> {
             k += 1;
         }
     }
-    fn lca(&self, u: usize, v: usize) -> usize {
+    pub fn lca(&self, u: usize, v: usize) -> usize {
         let (mut v0, mut v1) = if self.depth[u] <= self.depth[v] {
             (u, v)
         } else {
@@ -93,8 +89,8 @@ fn test_lca() {
         vec![4],
         vec![4],
     ];
-    let mut lca = LCA::new(0, &tree);
-    lca.build();
+    let mut lca = LCA::new(tree);
+    lca.build(0);
 
     let probs = [
         (1,2,0),

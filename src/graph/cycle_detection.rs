@@ -21,7 +21,6 @@ pub fn cycle_detection_directed(g: &[Vec<usize>]) -> bool {
     }
 
     let mut m=0;
-    // O(E)?
     while let Some(v) = v_indegree0.pop() {
         m += 1;
         for &to in &g[v] {
