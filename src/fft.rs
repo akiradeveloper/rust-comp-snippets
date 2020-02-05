@@ -1,6 +1,7 @@
 use crate::complex::Complex;
 
 #[snippet = "fft"]
+#[doc = "convolve two waves a[x],b[y] to c[x+y]. O(nlogn)"]
 pub fn convolve(a: &[f64], b: &[f64]) -> Vec<f64> {
     let n = a.len() + b.len() - 1;
     let mut m = 1;
