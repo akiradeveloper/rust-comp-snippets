@@ -92,10 +92,10 @@ impl FID {
             upper: (self.n-1) as i64,
             p: |i: i64| {
                 let r = self.rank0(i as usize);
-                r >= k+1
+                (r >= k+1, -1)
             },
         };
-        bs.lower_bound() as usize - 1
+        bs.lower_bound().0 as usize - 1
     }
     #[doc = "query the index of k-th 1 (0-indexed)"]
     pub fn select1(&self, k: usize) -> usize {
@@ -104,10 +104,10 @@ impl FID {
             upper: (self.n-1) as i64,
             p: |i: i64| {
                 let r = self.rank1(i as usize);
-                r >= k+1
+                (r >= k+1, -1)
             },
         };
-        bs.lower_bound() as usize - 1
+        bs.lower_bound().0 as usize - 1
     }
     // #[doc = "query the index of k-th 0 (0-indexed)"]
     // pub fn select0_block_jump(&self, k: usize) -> usize {
@@ -360,10 +360,10 @@ impl WM {
             upper: (self.mat[0].n - 1) as i64,
             p: |i: i64| {
                 let cnt = self.rank(x, i as usize);
-                cnt >= k+1
+                (cnt >= k+1, -1)
             },
         };
-        bs.lower_bound() as usize - 1
+        bs.lower_bound().0 as usize - 1
     }
     #[doc = "k-th largest number in [l,r)"]
     pub fn quantile(&self, l: usize, r: usize, k: usize) -> u64 {

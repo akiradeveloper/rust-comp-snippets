@@ -6,62 +6,64 @@ pub struct BinarySearch<F> {
     pub upper: i64,
 }
 #[snippet = "BinarySearch"]
-impl <F: Fn(i64) -> bool> BinarySearch<F> {
+impl <T: std::default::Default, F: Fn(i64) -> (bool, T)> BinarySearch<F> {
     #[doc = "O(log(upper-lower))"]
-    pub fn lower_bound(&self) -> i64 {
+    pub fn lower_bound(&self) -> (i64, T) {
         let lower = self.lower;
         let upper = self.upper;
         assert!(lower<=upper);
 
+        let mut curval = T::default();
         let mut lb = lower - 1; 
         let mut ub = upper + 1;
         while ub - lb > 1 {
             let mid = (lb+ub)/2;
-            if (self.p)(mid) {
+            let (ok, newval) = (self.p)(mid);
+            if ok {
                 ub = mid;
+                curval = newval;
             } else {
                 lb = mid;
             }
         }
-        let latter = ub;
-        latter
+        (ub, curval)
     }
 }
 
 #[test]
 fn test_generic_binary_search() {
     let xs = vec![1,2,2,2,2,2,3,4,5];
-    let p0 = |i: i64| { xs[i as usize] >= 2 };
+    let p0 = |i: i64| { (xs[i as usize] >= 2, -1) };
     let bs0 = BinarySearch {
         p: p0,
         lower: 0,
         upper: xs.len() as i64 - 1,
     };
-    assert_eq!(bs0.lower_bound(), 1);
+    assert_eq!(bs0.lower_bound().0, 1);
 
-    let p1 = |i: i64| { xs[i as usize] > 2 };
+    let p1 = |i: i64| { (xs[i as usize] > 2, -1) };
     let bs1 = BinarySearch {
         p: p1,
         lower: 0,
         upper: xs.len() as i64 - 1,
     };
-    assert_eq!(bs1.lower_bound(), 6);
+    assert_eq!(bs1.lower_bound().0, 6);
 
-    let p2 = |i: i64| { xs[i as usize] >= 0 };
+    let p2 = |i: i64| { (xs[i as usize] >= 0, -1) };
     let bs2 = BinarySearch {
         p: p2,
         lower: 0,
         upper: xs.len() as i64 - 1,
     };
-    assert_eq!(bs2.lower_bound(), 0);
+    assert_eq!(bs2.lower_bound().0, 0);
 
-    let p3 = |i: i64| { xs[i as usize] >= 100 };
+    let p3 = |i: i64| { (xs[i as usize] >= 100, -1) };
     let bs3 = BinarySearch {
         p: p3,
         lower: 0,
         upper: xs.len() as i64 - 1,
     };
-    assert_eq!(bs3.lower_bound(), 9);
+    assert_eq!(bs3.lower_bound().0, 9);
 }
 
 #[snippet = "FTSearch"]
