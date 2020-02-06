@@ -1,6 +1,7 @@
 #[snippet = "CumRL"]
 trait Foldable {
     type T: Clone + std::fmt::Debug;
+    fn id() -> Self::T;
     fn fold(acc: Self::T, x: Self::T) -> Self::T;
 }
 #[snippet = "CumRL"]
@@ -13,16 +14,15 @@ struct CumRL<F: Foldable> {
 impl <F: Foldable> CumRL<F> {
     pub fn new(elems: Vec<F::T>) -> CumRL<F> {
         let n = elems.len();
-        let fi = elems[0].clone();
-        let mut lcum = vec![elems[0].clone()];
-        for i in 1..n {
-            lcum.push(F::fold(lcum[i-1].clone(), elems[i].clone()));
+        let mut lcum = vec![F::id()];
+        for i in 0..n {
+            lcum.push(F::fold(lcum[i].clone(), elems[i].clone()));
         }
         let mut elems = elems;
         elems.reverse();
-        let mut rcum = vec![elems[0].clone()];
-        for i in 1..n {
-            rcum.push(F::fold(rcum[i-1].clone(), elems[i].clone()));
+        let mut rcum = vec![F::id()];
+        for i in 0..n {
+            rcum.push(F::fold(rcum[i].clone(), elems[i].clone()));
         }
         CumRL {
             lcum: lcum,
@@ -30,13 +30,13 @@ impl <F: Foldable> CumRL<F> {
         }
     }
     pub fn len(&self) -> usize {
-        self.lcum.len()
+        self.lcum.len() - 1
     }
     pub fn lcum(&self, len: usize) -> F::T {
-        self.lcum[len-1].clone()
+        self.lcum[len].clone()
     }
     pub fn rcum(&self, len: usize) -> F::T {
-        self.rcum[len-1].clone()
+        self.rcum[len].clone()
     }
 }
 #[test]
@@ -44,6 +44,7 @@ fn test_cumrl() {
     struct Sum;
     impl Foldable for Sum {
         type T = i64;
+        fn id() -> i64 { 0 }
         fn fold(acc: i64, x: i64) -> i64 { acc + x }
     }
     let v = vec![1,2,3,4,5];
@@ -63,7 +64,7 @@ trait ZenHoable: Foldable + Clone + Sized {
     type NVal: Clone;
     type EVal: Clone;
     fn f(nvalue: Self::NVal, evalue: Self::EVal, dp: &[Self::T]) -> Self::T;
-    fn g(nvalue: Self::NVal, evalue: Self::EVal, dp: &CumRL<Self>, L: usize, R: usize) -> Self::T;
+    fn g(nvalue: Self::NVal, evalue: Self::EVal, dp: &CumRL<Self>, l: usize, r: usize) -> Self::T;
 }
 #[derive(Debug)]
 #[snippet = "ZenHo"]
@@ -123,7 +124,7 @@ impl <Z: ZenHoable> ZenHo<Z> {
         for i in 0..self.g[u].len() {
             let v = self.g[u][i];
             let L = i;
-            let R = n-1-i;
+            let R = n-1-L;
             let newv = Z::g(self.nvalues[u].clone(), self.evalues.get(&(u,v)).cloned().unwrap(), &cum, L, R);
             self.dp.insert((u,v), newv);
         }
@@ -136,6 +137,7 @@ impl <Z: ZenHoable> ZenHo<Z> {
     #[doc = "O(n)"]
     pub fn build(&mut self, root: usize) {
         self.init_dfs(None, root);
+        dbg!(&self.dp);
         self.reroot_bfs(None, root);
     }
     pub fn calc(&self, u: usize, v: usize) -> Z::T {
@@ -150,6 +152,7 @@ fn test_zenho() {
     struct M;
     impl Foldable for M {
         type T = usize;
+        fn id() -> usize { 0 }
         fn fold(acc: usize, x: usize) -> usize {
             acc + x
         }
@@ -157,7 +160,7 @@ fn test_zenho() {
     impl ZenHoable for M {
         type NVal = usize;
         type EVal = usize;
-        fn f(n: usize, e: usize, dp: &[usize]) -> usize {
+        fn f(_: usize, _: usize, dp: &[usize]) -> usize {
             let mut tot = 0;
             for &x in dp {
                 tot += x
@@ -165,14 +168,10 @@ fn test_zenho() {
             tot += 1;
             tot
         }
-        fn g(n: usize, e: usize, cum: &CumRL<Self>, l: usize, r: usize) -> usize {
+        fn g(_: usize, _: usize, cum: &CumRL<Self>, l: usize, r: usize) -> usize {
             let mut tot = 0;
-            if l>0 {
-                tot += cum.lcum(l);
-            }
-            if r>0 {
-                tot += cum.rcum(r);
-            }
+            tot += cum.lcum(l);
+            tot += cum.rcum(r);
             tot += 1;
             tot
         }
@@ -184,6 +183,7 @@ fn test_zenho() {
         zenho.add_edge(v, u, 0);
     }
     zenho.build(0);
+    dbg!(&zenho.dp);
     
     let ans = vec![
         (1,0,1),
