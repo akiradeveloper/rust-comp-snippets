@@ -80,3 +80,4 @@ impl <F: Foldable> ReRooting<F> {
         self.dp.clone()
     }
 }
+

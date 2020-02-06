@@ -4,7 +4,7 @@ trait Foldable {
     fn fold(acc: Self::T, x: Self::T) -> Self::T;
 }
 #[snippet = "CumRL"]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct CumRL<F: Foldable> {
     lcum: Vec<F::T>,
     rcum: Vec<F::T>,
@@ -65,6 +65,7 @@ trait ZenHoable: Foldable + Clone + Sized {
     fn f(nvalue: Self::NVal, evalue: Self::EVal, dp: &[Self::T]) -> Self::T;
     fn g(nvalue: Self::NVal, evalue: Self::EVal, dp: &CumRL<Self>, L: usize, R: usize) -> Self::T;
 }
+#[derive(Debug)]
 #[snippet = "ZenHo"]
 struct ZenHo<Z: ZenHoable> {
     g: Vec<Vec<usize>>,
@@ -136,9 +137,53 @@ impl <Z: ZenHoable> ZenHo<Z> {
     #[doc = "O(n)"]
     pub fn build(&mut self, root: usize) {
         self.init_dfs(None, root);
-        self.reroot_bfs(None, root);
+        // self.reroot_bfs(None, root);
     }
     pub fn calc(&self, u: usize, v: usize) -> Z::T {
         self.dp.get(&(u,v)).cloned().unwrap()
     }
+}
+
+#[test]
+fn test_zenho() {
+    use super::*;
+    #[derive(Clone, Debug)]
+    struct M;
+    impl Foldable for M {
+        type T = usize;
+        fn fold(acc: usize, x: usize) -> usize {
+            acc + x
+        }
+    }
+    impl ZenHoable for M {
+        type NVal = usize;
+        type EVal = usize;
+        fn f(n: usize, e: usize, dp: &[usize]) -> usize {
+            let mut tot = 0;
+            for &x in dp {
+                tot += x
+            }
+            tot += 1;
+            tot
+        }
+        fn g(n: usize, e: usize, cum: &CumRL<Self>, l: usize, r: usize) -> usize {
+            let mut tot = 0;
+            if l>0 {
+                tot += cum.lcum(l);
+            }
+            if r>0 {
+                tot += cum.rcum(r);
+            }
+            tot += 1;
+            tot
+        }
+    }
+    let mut zenho: ZenHo<M> = ZenHo::new(vec![0;5]);
+    let E = vec![(0,1),(0,2),(0,3),(2,4)];
+    for (u,v) in E {
+        zenho.add_edge(u, v, 0);
+        zenho.add_edge(v, u, 0);
+    }
+    zenho.build(0);
+    dbg!(&zenho);
 }
