@@ -139,7 +139,6 @@ impl <Z: ZenHoable> ZenHo<Z> {
     #[doc = "O(n)"]
     pub fn build(&mut self, root: usize) {
         self.init_dfs(None, root);
-        dbg!(&self.dp);
         self.reroot_bfs(None, root);
     }
     pub fn calc(&self, u: usize, v: usize) -> Z::T {
