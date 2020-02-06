@@ -11,7 +11,7 @@ struct CumRL<F: Foldable> {
 }
 #[snippet = "CumRL"]
 impl <F: Foldable> CumRL<F> {
-    fn new(elems: Vec<F::T>) -> CumRL<F> {
+    pub fn new(elems: Vec<F::T>) -> CumRL<F> {
         let n = elems.len();
         let fi = elems[0].clone();
         let mut lcum = vec![elems[0].clone()];
@@ -29,13 +29,13 @@ impl <F: Foldable> CumRL<F> {
             rcum: rcum,
         }
     }
-    fn len(&self) -> usize {
+    pub fn len(&self) -> usize {
         self.lcum.len()
     }
-    fn lcum(&self, len: usize) -> F::T {
+    pub fn lcum(&self, len: usize) -> F::T {
         self.lcum[len-1].clone()
     }
-    fn rcum(&self, len: usize) -> F::T {
+    pub fn rcum(&self, len: usize) -> F::T {
         self.rcum[len-1].clone()
     }
 }
@@ -58,22 +58,24 @@ fn test_cumrl() {
 
 use std::collections::HashMap;
 
+#[snippet = "ZenHo"]
 trait ZenHoable: Foldable + Clone + Sized {
     type NVal: Clone;
     type EVal: Clone;
-    type DPVal: Clone;
-    fn f(nvalue: Self::NVal, evalue: Self::EVal, dp: &[Self::DPVal]) -> Self::DPVal;
-    fn g(nvalue: Self::NVal, evalue: Self::EVal, dp: &CumRL<Self>) -> Self::DPVal;
+    fn f(nvalue: Self::NVal, evalue: Self::EVal, dp: &[Self::T]) -> Self::T;
+    fn g(nvalue: Self::NVal, evalue: Self::EVal, dp: &CumRL<Self>, L: usize, R: usize) -> Self::T;
 }
+#[snippet = "ZenHo"]
 struct ZenHo<Z: ZenHoable> {
     g: Vec<Vec<usize>>,
     nvalues: Vec<Z::NVal>,
     evalues: HashMap<(usize,usize), Z::EVal>,
-    dp: HashMap<(usize,usize), Z::DPVal>,
+    dp: HashMap<(usize,usize), Z::T>,
     rootcum: Vec<Option<CumRL<Z>>>,
 }
+#[snippet = "ZenHo"]
 impl <Z: ZenHoable> ZenHo<Z> {
-    fn new(nvalues: Vec<Z::NVal>) -> ZenHo<Z> {
+    pub fn new(nvalues: Vec<Z::NVal>) -> ZenHo<Z> {
         let n = nvalues.len();
         ZenHo {
             g: vec![vec![]; n],
@@ -83,10 +85,10 @@ impl <Z: ZenHoable> ZenHo<Z> {
             rootcum: vec![None; n],
         }
     }
-    fn n(&self) -> usize {
+    pub fn n(&self) -> usize {
         self.g.len()
     }
-    fn add_edge(&mut self, u: usize, v: usize, eval: Z::EVal) {
+    pub fn add_edge(&mut self, u: usize, v: usize, eval: Z::EVal) {
         self.g[u].push(v);
         self.evalues.insert((u,v), eval);
     }
@@ -97,21 +99,46 @@ impl <Z: ZenHoable> ZenHo<Z> {
             self.init_dfs(Some(u), v);
         }
         if let Some(p) = par {
-            let e = (u,p);
             let mut dp = vec![];
             for i in 0..self.g[u].len() {
                 let v = self.g[u][i];
                 if Some(v) == par { continue; }
-                let dpval: Z::DPVal = self.dp.get(&(v,u)).cloned().unwrap();
+                let dpval = self.dp.get(&(v,u)).cloned().unwrap();
                 dp.push(dpval);
             }
-            let newv: Z::DPVal = Z::f(self.nvalues[u].clone(), self.evalues.get(&e).cloned().unwrap(), &dp);
-            self.dp.insert(e, newv);
+            let newv = Z::f(self.nvalues[u].clone(), self.evalues.get(&(u,p)).cloned().unwrap(), &dp);
+            self.dp.insert((u,p), newv);
         }
     }
-    fn reroot_dfs(&mut self, par: Option<usize>, u: usize) {
+    fn reroot_bfs(&mut self, par: Option<usize>, u: usize) {
+        let mut dp = vec![];
+        // we have dp v->u
+        for i in 0..self.g[u].len() {
+            let v = self.g[u][i];
+            let x = self.dp.get(&(v,u)).cloned().unwrap();
+            dp.push(x);
+        }
+        let cum: CumRL<Z> = CumRL::new(dp);
+        let n = cum.len();
+        // let's make value dp u->v
+        for i in 0..self.g[u].len() {
+            let v = self.g[u][i];
+            let L = i;
+            let R = n-1-i;
+            let newv = Z::g(self.nvalues[u].clone(), self.evalues.get(&(u,v)).cloned().unwrap(), &cum, L, R);
+            self.dp.insert((u,v), newv);
+        }
+        for i in 0..self.g[u].len() {
+            let v = self.g[u][i];
+            self.reroot_bfs(Some(u), v);
+        }
     }
-    fn build(&mut self, root: usize) {
-
+    #[doc = "O(n)"]
+    pub fn build(&mut self, root: usize) {
+        self.init_dfs(None, root);
+        self.reroot_bfs(None, root);
+    }
+    pub fn calc(&self, u: usize, v: usize) -> Z::T {
+        self.dp.get(&(u,v)).cloned().unwrap()
     }
 }
