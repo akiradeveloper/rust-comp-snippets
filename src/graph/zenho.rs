@@ -16,13 +16,15 @@ impl <F: Foldable> CumRL<F> {
         let n = elems.len();
         let mut lcum = vec![F::id()];
         for i in 0..n {
-            lcum.push(F::fold(lcum[i].clone(), elems[i].clone()));
+            let x = F::fold(lcum[i].clone(), elems[i].clone());
+            lcum.push(x);
         }
         let mut elems = elems;
         elems.reverse();
         let mut rcum = vec![F::id()];
         for i in 0..n {
-            rcum.push(F::fold(rcum[i].clone(), elems[i].clone()));
+            let x = F::fold(rcum[i].clone(), elems[i].clone());
+            rcum.push(x);
         }
         CumRL {
             lcum: lcum,
