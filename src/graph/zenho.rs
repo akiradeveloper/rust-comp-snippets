@@ -1,6 +1,6 @@
 #[snippet = "CumRL"]
 trait Foldable {
-    type T: Clone;
+    type T: Clone + std::fmt::Debug;
     fn fold(acc: Self::T, x: Self::T) -> Self::T;
 }
 #[snippet = "CumRL"]
@@ -72,7 +72,6 @@ struct ZenHo<Z: ZenHoable> {
     nvalues: Vec<Z::NVal>,
     evalues: HashMap<(usize,usize), Z::EVal>,
     dp: HashMap<(usize,usize), Z::T>,
-    rootcum: Vec<Option<CumRL<Z>>>,
 }
 #[snippet = "ZenHo"]
 impl <Z: ZenHoable> ZenHo<Z> {
@@ -83,7 +82,6 @@ impl <Z: ZenHoable> ZenHo<Z> {
             nvalues: nvalues, 
             evalues: HashMap::new(),
             dp: HashMap::new(),
-            rootcum: vec![None; n],
         }
     }
     pub fn n(&self) -> usize {
@@ -131,13 +129,14 @@ impl <Z: ZenHoable> ZenHo<Z> {
         }
         for i in 0..self.g[u].len() {
             let v = self.g[u][i];
+            if Some(v) == par { continue; }
             self.reroot_bfs(Some(u), v);
         }
     }
     #[doc = "O(n)"]
     pub fn build(&mut self, root: usize) {
         self.init_dfs(None, root);
-        // self.reroot_bfs(None, root);
+        self.reroot_bfs(None, root);
     }
     pub fn calc(&self, u: usize, v: usize) -> Z::T {
         self.dp.get(&(u,v)).cloned().unwrap()
@@ -185,5 +184,18 @@ fn test_zenho() {
         zenho.add_edge(v, u, 0);
     }
     zenho.build(0);
-    dbg!(&zenho);
+    
+    let ans = vec![
+        (1,0,1),
+        (2,0,2),
+        (3,0,1),
+        (4,2,1),
+        (0,1,4),
+        (0,2,3),
+        (0,3,4),
+        (2,4,4),
+    ];
+    for (u,v,should_be) in ans {
+        assert_eq!(zenho.calc(u,v), should_be);
+    }
 }
