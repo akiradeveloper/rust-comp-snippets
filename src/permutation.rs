@@ -2,11 +2,7 @@
 
 #[snippet = "LexicalPermutation"]
 pub trait LexicalPermutation {
-    /// Return \`true\` if the slice was permuted, \`false\` if it is already
-    /// at the last ordered permutation.
     fn next_permutation(&mut self) -> bool;
-    /// Return \`true\` if the slice was permuted, \`false\` if it is already
-    /// at the first ordered permutation.
     fn prev_permutation(&mut self) -> bool;
 }
 
