@@ -53,3 +53,4 @@ pub mod complex;
 pub mod fft;
 pub mod karatsuba;
 pub mod gaussian_elimination;
+pub mod kadane;

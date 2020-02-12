@@ -186,25 +186,6 @@ fn test_group_fold() {
     assert_eq!(group_fold(vec![('L',1),('L',3),('R',2),('L',1)], |&x| {x.0}), vec![vec![('L',1),('L',3)],vec![('R',2)],vec![('L',1)]]);
 }
 
-#[snippet = "kadane"]
-#[doc = "return the sum of the maximum subarray. (Kadane's algorithm). O(N)"]
-fn kadane(xs: &[i64]) -> i64 {
-    let mut max_ending_here = xs[0];
-    let mut max_so_far = xs[0];
-    for i in 1..xs.len() {
-        let x=xs[i];
-        max_ending_here=max(x,max_ending_here+x);
-        max_so_far=max(max_so_far,max_ending_here);
-    }
-    max_so_far
-}
-#[test]
-fn test_kadane() {
-    assert_eq!(kadane(&[1,-2,1,1,-2,1]),2);
-    assert_eq!(kadane(&[1,5,-1,0,10]),15);
-    assert_eq!(kadane(&[0,-1,-5,0,-4]),0);
-}
-
 #[snippet = "vec_max"]
 fn vec_max<T: Ord + Clone>(xs: &[T]) -> T {
     let mut v = &xs[0];
