@@ -1,6 +1,6 @@
 mod bfs01 {
     // connected[i][i] == false
-    #[doc = "shortest path from directed matrix graph with 0/1 cost. O(V)"]
+    #[doc = "shortest path from directed matrix graph with 0/1 cost. O(E)"]
     #[snippet = "bfs01"]
     fn bfs01(g: &[Vec<i64>], s: usize, inf: i64) -> Vec<i64> {
         use std::collections::VecDeque;
@@ -144,6 +144,80 @@ mod djikstra_heap {
 
     #[test]
     fn test_dijkstra_heap() {}
+}
+
+use std::collections::HashMap;
+use std::collections::BinaryHeap;
+use std::collections::VecDeque;
+#[snippet = "DijkstraHeap"]
+struct DijkstraHeap<State: std::hash::Hash + std::cmp::Eq> {
+    cur: i64,
+    que: HashMap<i64, VecDeque<State>>,
+    next: BinaryHeap<i64>,
+}
+#[snippet = "DijkstraHeap"]
+impl <State: Default + std::hash::Hash + std::cmp::Eq> DijkstraHeap<State> {
+    fn new() -> DijkstraHeap<State> {
+        DijkstraHeap {
+            cur: std::i64::MIN,
+            que: HashMap::new(),
+            next: BinaryHeap::new(),
+        }
+    }
+    pub fn pop(&mut self) -> Option<(i64, State)> {
+        self.forward_cur();
+        if let Some(q) = self.que.get_mut(&self.cur) {
+            if q.is_empty() {
+                None
+            } else {
+                let e = q.pop_front().unwrap();
+                Some((self.cur, e))
+            }
+        } else {
+            None
+        }
+    }
+    pub fn push(&mut self, cost: i64, st: State) {
+        if !self.que.contains_key(&cost) {
+            self.next.push(-cost)
+        }
+        self.que.entry(cost).or_insert(VecDeque::new()).push_back(st);
+    }
+    pub fn is_empty(&mut self) -> bool {
+        self.forward_cur();
+        if let Some(q) = self.que.get(&self.cur) {
+            q.is_empty()
+        } else {
+            true
+        }
+    }
+    fn forward_cur(&mut self) {
+        if let Some(q) = self.que.get(&self.cur) {
+            if q.is_empty() {
+                if let Some(nx) = self.next.pop() {
+                    self.cur = -nx;
+                } 
+            }
+        } else {
+            if let Some(nx) = self.next.pop() {
+                self.cur = -nx;
+            } 
+        }
+    }
+}
+#[test]
+fn test_dijkstra_heap_struct() {
+    let mut q: DijkstraHeap<char> = DijkstraHeap::new();
+    assert!(q.is_empty());
+    assert_eq!(q.pop(), None);
+    q.push(0,'x');
+    q.push(10000,'a');
+    assert_eq!(q.pop(), Some((0,'x')));
+    assert!(!q.is_empty());
+    assert_eq!(q.pop(), Some((10000,'a')));
+    assert!(q.is_empty());
+    assert_eq!(q.pop(), None);
+    assert_eq!(q.pop(), None);
 }
 
 mod bellman_ford {
