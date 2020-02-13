@@ -157,14 +157,14 @@ struct DijkstraHeap<State: std::hash::Hash + std::cmp::Eq> {
 }
 #[snippet = "DijkstraHeap"]
 impl <State: Default + std::hash::Hash + std::cmp::Eq> DijkstraHeap<State> {
-    fn new() -> DijkstraHeap<State> {
+    pub fn new() -> DijkstraHeap<State> {
         DijkstraHeap {
             cur: std::i64::MIN,
             que: HashMap::new(),
             next: BinaryHeap::new(),
         }
     }
-    pub fn pop(&mut self) -> Option<(i64, State)> {
+    fn pop_retry(&mut self) -> Option<(i64, State)> {
         self.forward_cur();
         if let Some(q) = self.que.get_mut(&self.cur) {
             if q.is_empty() {
@@ -175,6 +175,18 @@ impl <State: Default + std::hash::Hash + std::cmp::Eq> DijkstraHeap<State> {
             }
         } else {
             None
+        } 
+    }
+    pub fn pop(&mut self) -> Option<(i64, State)> {
+        if let Some(q) = self.que.get_mut(&self.cur) {
+            if q.is_empty() {
+                self.pop_retry()
+            } else {
+                let e = q.pop_front().unwrap();
+                Some((self.cur, e))
+            }
+        } else {
+            self.pop_retry()
         }
     }
     pub fn push(&mut self, cost: i64, st: State) {
@@ -183,12 +195,24 @@ impl <State: Default + std::hash::Hash + std::cmp::Eq> DijkstraHeap<State> {
         }
         self.que.entry(cost).or_insert(VecDeque::new()).push_back(st);
     }
-    pub fn is_empty(&mut self) -> bool {
+    fn is_empty_retry(&mut self) -> bool {
         self.forward_cur();
         if let Some(q) = self.que.get(&self.cur) {
             q.is_empty()
         } else {
             true
+        }
+    }
+    pub fn is_empty(&mut self) -> bool {
+        self.forward_cur();
+        if let Some(q) = self.que.get(&self.cur) {
+            if q.is_empty() {
+                self.is_empty_retry()
+            } else {
+                false
+            }
+        } else {
+            self.is_empty_retry()
         }
     }
     fn forward_cur(&mut self) {
