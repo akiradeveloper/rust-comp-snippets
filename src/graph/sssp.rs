@@ -204,7 +204,6 @@ impl <State: Default + std::hash::Hash + std::cmp::Eq> DijkstraHeap<State> {
         }
     }
     pub fn is_empty(&mut self) -> bool {
-        self.forward_cur();
         if let Some(q) = self.que.get(&self.cur) {
             if q.is_empty() {
                 self.is_empty_retry()
