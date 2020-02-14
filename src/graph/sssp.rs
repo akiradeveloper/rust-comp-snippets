@@ -151,86 +151,66 @@ use std::collections::BinaryHeap;
 use std::collections::VecDeque;
 #[snippet = "DijkstraHeap"]
 struct DijkstraHeap<State: std::hash::Hash + std::cmp::Eq> {
-    cur: i64,
-    que: HashMap<i64, Vec<State>>,
+    cur: usize,
+    que: Vec<Vec<State>>,
     next: BinaryHeap<i64>,
 }
 #[snippet = "DijkstraHeap"]
-impl <State: Default + std::hash::Hash + std::cmp::Eq> DijkstraHeap<State> {
-    pub fn new() -> DijkstraHeap<State> {
+impl <State: Default + Clone + std::hash::Hash + std::cmp::Eq> DijkstraHeap<State> {
+    pub fn new(maxdist: usize) -> DijkstraHeap<State> {
         DijkstraHeap {
-            cur: std::i64::MIN,
-            que: HashMap::new(),
+            cur: maxdist+1,
+            que: vec![vec![]; maxdist+2],
             next: BinaryHeap::new(),
         }
     }
-    fn pop_retry(&mut self) -> Option<(i64, State)> {
+    fn pop_retry(&mut self) -> Option<(usize, State)> {
         self.forward_cur();
-        if let Some(q) = self.que.get_mut(&self.cur) {
-            if q.is_empty() {
-                None
-            } else {
-                let e = q.pop().unwrap();
-                Some((self.cur, e))
-            }
-        } else {
+        let q = &mut self.que[self.cur];
+        if q.is_empty() {
             None
-        } 
-    }
-    pub fn pop(&mut self) -> Option<(i64, State)> {
-        if let Some(q) = self.que.get_mut(&self.cur) {
-            if q.is_empty() {
-                self.pop_retry()
-            } else {
-                let e = q.pop().unwrap();
-                Some((self.cur, e))
-            }
         } else {
-            self.pop_retry()
+            let e = q.pop().unwrap();
+            Some((self.cur, e))
         }
     }
-    pub fn push(&mut self, cost: i64, st: State) {
-        if !self.que.contains_key(&cost) {
-            self.next.push(-cost)
+    pub fn pop(&mut self) -> Option<(usize, State)> {
+        let q = &mut self.que[self.cur];
+        if q.is_empty() {
+            self.pop_retry()
+        } else {
+            let e = q.pop().unwrap();
+            Some((self.cur, e))
         }
-        self.que.entry(cost).or_insert(vec![]).push(st);
+    }
+    pub fn push(&mut self, cost: usize, st: State) {
+        if self.que[cost].is_empty() {
+            self.next.push(-1 * cost as i64);
+        }
+        self.que[cost].push(st);
     }
     fn is_empty_retry(&mut self) -> bool {
         self.forward_cur();
-        if let Some(q) = self.que.get(&self.cur) {
-            q.is_empty()
-        } else {
-            true
-        }
+        let q = &self.que[self.cur];
+        q.is_empty()
     }
     pub fn is_empty(&mut self) -> bool {
-        if let Some(q) = self.que.get(&self.cur) {
-            if q.is_empty() {
-                self.is_empty_retry()
-            } else {
-                false
-            }
-        } else {
+        let q = &self.que[self.cur];
+        if q.is_empty() {
             self.is_empty_retry()
+        } else {
+            false
         }
     }
     fn forward_cur(&mut self) {
-        if let Some(q) = self.que.get(&self.cur) {
-            if q.is_empty() {
-                if let Some(nx) = self.next.pop() {
-                    self.cur = -nx;
-                } 
-            }
-        } else {
-            if let Some(nx) = self.next.pop() {
-                self.cur = -nx;
-            } 
-        }
+        if let Some(nx) = self.next.pop() {
+            self.cur = -nx as usize;
+        } 
     }
 }
 #[test]
 fn test_dijkstra_heap_struct() {
-    let mut q: DijkstraHeap<char> = DijkstraHeap::new();
+    let mut q: DijkstraHeap<char> = DijkstraHeap::new(10000);
     assert!(q.is_empty());
     assert_eq!(q.pop(), None);
     q.push(0,'x');
@@ -242,10 +222,10 @@ fn test_dijkstra_heap_struct() {
     assert_eq!(q.pop(), None);
     assert_eq!(q.pop(), None);
 }
-const SZ: i64 = 1000000;
+const SZ: usize = 10000;
 #[bench]
 fn bench_dijkstra_heap_push(b: &mut test::Bencher) {
-    let mut s = DijkstraHeap::new();
+    let mut s = DijkstraHeap::new(SZ);
     let mut data = vec![];
     for i in 0..SZ {
         data.push(i);
@@ -258,7 +238,7 @@ fn bench_dijkstra_heap_push(b: &mut test::Bencher) {
 }
 #[bench]
 fn bench_dijkstra_heap_pop(b: &mut test::Bencher) {
-    let mut s = DijkstraHeap::new();
+    let mut s = DijkstraHeap::new(SZ);
     for i in 0..SZ {
         s.push(i, 0);
     }
@@ -270,7 +250,7 @@ fn bench_dijkstra_heap_pop(b: &mut test::Bencher) {
 }
 #[bench]
 fn bench_dijkstra_heap_is_empty(b: &mut test::Bencher) {
-    let mut s = DijkstraHeap::new();
+    let mut s = DijkstraHeap::new(SZ);
     s.push(1,0);
     b.iter(||
         for _ in 0..SZ {
