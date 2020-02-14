@@ -148,17 +148,16 @@ mod djikstra_heap {
 
 use std::collections::HashMap;
 use std::collections::BinaryHeap;
-use std::collections::VecDeque;
 #[snippet = "DijkstraHeap"]
-struct DijkstraHeap<State: std::hash::Hash + std::cmp::Eq> {
+struct DijkstraQueue<State: std::hash::Hash + std::cmp::Eq> {
     cur: usize,
     que: Vec<Vec<State>>,
     next: BinaryHeap<i64>,
 }
 #[snippet = "DijkstraHeap"]
-impl <State: Default + Clone + std::hash::Hash + std::cmp::Eq> DijkstraHeap<State> {
-    pub fn new(maxdist: usize) -> DijkstraHeap<State> {
-        DijkstraHeap {
+impl <State: Default + Clone + std::hash::Hash + std::cmp::Eq> DijkstraQueue<State> {
+    pub fn new(maxdist: usize) -> DijkstraQueue<State> {
+        DijkstraQueue {
             cur: maxdist+1,
             que: vec![vec![]; maxdist+2],
             next: BinaryHeap::new(),
@@ -210,7 +209,7 @@ impl <State: Default + Clone + std::hash::Hash + std::cmp::Eq> DijkstraHeap<Stat
 }
 #[test]
 fn test_dijkstra_heap_struct() {
-    let mut q: DijkstraHeap<char> = DijkstraHeap::new(10000);
+    let mut q: DijkstraQueue<char> = DijkstraQueue::new(10000);
     assert!(q.is_empty());
     assert_eq!(q.pop(), None);
     q.push(0,'x');
@@ -225,7 +224,7 @@ fn test_dijkstra_heap_struct() {
 const SZ: usize = 10000;
 #[bench]
 fn bench_dijkstra_heap_push(b: &mut test::Bencher) {
-    let mut s = DijkstraHeap::new(SZ);
+    let mut s = DijkstraQueue::new(SZ);
     let mut data = vec![];
     for i in 0..SZ {
         data.push(i);
@@ -238,7 +237,7 @@ fn bench_dijkstra_heap_push(b: &mut test::Bencher) {
 }
 #[bench]
 fn bench_dijkstra_heap_pop(b: &mut test::Bencher) {
-    let mut s = DijkstraHeap::new(SZ);
+    let mut s = DijkstraQueue::new(SZ);
     for i in 0..SZ {
         s.push(i, 0);
     }
@@ -250,7 +249,7 @@ fn bench_dijkstra_heap_pop(b: &mut test::Bencher) {
 }
 #[bench]
 fn bench_dijkstra_heap_is_empty(b: &mut test::Bencher) {
-    let mut s = DijkstraHeap::new(SZ);
+    let mut s = DijkstraQueue::new(SZ);
     s.push(1,0);
     b.iter(||
         for _ in 0..SZ {
