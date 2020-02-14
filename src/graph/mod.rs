@@ -16,3 +16,4 @@ pub mod tree_diameter;
 pub mod tree_extraction;
 pub mod zenho;
 pub mod longest_distance;
+pub mod dijkstra_queue;
