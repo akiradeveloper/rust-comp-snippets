@@ -152,7 +152,7 @@ use std::collections::VecDeque;
 #[snippet = "DijkstraHeap"]
 struct DijkstraHeap<State: std::hash::Hash + std::cmp::Eq> {
     cur: i64,
-    que: HashMap<i64, VecDeque<State>>,
+    que: HashMap<i64, Vec<State>>,
     next: BinaryHeap<i64>,
 }
 #[snippet = "DijkstraHeap"]
@@ -170,7 +170,7 @@ impl <State: Default + std::hash::Hash + std::cmp::Eq> DijkstraHeap<State> {
             if q.is_empty() {
                 None
             } else {
-                let e = q.pop_front().unwrap();
+                let e = q.pop().unwrap();
                 Some((self.cur, e))
             }
         } else {
@@ -182,7 +182,7 @@ impl <State: Default + std::hash::Hash + std::cmp::Eq> DijkstraHeap<State> {
             if q.is_empty() {
                 self.pop_retry()
             } else {
-                let e = q.pop_front().unwrap();
+                let e = q.pop().unwrap();
                 Some((self.cur, e))
             }
         } else {
@@ -193,7 +193,7 @@ impl <State: Default + std::hash::Hash + std::cmp::Eq> DijkstraHeap<State> {
         if !self.que.contains_key(&cost) {
             self.next.push(-cost)
         }
-        self.que.entry(cost).or_insert(VecDeque::new()).push_back(st);
+        self.que.entry(cost).or_insert(vec![]).push(st);
     }
     fn is_empty_retry(&mut self) -> bool {
         self.forward_cur();
@@ -242,6 +242,43 @@ fn test_dijkstra_heap_struct() {
     assert_eq!(q.pop(), None);
     assert_eq!(q.pop(), None);
 }
+const SZ: i64 = 1000000;
+#[bench]
+fn bench_dijkstra_heap_push(b: &mut test::Bencher) {
+    let mut s = DijkstraHeap::new();
+    let mut data = vec![];
+    for i in 0..SZ {
+        data.push(i);
+    }
+    b.iter(||
+        for &x in &data {
+            s.push(x,0);
+        }
+    );
+}
+#[bench]
+fn bench_dijkstra_heap_pop(b: &mut test::Bencher) {
+    let mut s = DijkstraHeap::new();
+    for i in 0..SZ {
+        s.push(i, 0);
+    }
+    b.iter(||
+        for _ in 0..SZ {
+            s.pop();
+        }
+    );
+}
+#[bench]
+fn bench_dijkstra_heap_is_empty(b: &mut test::Bencher) {
+    let mut s = DijkstraHeap::new();
+    s.push(1,0);
+    b.iter(||
+        for _ in 0..SZ {
+            s.is_empty();
+        }
+    );
+}
+
 
 mod bellman_ford {
     #[snippet = "bellman_ford"]
