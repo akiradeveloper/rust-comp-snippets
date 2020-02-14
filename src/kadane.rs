@@ -42,3 +42,14 @@ impl Kadane {
         res
     }
 }
+#[test]
+fn test_kadane() {
+    let a = vec![1,-2,3,-4,5,6];
+    let kdn = Kadane::new(a);
+    assert_eq!(kdn.rmax(0), (9,6));
+    assert_eq!(kdn.lmax(6), (11,2));
+    assert_eq!(kdn.lmax(5), (5,1));
+    assert_eq!(kdn.lmax(2), (0,0));
+    assert_eq!(kdn.lmax(4), (0,0));
+    assert_eq!(kdn.lmax(3), (3,1));
+}
