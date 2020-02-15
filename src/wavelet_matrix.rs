@@ -395,7 +395,7 @@ impl WM {
         }
         res 
     }
-    pub fn rank_all(&self, l: usize, r: usize, x: u64) -> (usize, usize, usize) {
+    fn rank_all(&self, l: usize, r: usize, x: u64) -> (usize, usize, usize) {
         let mut cnt_lt = 0;
         let mut cnt_gt = 0;
         let mut s = l;
@@ -426,66 +426,6 @@ impl WM {
         let (cntlt_max,_,_) = self.rank_all(l, r, max);
         let (cntlt_min,_,_) = self.rank_all(l, r, min);
         cntlt_max - cntlt_min
-    }
-}
-
-#[test]
-fn test_wm_rank() {
-    let xs = vec![0,7,2,1,4,3,6,7,2,5,0,4,7,2,6,3];
-    let wm = WM::new(xs);
-    assert_eq!(wm.rank(2, 12), 2);
-    assert_eq!(wm.rank(7, 12), 2);
-    assert_eq!(wm.rank(7, 13), 3);
-    assert_eq!(wm.rank(7, 15), 3);
-}
-
-#[test]
-fn test_wm_select() {
-    let xs = vec![0,7,2,1,4,3,6,7,2,5,0,4,7,2,6,3];
-    let wm = WM::new(xs);
-    assert_eq!(wm.select(2, 0), 2);
-    assert_eq!(wm.select(2, 1), 8);
-    assert_eq!(wm.select(2, 2), 13);
-    assert_eq!(wm.select(0, 0), 0);
-    assert_eq!(wm.select(0, 1), 10);
-}
-
-#[test]
-fn test_wm_quantile_simple() {
-    let xs = vec![0,7,2,1,4,3,6,7,2,5,0,4,7,2,6,3];
-    let wm = WM::new(xs);
-    assert_eq!(wm.quantile(4, 12, 3), 5);
-    assert_eq!(wm.quantile(12, 16, 2), 6);
-}
-
-#[test]
-fn test_wm_quantile() {
-    use crate::xorshift::Xorshift;
-    let mut rand = Xorshift::new();
-    let mut xs = vec![];
-    for _ in 0..1000 {
-        let x = rand.rand(300);
-        xs.push(x);
-    }
-    let wm = WM::new(xs.clone());
-    for i in 0..1000 {
-        let l = rand.rand(499);
-        let n = rand.rand(500)+1;
-        let k = rand.rand(n)+1;
-        let l = l as usize;
-        let n = n as usize;
-        let k = k as usize;
-        let r = l + n;
-        let res = wm.quantile(l, r, k);
-
-        let mut v = vec![];
-        for i in l..r {
-            v.push(xs[i]);
-        }
-        v.sort();
-        v.reverse();
-        let ans = v[k-1];
-        assert_eq!(res, ans);
     }
 }
 
@@ -526,32 +466,21 @@ fn test_wm_rank_all() {
     }
 }
 
-#[test]
-fn test_wm_rangefreq() {
-    let xs = vec![0,7,2,1,4,3,6,7,2,5,0,4,7,2,6,3];
-    let wm = WM::new(xs);
-    assert_eq!(wm.rangefreq(0, 5, 1, 1), 0);
-    assert_eq!(wm.rangefreq(0, 5, 1, 2), 1);
-    assert_eq!(wm.rangefreq(0, 5, 1, 3), 2);
-    assert_eq!(wm.rangefreq(0, 5, 0, 3), 3);
-    assert_eq!(wm.rangefreq(1, 5, 0, 3), 2);
-}
-
 #[snippet = "WaveletMatrix"]
-struct WMI {
+struct WMi64 {
     offset: i64,
     wm: WM,
 }
 #[snippet = "WaveletMatrix"]
-impl WMI {
-    pub fn new(xs: Vec<i64>) -> WMI {
+impl WMi64 {
+    pub fn new(xs: Vec<i64>) -> WMi64 {
         let offset = 1<<62;
         let mut ys = vec![];
         for x in xs {
             ys.push((x+offset) as u64)
         }
         let wm = WM::new(ys);
-        WMI {
+        WMi64 {
             offset: offset,
             wm: wm
         }
@@ -568,4 +497,75 @@ impl WMI {
     pub fn select(&self, x: i64, k: usize) -> usize {
         self.wm.select((x+self.offset) as u64, k)
     }
+}
+
+#[test]
+fn test_wm_rank() {
+    let xs = vec![0,7,2,1,4,3,6,7,2,5,0,4,7,2,6,3];
+    let wm = WMi64::new(xs);
+    assert_eq!(wm.rank(2, 12), 2);
+    assert_eq!(wm.rank(7, 12), 2);
+    assert_eq!(wm.rank(7, 13), 3);
+    assert_eq!(wm.rank(7, 15), 3);
+}
+
+#[test]
+fn test_wm_select() {
+    let xs = vec![0,7,2,1,4,3,6,7,2,5,0,4,7,2,6,3];
+    let wm = WMi64::new(xs);
+    assert_eq!(wm.select(2, 0), 2);
+    assert_eq!(wm.select(2, 1), 8);
+    assert_eq!(wm.select(2, 2), 13);
+    assert_eq!(wm.select(0, 0), 0);
+    assert_eq!(wm.select(0, 1), 10);
+}
+
+#[test]
+fn test_wm_quantile_simple() {
+    let xs = vec![0,7,2,1,4,3,6,7,2,5,0,4,7,2,6,3];
+    let wm = WMi64::new(xs);
+    assert_eq!(wm.quantile(4, 12, 3), 5);
+    assert_eq!(wm.quantile(12, 16, 2), 6);
+}
+
+#[test]
+fn test_wm_quantile() {
+    use crate::xorshift::Xorshift;
+    let mut rand = Xorshift::new();
+    let mut xs = vec![];
+    for _ in 0..1000 {
+        let x = rand.rand(300) as i64;
+        xs.push(x);
+    }
+    let wm = WMi64::new(xs.clone());
+    for i in 0..1000 {
+        let l = rand.rand(499);
+        let n = rand.rand(500)+1;
+        let k = rand.rand(n)+1;
+        let l = l as usize;
+        let n = n as usize;
+        let k = k as usize;
+        let r = l + n;
+        let res = wm.quantile(l, r, k);
+
+        let mut v = vec![];
+        for i in l..r {
+            v.push(xs[i]);
+        }
+        v.sort();
+        v.reverse();
+        let ans = v[k-1];
+        assert_eq!(res, ans);
+    }
+}
+
+#[test]
+fn test_wm_rangefreq() {
+    let xs = vec![0,7,2,1,4,3,6,7,2,5,0,4,7,2,6,3];
+    let wm = WMi64::new(xs);
+    assert_eq!(wm.rangefreq(0, 5, 1, 1), 0);
+    assert_eq!(wm.rangefreq(0, 5, 1, 2), 1);
+    assert_eq!(wm.rangefreq(0, 5, 1, 3), 2);
+    assert_eq!(wm.rangefreq(0, 5, 0, 3), 3);
+    assert_eq!(wm.rangefreq(1, 5, 0, 3), 2);
 }

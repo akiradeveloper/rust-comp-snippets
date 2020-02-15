@@ -21,7 +21,7 @@ struct SEG<T: SEGImpl> {
 
 #[snippet = "SEG_LAZY"]
 impl <T: SEGImpl> SEG<T> {
-    fn new(init: T::Monoid, n: usize) -> SEG<T> {
+    pub fn new(init: T::Monoid, n: usize) -> SEG<T> {
         let mut m = 1;
         while m < n { m *= 2; }
         SEG {
@@ -76,9 +76,10 @@ impl <T: SEGImpl> SEG<T> {
             self.data[k]
         }
     }
-    fn update(&mut self, a: usize, b: usize, x: T::OperatorMonoid) -> T::Monoid {
+    #[doc = "[l,r)"]
+    pub fn update(&mut self, l: usize, r: usize, x: T::OperatorMonoid) -> T::Monoid {
         let n = self.n;
-        self.do_update(a, b, x, 1, 0, n)
+        self.do_update(l, r, x, 1, 0, n)
     }
     fn do_query(&mut self, a: usize, b: usize, k: usize, l: usize, r: usize) -> T::Monoid {
         self.propagate(k, r-l);
@@ -93,10 +94,10 @@ impl <T: SEGImpl> SEG<T> {
             )
         }
     }
-    // [a,b)
-    fn query(&mut self, a: usize, b: usize) -> T::Monoid {
+    #[doc = "[l,r)"]
+    pub fn query(&mut self, l: usize, r: usize) -> T::Monoid {
         let n = self.n;
-        self.do_query(a, b, 1, 0, n)
+        self.do_query(l, r, 1, 0, n)
     }
 }
 
