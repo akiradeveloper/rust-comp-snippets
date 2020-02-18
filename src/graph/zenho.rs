@@ -1,3 +1,5 @@
+// Verified: ECR64-D
+
 #[snippet = "CumRL"]
 trait Foldable {
     type T: Clone + std::fmt::Debug;

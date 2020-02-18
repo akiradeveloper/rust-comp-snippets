@@ -1,5 +1,7 @@
 use crate::sequence01::BinarySearch;
 
+// Verified: CFR510-D
+
 #[derive(Clone)]
 #[snippet = "WaveletMatrix"]
 struct FID {
