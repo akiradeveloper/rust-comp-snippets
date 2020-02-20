@@ -1,13 +1,4 @@
 #[snippet = "Lowlink"]
-fn minmax(p: (usize, usize)) -> (usize, usize) {
-    if p.0 <= p.1 {
-        p
-    } else {
-        (p.1, p.0)
-    }
-}
-
-#[snippet = "Lowlink"]
 struct LowLink {
     g: Vec<Vec<usize>>,
     used: Vec<bool>,
@@ -16,13 +7,19 @@ struct LowLink {
     pub articulation: Vec<usize>,
     pub bridge: Vec<(usize, usize)>,
 }
-
 #[snippet = "Lowlink"]
 #[doc = "find articulation points and bridges at the same time"]
 impl LowLink {
+    fn minmax(p: (usize, usize)) -> (usize, usize) {
+        if p.0 <= p.1 {
+            p
+        } else {
+            (p.1, p.0)
+        }
+    }
     #[doc = "undirected"]
-    fn new(g: Vec<Vec<usize>>) -> LowLink {
-        let n = g.len();
+    pub fn new(n: usize) -> LowLink {
+        let mut g = vec![vec![];n];
         let mut used = vec![false; n];
         let mut ord = vec![0; n];
         let mut low = vec![0; n];
@@ -37,7 +34,11 @@ impl LowLink {
             bridge,
         }
     }
-    fn build(&mut self) {
+    pub fn connect(&mut self, u: usize, v: usize) {
+        self.g[u].push(v);
+        self.g[v].push(u);
+    }
+    pub fn build(&mut self) {
         self.do_build(0, 0, None);
         self.articulation.sort();
         self.bridge.sort();
@@ -58,7 +59,7 @@ impl LowLink {
                self.low[u] = std::cmp::min(self.low[u], self.low[v]);
                is_articulation |= par.is_some() && self.low[v] >= self.ord[u];
                if self.ord[u] < self.low[v] {
-                   self.bridge.push(minmax((u, v)));
+                   self.bridge.push(Self::minmax((u, v)));
                }
             } else if Some(v) != par {
                 self.low[u] = std::cmp::min(self.low[u], self.ord[v]);
@@ -74,18 +75,12 @@ impl LowLink {
 
 #[test]
 fn test_lowlink() {
-    let g = vec![
-        vec![1,2],
-        vec![0,2,3],
-        vec![0,1,3],
-        vec![1,2,6],
-        vec![6],
-        vec![6,7],
-        vec![3,4,5,7],
-        vec![5,6],
-    ];
-    let mut lowlink = LowLink::new(g);
-    lowlink.build();
-    assert_eq!(lowlink.articulation, [3,6]);
-    assert_eq!(lowlink.bridge, [(3,6),(4,6)]);
+    let e = vec![(0,1),(0,2),(1,2),(1,3),(2,3),(3,6),(4,6),(5,6),(5,7),(6,7)];
+    let mut g = LowLink::new(8);
+    for (u,v) in e {
+        g.connect(u, v);
+    }
+    g.build();
+    assert_eq!(g.articulation, [3,6]);
+    assert_eq!(g.bridge, [(3,6),(4,6)]);
 }
