@@ -43,7 +43,7 @@ pub mod permutation;
 pub mod bitop;
 pub mod combination;
 pub mod treap;
-pub mod syakutori;
+pub mod two_pointer;
 pub mod macros;
 pub mod wavelet_matrix;
 pub mod btree;
