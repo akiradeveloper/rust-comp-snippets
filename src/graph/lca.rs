@@ -75,6 +75,9 @@ impl LCA {
         }
         return self.parent[0][v0].unwrap();
     }
+    pub fn distance(&self, u: usize, v: usize) -> usize {
+        self.depth[u] + self.depth[v] - 2 * self.depth[self.lca(u, v)]
+    }
 }
 
 #[test]
