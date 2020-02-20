@@ -1,9 +1,8 @@
 use std::collections::HashSet;
 
 // verified: GRL_4_A
-#[doc = "directed. O(E)"]
-#[snippet = "cycle_detection_directed"]
-pub fn cycle_detection_directed(g: &[Vec<usize>]) -> bool {
+#[snippet = "CycleDetection"]
+fn cycle_detection_directed(g: &[Vec<usize>]) -> bool {
     let n = g.len();
     let mut in_g = vec![HashSet::new();n];
     // O(E)
@@ -32,20 +31,46 @@ pub fn cycle_detection_directed(g: &[Vec<usize>]) -> bool {
 
     m != n
 }
+#[snippet = "CycleDetection"]
+struct CycleDetection {
+    g: Vec<Vec<usize>>,
+}
+#[snippet = "CycleDetection"]
+impl CycleDetection {
+    pub fn new(n: usize) -> CycleDetection {
+        CycleDetection {
+            g: vec![vec![];n]
+        }
+    }
+    pub fn add_edge(&mut self, u: usize, v: usize) {
+        self.g[u].push(v);
+    }
+    #[doc = "O(E)"]
+    pub fn solve(&self) -> bool {
+        cycle_detection_directed(&self.g)
+    }
+}
 
 #[test]
 fn test_detect_cycle_directed_0() {
-    let mut g = vec![
+    let e = vec![
         vec![1,2],
         vec![2],
         vec![],
     ];
-    assert_eq!(cycle_detection_directed(&g), false);
+    let mut g = CycleDetection::new(3);
+    for u in 0..e.len() {
+        let vs = e[u].clone();
+        for v in vs {
+            g.add_edge(u, v);
+        }
+    }
+    assert_eq!(g.solve(), false);
 }
 
 #[test]
 fn test_detect_cycle_directed_1() {
-    let mut g = vec![
+    let e = vec![
         vec![1,2],
         vec![2],
         vec![],
@@ -53,5 +78,12 @@ fn test_detect_cycle_directed_1() {
         vec![5],
         vec![3],
     ];
-    assert_eq!(cycle_detection_directed(&g), true);
+    let mut g = CycleDetection::new(6);
+    for u in 0..e.len() {
+        let vs = e[u].clone();
+        for v in vs {
+            g.add_edge(u,v);
+        }
+    }
+    assert_eq!(g.solve(), true);
 }
