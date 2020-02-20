@@ -12,24 +12,19 @@ struct TopologicalSort {
 
 #[snippet = "TopologicalSort"]
 impl TopologicalSort {
-    #[doc = "g = directed"]
-    pub fn new(g: Vec<Vec<usize>>) -> Self {
-        let n = g.len();
+    pub fn new(n: usize) -> Self {
         let mut colors = vec![false; n];
         let mut indeg = vec![0; n];
-        for u in 0..n {
-            let conn = &g[u];
-            for &next in conn {
-                indeg[next] += 1;
-            }
-        }
         TopologicalSort {
-            g: g,
+            g: vec![vec![];n],
             Q: VecDeque::new(),
             colors: colors,
             indeg: indeg,
             out: Vec::new(),
         }
+    }
+    pub fn add_edge(&mut self, u: usize, v: usize) {
+        self.g[u].push(v);
     }
     fn bfs(&mut self, s: usize) {
         self.Q.push_back(s);
@@ -51,6 +46,12 @@ impl TopologicalSort {
     pub fn tsort(&mut self) {
         let n = self.g.len();
         for u in 0..n {
+            let conn = &self.g[u];
+            for &next in conn {
+                self.indeg[next] += 1;
+            }
+        }
+        for u in 0..n {
             if self.indeg[u] == 0 && self.colors[u] == false {
                 self.bfs(u)
             }
@@ -60,7 +61,7 @@ impl TopologicalSort {
 
 #[test]
 fn test_tsort() {
-    let mut conns = vec![
+    let mut e = vec![
         vec![1],
         vec![2],
         vec![],
@@ -68,19 +69,31 @@ fn test_tsort() {
         vec![5],
         vec![2],
     ];
-    let mut tsort = TopologicalSort::new(conns);
-    tsort.tsort();
-    assert_eq!(tsort.out, [0,3,1,4,5,2]);
+    let n = e.len();
+    let mut g = TopologicalSort::new(n);
+    for u in 0..n {
+        for v in e[u].clone() {
+            g.add_edge(u, v);
+        }
+    }
+    g.tsort();
+    assert_eq!(g.out, [0,3,1,4,5,2]);
 }
 
 #[test]
 fn test_tsort_loop() {
-    let mut conns = vec![
+    let mut e = vec![
         vec![1],
         vec![2],
         vec![0]
     ];
-    let mut tsort = TopologicalSort::new(conns);
-    tsort.tsort();
-    assert_eq!(tsort.out.len(), 0);
+    let n = e.len();
+    let mut g = TopologicalSort::new(n);
+    for u in 0..n {
+        for v in e[u].clone() {
+            g.add_edge(u, v);
+        }
+    }
+    g.tsort();
+    assert_eq!(g.out.len(), 0);
 }
