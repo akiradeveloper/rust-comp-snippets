@@ -4,21 +4,23 @@ struct LCA {
     parent: Vec<Vec<Option<usize>>>,
     depth: Vec<usize>,
 }
-
 #[snippet = "LCA"]
 impl LCA {
-    pub fn new(tree: Vec<Vec<usize>>) -> Self {
-        let n = tree.len();
+    pub fn new(n: usize) -> Self {
         let mut log_n = (n as f64).log2().ceil() as usize;
         if log_n == 0 {
             log_n = 1;
         }
         assert!(log_n > 0);
         LCA {
-            tree: tree,
+            tree: vec![vec![];n],
             parent: vec![vec![None; n]; log_n],
             depth: vec![0; n],
         }
+    }
+    pub fn connect(&mut self, u: usize, v: usize) {
+        self.tree[u].push(v);
+        self.tree[v].push(u);
     }
     // store direct parent and depth
     fn dfs(&mut self, u: usize, parent: Option<usize>, depth: usize) {
@@ -92,18 +94,26 @@ fn test_lca() {
         vec![4],
         vec![4],
     ];
-    let mut lca = LCA::new(tree);
+    let mut e = vec![
+        (0,1),(0,2),(1,3),(1,4),(2,5),
+        (4,6),(4,7),
+    ];
+    let mut lca = LCA::new(8);
+    for (u,v) in e {
+        lca.connect(u,v);
+    }
     lca.build(0);
 
-    let probs = [
-        (1,2,0),
-        (3,7,1),
-        (4,4,4),
-        (3,5,0),
-        (1,7,1),
-        (2,5,2),
+    let Q = vec![
+        (1,2,0,2),
+        (3,7,1,3),
+        (4,4,4,0),
+        (3,5,0,4),
+        (1,7,1,2),
+        (2,5,2,1),
     ];
-    for &(u, v, p) in &probs {
+    for (u,v,p,d) in Q {
         assert_eq!(lca.lca(u, v), p);
+        assert_eq!(lca.distance(u, v), d);
     }
 }
