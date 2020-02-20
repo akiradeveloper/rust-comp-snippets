@@ -12,23 +12,18 @@ pub struct SCC {
 #[snippet = "SCC"]
 #[doc = "nodes that communicates each others are contracted into one node"]
 impl SCC {
-    #[doc = "directed"]
-    pub fn new(g: Vec<Vec<usize>>) -> Self {
-        let n = g.len();
-        let mut r_g = vec![vec![]; n];
-        for u in 0..n {
-            let conn = &g[u];
-            for &v in conn {
-                r_g[v].push(u);
-            }
-        }
+    pub fn new(n: usize) -> Self {
         Self {
-            g,
-            r_g,
+            g: vec![vec![];n],
+            r_g: vec![vec![];n],
             post_order: VecDeque::new(),
             used: vec![false; n],
             order: vec![n; n],
         }
+    }
+    pub fn add_edge(&mut self, u: usize, v: usize) {
+        self.g[u].push(v);
+        self.r_g[v].push(u);
     }
     fn dfs(&mut self, u: usize) {
         self.used[u] = true;
@@ -71,7 +66,7 @@ impl SCC {
 
 #[test]
 fn test_scc() {
-    let g = vec![
+    let e = vec![
         vec![1],
         vec![2,3],
         vec![3],
@@ -85,8 +80,14 @@ fn test_scc() {
         vec![9],
         vec![],
     ];
-    let mut scc = SCC::new(g);
-    scc.build();
+    let n = e.len();
+    let mut g = SCC::new(n);
+    for u in 0..n {
+        for v in e[u].clone() {
+            g.add_edge(u,v);
+        }
+    }
+    g.build();
 
-    assert_eq!(scc.order, [0,1,2,2,2,3,3,3,4,6,6,5]);
+    assert_eq!(g.order, [0,1,2,2,2,3,3,3,4,6,6,5]);
 }

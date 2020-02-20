@@ -93,9 +93,10 @@ mod chu_liu_edmonds {
     #[snippet = "chu_liu_edmonds"]
     fn chu_liu_edmonds(in_g: &[Vec<Edge>], root: usize) -> u64 {
         // dbg!(&in_g);
+        let n = in_g.len();
         let mut min_in_g: Vec<&Edge> = vec![];
-        let mut min_out_g: Vec<Vec<usize>> = vec![vec![]; in_g.len()];
-        for to in 0..in_g.len() {
+        let mut min_out_g: Vec<Vec<usize>> = vec![vec![]; n];
+        for to in 0..n {
             if to == root {
                 min_in_g.push(NULL_EDGE);
                 continue;
@@ -105,7 +106,13 @@ mod chu_liu_edmonds {
             min_out_g[e.0].push(to);
         }
 
-        let mut scc = scc::SCC::new(min_out_g);
+        let mut scc = scc::SCC::new(n);
+        for u in 0..n {
+            for i in 0..min_out_g[u].len() {
+                let v = min_out_g[u][i];
+                scc.add_edge(u, v);
+            }
+        }
         scc.build();
 
         // dbg!(&min_in_g);
