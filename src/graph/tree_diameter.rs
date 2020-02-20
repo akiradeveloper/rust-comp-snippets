@@ -2,17 +2,17 @@
 
 #[derive(Clone, Copy)]
 #[snippet = "tree_diameter"]
-pub struct Edge {
+struct Edge {
     dst: usize,
     weight: i64,
 }
 #[snippet = "tree_diameter"]
-pub struct FindFurthestPair {
+struct FindFurthestPair {
     g: Vec<Vec<Edge>>
 }
 #[snippet = "tree_diameter"]
 impl FindFurthestPair {
-    pub fn find(&self, v: usize) -> (usize, i64) {
+    fn find(&self, v: usize) -> (usize, i64) {
         self.find_rec(None, v)
     }
     fn find_rec(&self, par: Option<usize>, v: usize) -> (usize, i64) {
@@ -30,12 +30,26 @@ impl FindFurthestPair {
     }
 }
 #[snippet = "tree_diameter"]
-#[doc = "undirected"]
-pub fn tree_diameter(tree: Vec<Vec<Edge>>) -> i64 {
-    let ffp = FindFurthestPair {
-        g: tree,
-    };
-    let (v, _) = ffp.find(0);
-    let (_, d) = ffp.find(v);
-    d
+struct TreeDiameter {
+    g: Vec<Vec<Edge>>,
+}
+#[snippet = "tree_diameter"]
+impl TreeDiameter {
+    pub fn new(n: usize) -> TreeDiameter {
+        TreeDiameter {
+            g: vec![vec![];n]
+        }
+    }
+    pub fn connect(&mut self, u: usize, v: usize, dist: i64) {
+        self.g[u].push(Edge { dst: v, weight: dist });
+        self.g[v].push(Edge { dst: u, weight: dist });
+    }
+    pub fn solve(&self) -> i64 {
+        let ffp = FindFurthestPair {
+            g: self.g.clone(),
+        };
+        let (v, _) = ffp.find(0);
+        let (_, d) = ffp.find(v);
+        d
+    }
 }
