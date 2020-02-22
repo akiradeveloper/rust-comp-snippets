@@ -156,58 +156,6 @@ fn test_group_by_relevance() {
     assert_eq!(group_by_relevance(vec![1,1,2,2,3,3], |&x,&y| { x == y }), vec![vec![1,1],vec![2,2],vec![3,3]]);
 }
 
-#[snippet = "group_fold"]
-#[doc = "fold elems in to groups by f"]
-pub fn group_fold<T, F: Fn(&T) -> G, G: Eq+Clone>(xs: Vec<T>, f: F) -> Vec<Vec<T>> {
-    let mut res = vec![];
-    let mut cur_g = None;
-    let mut tmp = vec![];
-    for x in xs {
-        let g = Some(f(&x));
-        if g != cur_g {
-            if !tmp.is_empty() {
-                res.push(tmp);
-            }
-            tmp = vec![x];
-            cur_g = g;
-        } else {
-            tmp.push(x);
-        }
-    }
-    if !tmp.is_empty() {
-        res.push(tmp);
-    }
-    res
-}
-#[test]
-fn test_group_fold() {
-    let emp: Vec<usize> = vec![];
-    assert_eq!(group_fold(vec![1,2,1], |&x| {x}), vec![vec![1],vec![2],vec![1]]);
-    assert_eq!(group_fold(vec![('L',1),('L',3),('R',2),('L',1)], |&x| {x.0}), vec![vec![('L',1),('L',3)],vec![('R',2)],vec![('L',1)]]);
-}
-
-#[snippet = "vec_max"]
-fn vec_max<T: Ord + Clone>(xs: &[T]) -> T {
-    let mut v = &xs[0];
-    for x in xs {
-        if x > v {
-            v = x;
-        }
-    }
-    v.clone()
-}
-
-#[snippet = "vec_min"]
-fn vec_min<T: Ord + Clone>(xs: &[T]) -> T {
-    let mut v = &xs[0];
-    for x in xs {
-        if x < v {
-            v = x;
-        }
-    }
-    v.clone()
-}
-
 #[snippet = "neighbour_table"]
 pub fn neighbour_table(xs: &[usize]) -> (Vec<Option<usize>>, Vec<Option<usize>>) {
     let n = xs.len();
@@ -276,7 +224,6 @@ pub fn split_sequence<T, F: Fn(&T) -> bool>(xs: Vec<T>, splitter: F) -> Vec<Spli
     }
     res
 }
-
 #[test]
 fn test_split_sequence() {
     let mut t1 = vec![1,2,3,4];
