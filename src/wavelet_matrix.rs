@@ -1,4 +1,4 @@
-use crate::sequence01::BinarySearch;
+use crate::binary_search::BinarySearch;
 
 // Verified: CFR510-D
 
@@ -89,27 +89,27 @@ impl FID {
     }
     #[doc = "query the index of k-th 0 (0-indexed)"]
     pub fn select0(&self, k: usize) -> usize {
-        let bs = BinarySearch {
+        let mut bs = BinarySearch {
             lower: 0,
             upper: (self.n-1) as i64,
             p: |i: i64| {
                 let r = self.rank0(i as usize);
-                (r >= k+1, -1)
+                r >= k+1
             },
         };
-        bs.lower_bound().0 as usize - 1
+        bs.lower_bound() as usize - 1
     }
     #[doc = "query the index of k-th 1 (0-indexed)"]
     pub fn select1(&self, k: usize) -> usize {
-        let bs = BinarySearch {
+        let mut bs = BinarySearch {
             lower: 0,
             upper: (self.n-1) as i64,
             p: |i: i64| {
                 let r = self.rank1(i as usize);
-                (r >= k+1, -1)
+                r >= k+1
             },
         };
-        bs.lower_bound().0 as usize - 1
+        bs.lower_bound() as usize - 1
     }
     // #[doc = "query the index of k-th 0 (0-indexed)"]
     // pub fn select0_block_jump(&self, k: usize) -> usize {
@@ -357,15 +357,15 @@ impl WM {
     }
     #[doc = "the position of k-th x (0-indexed). O(logn)"]
     pub fn select(&self, x: u64, k: usize) -> usize {
-        let bs = BinarySearch {
+        let mut bs = BinarySearch {
             lower: 0,
             upper: (self.mat[0].n - 1) as i64,
             p: |i: i64| {
                 let cnt = self.rank(x, i as usize);
-                (cnt >= k+1, -1)
+                cnt >= k+1
             },
         };
-        bs.lower_bound().0 as usize - 1
+        bs.lower_bound() as usize - 1
     }
     #[doc = "k-th largest number in [l,r)"]
     pub fn quantile(&self, l: usize, r: usize, k: usize) -> u64 {
