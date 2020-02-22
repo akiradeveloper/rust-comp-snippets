@@ -123,7 +123,7 @@ pub mod matrix {
     }
 }
 
-#[snippet = "matrix"]
+#[snippet = "Matrix"]
 pub type Matrix = matrix::Matrix;
 
 #[test]

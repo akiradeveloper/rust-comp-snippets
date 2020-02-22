@@ -241,5 +241,6 @@ fn test_hl_decomposition() {
     dbg!(hl.edge_decomposition());
     dbg!(hl.vertex_decomposition_between(8, 6));
     dbg!(hl.edge_decomposition_between(8, 6));
+    dbg!(hl.vertex_decomposition_between(10, 7));
     dbg!(hl.edge_decomposition_between(10, 7));
 }
