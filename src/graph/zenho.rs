@@ -110,6 +110,8 @@ impl <Z: ZenHoable> ZenHo<Z> {
                 let dpval = self.dp.get(&(v,u)).cloned().unwrap();
                 dp.push(dpval);
             }
+            // let cumRL: CumRL<Z> = CumRL::new(dp);
+            // let newv = Z::g(self.nvalues[u].clone(), self.evalues.get(&(u,p)).cloned().unwrap(), &cumRL, cumRL.len(), 0);
             let newv = Z::f(self.nvalues[u].clone(), self.evalues.get(&(u,p)).cloned().unwrap(), &dp);
             self.dp.insert((u,p), newv);
         }
