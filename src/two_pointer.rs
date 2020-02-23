@@ -1,7 +1,9 @@
+#[snippet = "TwoPointer"]
 struct TwoPointer<F> {
     n: usize,
     f: F,
 }
+#[snippet = "TwoPointer"]
 impl <F: FnMut(usize,usize) -> bool> TwoPointer<F> {
     pub fn new(n: usize, f: F) -> TwoPointer<F> {
         TwoPointer {
