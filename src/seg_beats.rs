@@ -294,4 +294,25 @@ impl SEGBeats {
         let rv = self._query_sum(a, b, 2 * k + 2, (l + r) / 2, r);
         return lv + rv;
     }
+    fn query_min(&mut self, l: usize, r: usize) -> i64 {
+        self._query_min(l, r, 0, 0, self.n0)
+    }
+    fn query_max(&mut self, l: usize, r: usize) -> i64 {
+        self._query_max(l, r, 0, 0, self.n0)
+    }
+    fn query_sum(&mut self, l: usize, r: usize) -> i64 {
+        self._query_sum(l, r, 0, 0, self.n0)
+    }
+    fn update_min(&mut self, l: usize, r: usize, x: i64) {
+        self._update_min(x, l, r, 0, 0, self.n0)
+    }
+    fn update_max(&mut self, l: usize, r: usize, x: i64) {
+        self._update_max(x, l, r, 0, 0, self.n0)
+    }
+    fn add_val(&mut self, l: usize, r: usize, x: i64) {
+        self._add_val(x, l, r, 0, 0, self.n0)
+    }
+    fn update_val(&mut self, l: usize, r: usize, x: i64) {
+        self._update_val(x, l, r, 0, 0, self.n0)
+    }
 }
