@@ -8,3 +8,18 @@ pub fn valid4(h: usize, w: usize, ps: Vec<(i64,i64)>) -> Vec<(usize,usize)> {
     }
     res
 }
+#[snippet = "valid4u"]
+pub fn valid4u(h: usize, w: usize, ps: Vec<(Option<usize>, Option<usize>)>) -> Vec<(usize, usize)> {
+    let mut res = vec![];
+    for (x, y) in ps {
+        if x.is_none() || y.is_none() {
+            continue;
+        }
+        let x = x.unwrap();
+        let y = y.unwrap();
+        if x >= h || y >= w {
+            res.push((x,y));
+        }
+    }
+    res
+}
