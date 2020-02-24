@@ -1,7 +1,7 @@
 use std::cmp::{max,min};
 struct SEGBeats {
-    max_v: Vec<i64>, smax_v: Vec<i64>, max_c: Vec<i64>,
-    min_v: Vec<i64>, smin_v: Vec<i64>, min_c: Vec<i64>,
+    max_v: Vec<i64>, smax_v: Vec<i64>, max_c: Vec<usize>,
+    min_v: Vec<i64>, smin_v: Vec<i64>, min_c: Vec<usize>,
     sum: Vec<i64>,
     len: Vec<usize>, ladd: Vec<i64>, lval: Vec<i64>,
     n0: usize,
@@ -67,7 +67,7 @@ impl SEGBeats {
         }
     }
     fn update_node_max(&mut self, k: usize, x: i64) {
-        self.sum[k] += (x - self.max_v[k]) * self.max_c[k];
+        self.sum[k] += (x - self.max_v[k]) * self.max_c[k] as i64;
 
         if (self.max_v[k] == self.min_v[k]) {
           self.max_v[k] = x;
@@ -84,7 +84,7 @@ impl SEGBeats {
         }
     }
     fn update_node_min(&mut self, k: usize, x: i64) {
-        self.sum[k] += (x - self.min_v[k]) * self.min_c[k];
+        self.sum[k] += (x - self.min_v[k]) * self.min_c[k] as i64;
 
         if (self.max_v[k] == self.min_v[k]) {
           self.max_v[k] = x;
@@ -104,15 +104,15 @@ impl SEGBeats {
         if (self.n0-1 <= k) { return; }
 
         if (self.lval[k] != Self::inf) {
-          self.updateall(2*k+1, self.lval[k]);
-          self.updateall(2*k+2, self.lval[k]);
+          self.update_all(2*k+1, self.lval[k]);
+          self.update_all(2*k+2, self.lval[k]);
           self.lval[k] = Self::inf;
           return;
         }
     
         if(self.ladd[k] != 0) {
-          self.addall(2*k+1, self.ladd[k]);
-          self.addall(2*k+2, self.ladd[k]);
+          self.add_all(2*k+1, self.ladd[k]);
+          self.add_all(2*k+2, self.ladd[k]);
           self.ladd[k] = 0;
         }
     
@@ -161,7 +161,7 @@ impl SEGBeats {
           self.smin_v[k] = min(self.smin_v[2*k+1], self.smin_v[2*k+2]);
         }
     }
-    fn _update_min(&mut self) {
+    fn _update_min(&mut self, x: i64, a: usize, b: usize, k: usize, l: usize, r: usize) {
         if(b <= l || r <= a || self.max_v[k] <= x) {
             return;
           }
@@ -175,7 +175,7 @@ impl SEGBeats {
           self._update_min(x, a, b, 2*k+2, (l+r)/2, r);
           self.update(k);
     }
-    fn _update_max(&mut self) {
+    fn _update_max(&mut self, x: i64, a: usize, b: usize, k: usize, l: usize, r: usize) {
         if(b <= l || r <= a || x <= self.min_v[k]) {
             return;
           }
@@ -189,90 +189,90 @@ impl SEGBeats {
           self._update_max(x, a, b, 2*k+2, (l+r)/2, r);
           self.update(k);
     }
-    fn add_all(&mut self) {
+    fn add_all(&mut self, k: usize, x: i64) {
         self.max_v[k] += x;
-        if(self.smax_v[k] != -Self::inf) self.smax_v[k] += x;
+        if(self.smax_v[k] != -Self::inf) { self.smax_v[k] += x; }
         self.min_v[k] += x;
-        if(self.smin_v[k] != Self::inf) self.smin_v[k] += x;
+        if(self.smin_v[k] != Self::inf) { self.smin_v[k] += x; }
     
-        self.sum[k] += self.len[k] * x;
+        self.sum[k] += self.len[k] as i64 * x;
         if(self.lval[k] != Self::inf) {
           self.lval[k] += x;
         } else {
           self.ladd[k] += x;
         }
     }
-    fn update_all(&mut self) {
+    fn update_all(&mut self, k: usize, x: i64) {
         self.max_v[k] = x; self.smax_v[k] = -Self::inf;
         self.min_v[k] = x; self.smin_v[k] = Self::inf;
         self.max_c[k] = self.len[k];
         self.min_c[k] = self.len[k];
     
-        self.sum[k] = x * len[k];
+        self.sum[k] = x * self.len[k] as i64;
         self.lval[k] = x; self.ladd[k] = 0;
     }
-    fn _add_val(&mut self) {
+    fn _add_val(&mut self, x: i64, a: usize, b: usize, k: usize, l: usize, r: usize) {
         if(b <= l || r <= a) {
             return;
           }
           if(a <= l && r <= b) {
-            addall(k, x);
+            self.add_all(k, x);
             return;
           }
       
-          push(k);
-          _add_val(x, a, b, 2*k+1, l, (l+r)/2);
-          _add_val(x, a, b, 2*k+2, (l+r)/2, r);
-          update(k);
+          self.push(k);
+          self._add_val(x, a, b, 2*k+1, l, (l+r)/2);
+          self._add_val(x, a, b, 2*k+2, (l+r)/2, r);
+          self.update(k);
     }
-    fn _update_val(&mut self) {
+    fn _update_val(&mut self, x: i64, a: usize, b: usize, k: usize, l: usize, r: usize) {
         if(b <= l || r <= a) {
             return;
           }
           if(a <= l && r <= b) {
-            updateall(k, x);
+            self.update_all(k, x);
             return;
           }
       
-          push(k);
-          _update_val(x, a, b, 2*k+1, l, (l+r)/2);
-          _update_val(x, a, b, 2*k+2, (l+r)/2, r);
-          update(k);
+          self.push(k);
+          self._update_val(x, a, b, 2*k+1, l, (l+r)/2);
+          self._update_val(x, a, b, 2*k+2, (l+r)/2, r);
+          self.update(k);
     }
-    fn _query_max(&mut self) {
+    fn _query_max(&mut self, a: usize, b: usize, k: usize, l: usize, r: usize) -> i64 {
         if(b <= l || r <= a) {
-            return -inf;
+            return -Self::inf;
           }
           if(a <= l && r <= b) {
-            return max_v[k];
+            return self.max_v[k];
           }
-          push(k);
-          ll lv = _query_max(a, b, 2*k+1, l, (l+r)/2);
-          ll rv = _query_max(a, b, 2*k+2, (l+r)/2, r);
+          self.push(k);
+          let lv = self._query_max(a, b, 2*k+1, l, (l+r)/2);
+          let rv = self._query_max(a, b, 2*k+2, (l+r)/2, r);
           return max(lv, rv);
     }
-    fn _query_min(&mut self) {
+    fn _query_min(&mut self, a: usize, b: usize, k: usize, l: usize, r: usize) -> i64 {
         if(b <= l || r <= a) {
-            return inf;
+            return Self::inf;
           }
           if(a <= l && r <= b) {
-            return min_v[k];
+            return self.min_v[k];
           }
-          push(k);
-          ll lv = _query_min(a, b, 2*k+1, l, (l+r)/2);
-          ll rv = _query_min(a, b, 2*k+2, (l+r)/2, r);
+          self.push(k);
+          let lv = self._query_min(a, b, 2*k+1, l, (l+r)/2);
+          let rv = self._query_min(a, b, 2*k+2, (l+r)/2, r);
           return min(lv, rv);
     }
-    fn _query_sum(&mut self) {
+    fn _query_sum(&mut self, a: usize, b: usize, k: usize, l: usize, r: usize) -> i64 {
         if(b <= l || r <= a) {
             return 0;
           }
           if(a <= l && r <= b) {
-            return sum[k];
+            return self.sum[k];
           }
-          push(k);
-          ll lv = _query_sum(a, b, 2*k+1, l, (l+r)/2);
-          ll rv = _query_sum(a, b, 2*k+2, (l+r)/2, r);
+          self.push(k);
+          let lv = self._query_sum(a, b, 2*k+1, l, (l+r)/2);
+          let rv = self._query_sum(a, b, 2*k+2, (l+r)/2, r);
           return lv + rv;
     }
 }
