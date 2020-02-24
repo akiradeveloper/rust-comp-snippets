@@ -83,75 +83,75 @@ impl SEGBeats {
     fn update_node_max(&mut self, k: usize, x: i64) {
         self.sum[k] += (x - self.max_v[k]) * self.max_c[k] as i64;
 
-        if (self.max_v[k] == self.min_v[k]) {
+        if self.max_v[k] == self.min_v[k] {
             self.max_v[k] = x;
             self.min_v[k] = x;
-        } else if (self.max_v[k] == self.smin_v[k]) {
+        } else if self.max_v[k] == self.smin_v[k] {
             self.max_v[k] = x;
             self.smin_v[k] = x;
         } else {
             self.max_v[k] = x;
         }
-        if (self.lval[k] != Self::inf && x < self.lval[k]) {
+        if self.lval[k] != Self::inf && x < self.lval[k] {
             self.lval[k] = x;
         }
     }
     fn update_node_min(&mut self, k: usize, x: i64) {
         self.sum[k] += (x - self.min_v[k]) * self.min_c[k] as i64;
 
-        if (self.max_v[k] == self.min_v[k]) {
+        if self.max_v[k] == self.min_v[k] {
             self.max_v[k] = x;
             self.min_v[k] = x;
-        } else if (self.smax_v[k] == self.min_v[k]) {
+        } else if self.smax_v[k] == self.min_v[k] {
             self.min_v[k] = x;
             self.smax_v[k] = x;
         } else {
             self.min_v[k] = x;
         }
-        if (self.lval[k] != Self::inf && self.lval[k] < x) {
+        if self.lval[k] != Self::inf && self.lval[k] < x {
             self.lval[k] = x;
         }
     }
     fn push(&mut self, k: usize) {
-        if (self.n0 - 1 <= k) {
+        if self.n0 - 1 <= k {
             return;
         }
 
-        if (self.lval[k] != Self::inf) {
+        if self.lval[k] != Self::inf {
             self.update_all(2 * k + 1, self.lval[k]);
             self.update_all(2 * k + 2, self.lval[k]);
             self.lval[k] = Self::inf;
             return;
         }
 
-        if (self.ladd[k] != 0) {
+        if self.ladd[k] != 0 {
             self.add_all(2 * k + 1, self.ladd[k]);
             self.add_all(2 * k + 2, self.ladd[k]);
             self.ladd[k] = 0;
         }
 
-        if (self.max_v[k] < self.max_v[2 * k + 1]) {
+        if self.max_v[k] < self.max_v[2 * k + 1] {
             self.update_node_max(2 * k + 1, self.max_v[k]);
         }
-        if (self.min_v[2 * k + 1] < self.min_v[k]) {
+        if self.min_v[2 * k + 1] < self.min_v[k] {
             self.update_node_min(2 * k + 1, self.min_v[k]);
         }
 
-        if (self.max_v[k] < self.max_v[2 * k + 2]) {
+        if self.max_v[k] < self.max_v[2 * k + 2] {
             self.update_node_max(2 * k + 2, self.max_v[k]);
         }
-        if (self.min_v[2 * k + 2] < self.min_v[k]) {
+        if self.min_v[2 * k + 2] < self.min_v[k] {
             self.update_node_min(2 * k + 2, self.min_v[k]);
         }
     }
     fn update(&mut self, k: usize) {
         self.sum[k] = self.sum[2 * k + 1] + self.sum[2 * k + 2];
 
-        if (self.max_v[2 * k + 1] < self.max_v[2 * k + 2]) {
+        if self.max_v[2 * k + 1] < self.max_v[2 * k + 2] {
             self.max_v[k] = self.max_v[2 * k + 2];
             self.max_c[k] = self.max_c[2 * k + 2];
             self.smax_v[k] = std::cmp::max(self.max_v[2 * k + 1], self.smax_v[2 * k + 2]);
-        } else if (self.max_v[2 * k + 1] > self.max_v[2 * k + 2]) {
+        } else if self.max_v[2 * k + 1] > self.max_v[2 * k + 2] {
             self.max_v[k] = self.max_v[2 * k + 1];
             self.max_c[k] = self.max_c[2 * k + 1];
             self.smax_v[k] = std::cmp::max(self.smax_v[2 * k + 1], self.max_v[2 * k + 2]);
@@ -161,11 +161,11 @@ impl SEGBeats {
             self.smax_v[k] = std::cmp::max(self.smax_v[2 * k + 1], self.smax_v[2 * k + 2]);
         }
 
-        if (self.min_v[2 * k + 1] < self.min_v[2 * k + 2]) {
+        if self.min_v[2 * k + 1] < self.min_v[2 * k + 2] {
             self.min_v[k] = self.min_v[2 * k + 1];
             self.min_c[k] = self.min_c[2 * k + 1];
             self.smin_v[k] = min(self.smin_v[2 * k + 1], self.min_v[2 * k + 2]);
-        } else if (self.min_v[2 * k + 1] > self.min_v[2 * k + 2]) {
+        } else if self.min_v[2 * k + 1] > self.min_v[2 * k + 2] {
             self.min_v[k] = self.min_v[2 * k + 2];
             self.min_c[k] = self.min_c[2 * k + 2];
             self.smin_v[k] = min(self.min_v[2 * k + 1], self.smin_v[2 * k + 2]);
@@ -176,10 +176,10 @@ impl SEGBeats {
         }
     }
     fn _update_min(&mut self, x: i64, a: usize, b: usize, k: usize, l: usize, r: usize) {
-        if (b <= l || r <= a || self.max_v[k] <= x) {
+        if b <= l || r <= a || self.max_v[k] <= x {
             return;
         }
-        if (a <= l && r <= b && self.smax_v[k] < x) {
+        if a <= l && r <= b && self.smax_v[k] < x {
             self.update_node_max(k, x);
             return;
         }
@@ -190,10 +190,10 @@ impl SEGBeats {
         self.update(k);
     }
     fn _update_max(&mut self, x: i64, a: usize, b: usize, k: usize, l: usize, r: usize) {
-        if (b <= l || r <= a || x <= self.min_v[k]) {
+        if b <= l || r <= a || x <= self.min_v[k] {
             return;
         }
-        if (a <= l && r <= b && x < self.smin_v[k]) {
+        if a <= l && r <= b && x < self.smin_v[k] {
             self.update_node_min(k, x);
             return;
         }
@@ -205,15 +205,15 @@ impl SEGBeats {
     }
     fn add_all(&mut self, k: usize, x: i64) {
         self.max_v[k] += x;
-        if (self.smax_v[k] != -Self::inf) {
+        if self.smax_v[k] != -Self::inf {
             self.smax_v[k] += x;
         }
         self.min_v[k] += x;
-        if (self.smin_v[k] != Self::inf) {
+        if self.smin_v[k] != Self::inf {
             self.smin_v[k] += x;
         }
         self.sum[k] += self.len[k] as i64 * x;
-        if (self.lval[k] != Self::inf) {
+        if self.lval[k] != Self::inf {
             self.lval[k] += x;
         } else {
             self.ladd[k] += x;
@@ -231,10 +231,10 @@ impl SEGBeats {
         self.ladd[k] = 0;
     }
     fn _add_val(&mut self, x: i64, a: usize, b: usize, k: usize, l: usize, r: usize) {
-        if (b <= l || r <= a) {
+        if b <= l || r <= a {
             return;
         }
-        if (a <= l && r <= b) {
+        if a <= l && r <= b {
             self.add_all(k, x);
             return;
         }
@@ -245,10 +245,10 @@ impl SEGBeats {
         self.update(k);
     }
     fn _update_val(&mut self, x: i64, a: usize, b: usize, k: usize, l: usize, r: usize) {
-        if (b <= l || r <= a) {
+        if b <= l || r <= a {
             return;
         }
-        if (a <= l && r <= b) {
+        if a <= l && r <= b {
             self.update_all(k, x);
             return;
         }
@@ -259,10 +259,10 @@ impl SEGBeats {
         self.update(k);
     }
     fn _query_max(&mut self, a: usize, b: usize, k: usize, l: usize, r: usize) -> i64 {
-        if (b <= l || r <= a) {
+        if b <= l || r <= a {
             return -Self::inf;
         }
-        if (a <= l && r <= b) {
+        if a <= l && r <= b {
             return self.max_v[k];
         }
         self.push(k);
@@ -271,10 +271,10 @@ impl SEGBeats {
         return max(lv, rv);
     }
     fn _query_min(&mut self, a: usize, b: usize, k: usize, l: usize, r: usize) -> i64 {
-        if (b <= l || r <= a) {
+        if b <= l || r <= a {
             return Self::inf;
         }
-        if (a <= l && r <= b) {
+        if a <= l && r <= b {
             return self.min_v[k];
         }
         self.push(k);
@@ -283,10 +283,10 @@ impl SEGBeats {
         return min(lv, rv);
     }
     fn _query_sum(&mut self, a: usize, b: usize, k: usize, l: usize, r: usize) -> i64 {
-        if (b <= l || r <= a) {
+        if b <= l || r <= a {
             return 0;
         }
-        if (a <= l && r <= b) {
+        if a <= l && r <= b {
             return self.sum[k];
         }
         self.push(k);
