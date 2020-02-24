@@ -17,7 +17,7 @@ impl SEGBeats {
     pub fn new(n: usize) -> SEGBeats {
         let mut n0 = 1;
         while n0 < n {
-            n0 <= 1;
+            n0 <<= 1;
         }
         let mut max_v = vec![0; 2 * n0];
         let mut smax_v = vec![0; 2 * n0];
@@ -315,4 +315,34 @@ impl SEGBeats {
     fn update_val(&mut self, l: usize, r: usize, x: i64) {
         self._update_val(x, l, r, 0, 0, self.n0)
     }
+}
+
+#[test]
+fn test_segbeats_simple() {
+    let mut seg = SEGBeats::new(5);
+    assert_eq!(seg.query_max(0, 5), 0);
+    assert_eq!(seg.query_min(0, 5), 0);
+    assert_eq!(seg.query_sum(0, 5), 0);
+    for i in 0..5 {
+        seg.update_val(i, i+1, i as i64 +1);
+    }
+    for i in 0..5 {
+        seg.add_val(i, i+1, 0);
+    }
+    assert_eq!(seg.query_sum(0, 3), 6);
+    assert_eq!(seg.query_max(0, 3), 3);
+    assert_eq!(seg.query_min(0, 3), 1);
+
+    assert_eq!(seg.query_sum(0, 5), 15);
+    seg.update_min(0, 3, 2); // 1,2,2,4,5
+    assert_eq!(seg.query_max(0, 3), 2);
+    assert_eq!(seg.query_sum(0, 5), 14);
+    seg.update_max(0, 3, 3); // 3,3,3,4,5
+    assert_eq!(seg.query_sum(0, 5), 18);
+    assert_eq!(seg.query_min(1, 5), 3);
+    seg.update_min(2, 4, 2); // 3,3,2,2,5
+    assert_eq!(seg.query_sum(0, 5), 15);
+    assert_eq!(seg.query_min(0, 5), 2);
+    assert_eq!(seg.query_max(2, 4), 2);
+    assert_eq!(seg.query_max(2, 5), 5);
 }
