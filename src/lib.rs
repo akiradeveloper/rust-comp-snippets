@@ -45,7 +45,6 @@ pub mod treap;
 pub mod two_pointer;
 pub mod macros;
 pub mod wavelet_matrix;
-pub mod btree;
 pub mod arith_seq;
 pub mod grundy;
 pub mod complex;

@@ -1,7 +1,7 @@
 /// https://ei1333.github.io/luzhiled/snippets/structure/segment-tree.html
 
 #[snippet = "SEG_LAZY"]
-trait SEGImpl {
+trait SEGLazyImpl {
     type Monoid: Copy;
     type OperatorMonoid: Copy + PartialEq;
     fn m0() -> Self::Monoid;
@@ -12,7 +12,7 @@ trait SEGImpl {
 }
 
 #[snippet = "SEG_LAZY"]
-struct SEG<T: SEGImpl> {
+struct SEGLazy<T: SEGLazyImpl> {
     n: usize,
     data: Vec<T::Monoid>,
     lazy: Vec<T::OperatorMonoid>,
@@ -20,11 +20,11 @@ struct SEG<T: SEGImpl> {
 }
 
 #[snippet = "SEG_LAZY"]
-impl <T: SEGImpl> SEG<T> {
-    pub fn new(init: T::Monoid, n: usize) -> SEG<T> {
+impl <T: SEGLazyImpl> SEGLazy<T> {
+    pub fn new(init: T::Monoid, n: usize) -> SEGLazy<T> {
         let mut m = 1;
         while m < n { m *= 2; }
-        SEG {
+        SEGLazy {
             n: m,
             data: vec![init; m*2],
             lazy: vec![T::om0(); m*2],
@@ -104,7 +104,7 @@ impl <T: SEGImpl> SEG<T> {
 #[snippet = "SEG_LAZY_MAX_RUQ"]
 struct MAX_RUQ;
 #[snippet = "SEG_LAZY_MAX_RUQ"]
-impl SEGImpl for MAX_RUQ {
+impl SEGLazyImpl for MAX_RUQ {
     type Monoid = i64;
     type OperatorMonoid = i64;
     fn m0() -> Self::Monoid {
@@ -125,7 +125,7 @@ impl SEGImpl for MAX_RUQ {
 }
 #[test]
 fn test_MAX_RUQ() {
-    let mut seg: SEG<MAX_RUQ> = SEG::new(MAX_RUQ::m0(), 10);
+    let mut seg: SEGLazy<MAX_RUQ> = SEGLazy::new(MAX_RUQ::m0(), 10);
     assert_eq!(seg.query(0, 3), 0);
     seg.update(0, 2, 10); // [10,10,0,...]
     assert_eq!(seg.query(0, 3), 10);
@@ -140,7 +140,7 @@ fn test_MAX_RUQ() {
 #[snippet = "SEG_LAZY_MIN_RUQ"]
 struct MIN_RUQ;
 #[snippet = "SEG_LAZY_MIN_RUQ"]
-impl SEGImpl for MIN_RUQ {
+impl SEGLazyImpl for MIN_RUQ {
     type Monoid = i64;
     type OperatorMonoid = i64;
     fn m0() -> Self::Monoid {
@@ -161,7 +161,7 @@ impl SEGImpl for MIN_RUQ {
 }
 #[test]
 fn test_MIN_RUQ() { // DSL_2_D
-    let mut seg: SEG<MIN_RUQ> = SEG::new(MIN_RUQ::m0(), 8);
+    let mut seg: SEGLazy<MIN_RUQ> = SEGLazy::new(MIN_RUQ::m0(), 8);
     seg.update(1,7,5);
     seg.update(2,8,2);
     seg.update(2,6,7);
@@ -177,7 +177,7 @@ fn test_MIN_RUQ() { // DSL_2_D
 #[snippet = "SEG_LAZY_SUM_RUQ"]
 struct SUM_RUQ;
 #[snippet = "SEG_LAZY_SUM_RUQ"]
-impl SEGImpl for SUM_RUQ { 
+impl SEGLazyImpl for SUM_RUQ { 
     type Monoid = i64;
     type OperatorMonoid = i64;
     fn m0() -> Self::Monoid {
@@ -198,7 +198,7 @@ impl SEGImpl for SUM_RUQ {
 }
 #[test]
 fn test_SUM_RUQ() { // DSL_1_I
-    let mut seg: SEG<SUM_RUQ> = SEG::new(SUM_RUQ::m0(), 8);
+    let mut seg: SEGLazy<SUM_RUQ> = SEGLazy::new(SUM_RUQ::m0(), 8);
     seg.update(1,7,-5);
     seg.update(2,5,-9);
     assert_eq!(seg.query(2,4),-18);
@@ -214,7 +214,7 @@ fn test_SUM_RUQ() { // DSL_1_I
 #[snippet = "SEG_LAZY_SUM_RAQ"]
 struct SUM_RAQ;
 #[snippet = "SEG_LAZY_SUM_RAQ"]
-impl SEGImpl for SUM_RAQ {
+impl SEGLazyImpl for SUM_RAQ {
     type Monoid = i64;
     type OperatorMonoid = i64;
     fn m0() -> Self::Monoid {
@@ -235,7 +235,7 @@ impl SEGImpl for SUM_RAQ {
 }
 #[test]
 fn test_SUM_RAQ() {
-    let mut seg: SEG<SUM_RAQ> = SEG::new(0, 10);
+    let mut seg: SEGLazy<SUM_RAQ> = SEGLazy::new(0, 10);
     assert_eq!(seg.query(0, 3), 0);
     seg.update(0,5,10);
     assert_eq!(seg.query(0, 1), 10);
@@ -251,7 +251,7 @@ fn test_SUM_RAQ() {
 #[snippet = "SEG_LAZY_MAX_RAQ"]
 struct MAX_RAQ;
 #[snippet = "SEG_LAZY_MAX_RAQ"]
-impl SEGImpl for MAX_RAQ {
+impl SEGLazyImpl for MAX_RAQ {
     type Monoid = i64;
     type OperatorMonoid = i64;
     fn m0() -> Self::Monoid {
@@ -274,7 +274,7 @@ impl SEGImpl for MAX_RAQ {
 #[snippet = "SEG_LAZY_MIN_RAQ"]
 struct MIN_RAQ;
 #[snippet = "SEG_LAZY_MIN_RAQ"]
-impl SEGImpl for MIN_RAQ { 
+impl SEGLazyImpl for MIN_RAQ { 
     type Monoid = i64;
     type OperatorMonoid = i64;
     fn m0() -> Self::Monoid {
@@ -295,7 +295,7 @@ impl SEGImpl for MIN_RAQ {
 }
 #[test]
 fn test_rmq_raq() { // DSL_2_H
-    let mut seg: SEG<MIN_RAQ> = SEG::new(0, 6);
+    let mut seg: SEGLazy<MIN_RAQ> = SEGLazy::new(0, 6);
     seg.update(1,4,1);
     seg.update(2,5,-2);
     assert_eq!(seg.query(0,6),-2);
@@ -304,4 +304,3 @@ fn test_rmq_raq() { // DSL_2_H
     assert_eq!(seg.query(3,5),1);
     assert_eq!(seg.query(0,6),-1);
 }
-

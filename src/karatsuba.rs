@@ -47,7 +47,7 @@ where T: std::marker::Copy +
 }
  
 #[snippet = "karatsuba"]
-fn multiply<T>(a: &[T], b: &[T]) -> Vec<T>
+pub fn multiply<T>(a: &[T], b: &[T]) -> Vec<T>
 where T: std::marker::Copy +
          std::ops::Add<Output = T> +
          std::ops::Sub<Output = T> +
