@@ -97,6 +97,21 @@ fn test_arith_seq_next() {
 #[test]
 fn test_arith_seq_prev() {
     let x = ArithSeq {
+        a: 0,
+        b: 3,
+    };
+    assert_eq!(x.prev(6), 6);
+    assert_eq!(x.prev(5), 3);
+    assert_eq!(x.prev(4), 3);
+    assert_eq!(x.prev(3), 3);
+    assert_eq!(x.prev(2), 0);
+    assert_eq!(x.prev(1), 0);
+    assert_eq!(x.prev(0), 0);
+    assert_eq!(x.prev(-1), -3);
+    assert_eq!(x.prev(-2), -3);
+    assert_eq!(x.prev(-3), -3);
+
+    let x = ArithSeq {
         a: 1,
         b: 3,
     };

@@ -16,3 +16,4 @@ pub mod zenho;
 pub mod longest_distance;
 pub mod dijkstra_queue;
 pub mod adjacency_matrix;
+pub mod partition;
