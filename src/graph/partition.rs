@@ -1,17 +1,20 @@
 use crate::union_find::UnionFind;
 use std::collections::HashMap;
 
+#[snippet = "Partition"]
 #[derive(Debug)]
 struct Connected {
     n: usize,
     e: Vec<(usize,usize)>,
     nodeid: Vec<usize>,
 }
+#[snippet = "Partition"]
 struct Partition {
     n: usize,
     e: Vec<(usize,usize)>,
     uf: UnionFind
 }
+#[snippet = "Partition"]
 impl Partition {
     fn new(n: usize) -> Partition {
         Partition {
@@ -37,7 +40,6 @@ impl Partition {
             let root = self.uf.root(i);
             grp.entry(root).or_insert(vec![]).push(i);
         }
-        dbg!(&grp);
         let mut res = vec![];
         for (_, nodeid) in grp {
             let n = nodeid.len();
@@ -50,7 +52,6 @@ impl Partition {
                     es.push((a,b));
                 }
             }
-            dbg!(&es);
             es.sort();
             es.dedup();
             let mut nes = vec![];
