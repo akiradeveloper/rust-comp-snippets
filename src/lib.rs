@@ -54,3 +54,4 @@ pub mod gaussian_elimination;
 pub mod kadane;
 pub mod seg_beats;
 pub mod ntt;
+pub mod polynomial;
