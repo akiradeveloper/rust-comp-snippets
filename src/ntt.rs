@@ -122,8 +122,7 @@ pub fn garner(mr: Vec<(i64,i64)>, mo: i64) -> i64 {
     }
     constants[mr.len() - 1]
 }
-#[snippet = "NTT"]
-pub fn ntt_multiply(a: &[i64], b: &[i64], mo: i64) -> Vec<i64> {
+pub fn ntt_multiply_naive(a: &[i64], b: &[i64], mo: i64) -> Vec<i64> {
     let mut a = a.to_vec();
     let mut b = b.to_vec();
     let n = a.len();
@@ -155,6 +154,51 @@ pub fn ntt_multiply(a: &[i64], b: &[i64], mo: i64) -> Vec<i64> {
     res.truncate(n+m-1);
     res
 }
+#[snippet = "NTT"]
+pub fn ntt_multiply(a: &[i64], b: &[i64], mo: i64) -> Vec<i64> {
+    let mut a = a.to_vec();
+    let mut b = b.to_vec();
+    let n = a.len();
+    let m = b.len();
+    for i in 0..n {
+        a[i] %= mo;
+    }
+    for i in 0..m {
+        b[i] %= mo;
+    }
+    let ntt1 = NTT::new(167772161);
+    let ntt2 = NTT::new(469762049);
+    let ntt3 = NTT::new(1224736769);
+
+    let x = ntt1.convolve(&a, &b);
+    let y = ntt2.convolve(&a, &b);
+    let z = ntt3.convolve(&a, &b);
+
+    let m1 = ntt1.mo;
+    let m2 = ntt2.mo;
+    let m3 = ntt3.mo;
+    let m1_inv_m2 = mod_inverse(m1, m2);
+    let m12_inv_m3 = mod_inverse(m1 * m2, m3);
+    let m12_mod = (m1 * m2) % mo;
+
+    let L = x.len();
+    let mut res = vec![0; L];
+    for i in 0..L {
+        let mut v1 = (y[i] - x[i]) * m1_inv_m2;
+        v1 %= m2;
+        if v1 < 0 { v1 += m2; }
+
+        let mut v2 = (z[i] - (x[i] + m1*v1) % m3) * m12_inv_m3;
+        v2 %= m3;
+        if v2 < 0 { v2 += m3; }
+        
+        let mut const3 = (x[i] + m1*v1 + m12_mod * v2) % mo;
+        if const3 < 0 { const3 += mo; }
+        res[i] = const3;
+    }
+    res.truncate(n+m-1);
+    res
+}
 
 #[test]
 fn test_ntt_multiply() {
@@ -171,12 +215,13 @@ fn test_ntt_multiply() {
     }
     let y = x.clone();
 
-    let z = ntt_multiply(&x, &y, ten(9) + 7);
     let t1 = vec![
         930000007, 60000000, 390000001, 920000004,
 		650000003, 580000006, 710000014, 40000021,
 		570000042, 300000064, 370000109, 240000144,
 		910000175, 380000187, 650000193, 720000185,
         590000162, 260000123, 730000074];
-    assert_eq!(z,t1);
+
+    assert_eq!(ntt_multiply_naive(&x, &y, ten(9)+7), t1);
+    assert_eq!(ntt_multiply(&x, &y, ten(9)+7), t1);
 }
