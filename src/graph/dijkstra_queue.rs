@@ -1,12 +1,13 @@
 use std::collections::HashMap;
 use std::collections::BinaryHeap;
-#[snippet = "DijkstraHeap"]
+
+#[snippet = "DijkstraQueue"]
 struct DijkstraQueue<State: std::hash::Hash + std::cmp::Eq> {
     cur: usize,
     que: Vec<Vec<State>>,
     next: BinaryHeap<i64>,
 }
-#[snippet = "DijkstraHeap"]
+#[snippet = "DijkstraQueue"]
 impl <State: Default + Clone + std::hash::Hash + std::cmp::Eq> DijkstraQueue<State> {
     pub fn new(maxdist: usize) -> DijkstraQueue<State> {
         DijkstraQueue {
