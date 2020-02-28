@@ -37,7 +37,7 @@ impl NTT {
         let mut m = 1;
         loop {
             if m < n {
-                let m2 = 2*m;
+                let m2 = m * 2;
                 let base = modpow(h, (n/m2) as i64, self.mo);
                 let mut w = 1;
                 for x in 0..m {
@@ -47,14 +47,15 @@ impl NTT {
                             let u = a[s];
                             let d = (a[s+m] * w) % self.mo;
                             a[s] = u + d;
-                            if a[s] >= self.mo { a[s] -= self.mo }
+                            if a[s] >= self.mo { a[s] -= self.mo; }
                             a[s+m] = u - d;
-                            if a[s+m] < 0 { a[s+m] += self.mo }
+                            if a[s+m] < 0 { a[s+m] += self.mo; }
                             s += m2;
                         } else {
                             break;
                         }
                     }
+                    w = (w * base) % self.mo;
                 }
                 m *= 2;
             } else {
@@ -93,7 +94,7 @@ impl NTT {
 
         let mut c = vec![0;n];
         for i in 0..n {
-            c[i] = a[i] * b[i];
+            c[i] = (a[i] * b[i]) % self.mo;
         }
 
         self.intt(&mut c, n);
@@ -116,7 +117,7 @@ pub fn garner(mr: Vec<(i64,i64)>, mo: i64) -> i64 {
     }
     constants[mr.len() - 1]
 }
-pub fn multiply(a: &[i64], b: &[i64], mo: i64) -> Vec<i64> {
+pub fn ntt_multiply(a: &[i64], b: &[i64], mo: i64) -> Vec<i64> {
     let mut a = a.to_vec();
     let mut b = b.to_vec();
     let n = a.len();
@@ -131,9 +132,9 @@ pub fn multiply(a: &[i64], b: &[i64], mo: i64) -> Vec<i64> {
     let ntt2 = NTT::new(469762049);
     let ntt3 = NTT::new(1224736769);
 
-    let x = ntt1.convolve(&a,&b);
-    let y = ntt2.convolve(&a,&b);
-    let z = ntt3.convolve(&a,&b);
+    let x = ntt1.convolve(&a, &b);
+    let y = ntt2.convolve(&a, &b);
+    let z = ntt3.convolve(&a, &b);
     
     let L = x.len();
     let mut res = vec![0;L];
@@ -145,6 +146,7 @@ pub fn multiply(a: &[i64], b: &[i64], mo: i64) -> Vec<i64> {
         ];
         res[i] = garner(mr, mo);
     }
+    res.truncate(n+m-1);
     res
 }
 
@@ -161,4 +163,14 @@ fn test_ntt_multiply() {
     for i in 0..10 {
         x.push(ten(8) + i as i64);
     }
+    let y = x.clone();
+
+    let z = ntt_multiply(&x, &y, ten(9) + 7);
+    let t1 = vec![
+        930000007, 60000000, 390000001, 920000004,
+		650000003, 580000006, 710000014, 40000021,
+		570000042, 300000064, 370000109, 240000144,
+		910000175, 380000187, 650000193, 720000185,
+        590000162, 260000123, 730000074];
+    assert_eq!(z,t1);
 }
