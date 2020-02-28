@@ -1,4 +1,4 @@
-use crate::number::{mod_inverse, modpow};
+use crate::number::{modinv, modpow};
 
 #[snippet = "NTT"]
 struct NTT {
@@ -15,7 +15,7 @@ impl NTT {
         let g = 3;
         let mut h = modpow(g, (self.mo-1)/n as i64, self.mo);
         if inverse {
-            h = mod_inverse(h, self.mo);
+            h = modinv(h, self.mo);
         }
 
         let mut i = 0;
@@ -75,7 +75,7 @@ impl NTT {
     }
     fn intt(&self, a: &mut [i64], n: usize) {
         self._ntt(a, n, true);
-        let n_inv = mod_inverse(a.len() as i64, self.mo);
+        let n_inv = modinv(a.len() as i64, self.mo);
         for i in 0..n {
             a[i] = (a[i] * n_inv) % self.mo;
         }
@@ -112,7 +112,7 @@ pub fn garner(mr: Vec<(i64,i64)>, mo: i64) -> i64 {
     let mut coef = vec![1; mr.len()];
     let mut constants = vec![0; mr.len()];
     for i in 0..mr.len() - 1 {
-        let v = (mr[i].1 + mr[i].0 - constants[i]) * mod_inverse(coef[i], mr[i].0) % mr[i].0;
+        let v = (mr[i].1 + mr[i].0 - constants[i]) * modinv(coef[i], mr[i].0) % mr[i].0;
         for j in i + 1..mr.len() {
             constants[j] += coef[j] * v;
             constants[j] %= mr[j].0;
@@ -177,8 +177,8 @@ pub fn ntt_multiply(a: &[i64], b: &[i64], mo: i64) -> Vec<i64> {
     let m1 = ntt1.mo;
     let m2 = ntt2.mo;
     let m3 = ntt3.mo;
-    let m1_inv_m2 = mod_inverse(m1, m2);
-    let m12_inv_m3 = mod_inverse(m1 * m2, m3);
+    let m1_inv_m2 = modinv(m1, m2);
+    let m12_inv_m3 = modinv(m1 * m2, m3);
     let m12_mod = (m1 * m2) % mo;
 
     let L = x.len();
@@ -191,7 +191,7 @@ pub fn ntt_multiply(a: &[i64], b: &[i64], mo: i64) -> Vec<i64> {
         let mut v2 = (z[i] - (x[i] + m1*v1) % m3) * m12_inv_m3;
         v2 %= m3;
         if v2 < 0 { v2 += m3; }
-        
+
         let mut const3 = (x[i] + m1*v1 + m12_mod * v2) % mo;
         if const3 < 0 { const3 += mo; }
         res[i] = const3;

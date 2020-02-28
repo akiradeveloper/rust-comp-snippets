@@ -1,4 +1,4 @@
-use crate::number::mod_inverse;
+use crate::number::modinv;
 
 #[snippet = "GaussianElimination"]
 struct GaussianElimination {
@@ -46,7 +46,7 @@ impl GaussianElimination {
                 A[rank][j2] = x;
                 A[pivot][j2] = y;
             }
-            let inv = mod_inverse(A[rank][j], mo);
+            let inv = modinv(A[rank][j], mo);
             for j2 in 0..w {
                 A[rank][j2] = (A[rank][j2] * inv) % mo;
             }

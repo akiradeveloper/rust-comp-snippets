@@ -55,8 +55,8 @@ fn test_extgcg() {
 }
 
 #[doc = "ay=1 (mod m) -> y=a^{-1}"]
-#[snippet = "mod_inverse"]
-pub fn mod_inverse(a: i64, m: i64) -> i64 {
+#[snippet = "modinv"]
+pub fn modinv(a: i64, m: i64) -> i64 {
     let (_, x, _) = extgcd(a, m);
     (m + x % m) % m
 }
