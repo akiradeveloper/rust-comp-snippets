@@ -1,8 +1,10 @@
 use crate::number::{mod_inverse, modpow};
 
+#[snippet = "NTT"]
 struct NTT {
     pub mo: i64,
 }
+#[snippet = "NTT"]
 impl NTT {
     pub fn new(mo: i64) -> NTT {
         NTT {
@@ -101,6 +103,9 @@ impl NTT {
         c
     }
 }
+#[snippet = "garner"]
+#[snippet = "NTT"]
+#[doc = "compute minimum x from a list of x % m[i] = r[i]"]
 pub fn garner(mr: Vec<(i64,i64)>, mo: i64) -> i64 {
     let mut mr = mr;
     mr.push((mo, 0));
@@ -117,6 +122,7 @@ pub fn garner(mr: Vec<(i64,i64)>, mo: i64) -> i64 {
     }
     constants[mr.len() - 1]
 }
+#[snippet = "NTT"]
 pub fn ntt_multiply(a: &[i64], b: &[i64], mo: i64) -> Vec<i64> {
     let mut a = a.to_vec();
     let mut b = b.to_vec();
