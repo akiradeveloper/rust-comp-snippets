@@ -1,9 +1,11 @@
+#[snippet = "LCS"]
 #[derive(Debug)]
 struct LCS<T> {
     max_matching: Vec<Vec<usize>>,
     matching: Vec<(usize,usize)>,
     phantom: std::marker::PhantomData<T>,
 }
+#[snippet = "LCS"]
 impl <T: Eq> LCS<T> {
     pub fn new(xs: &[T], ys: &[T]) -> LCS<T> {
         let n = xs.len();
