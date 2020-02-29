@@ -25,7 +25,7 @@ impl <T: Eq> LCS<T> {
             i -= 1;
             j -= 1;
         }
-        matching.sort();
+        matching.reverse();
         
         LCS {
             max_matching: dp,
