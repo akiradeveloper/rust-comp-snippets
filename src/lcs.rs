@@ -74,9 +74,16 @@ impl <T: Eq> LCS<T> {
 }
 
 #[test]
-fn test_lcs() {
+fn test_lcs0() {
     let xs = vec![6,9,2,8,3,7,4,6];
     let ys = vec![1,2,2,4,5,3,3,3,2,4];
     let lcs = LCS::new(&xs, &ys);
-    dbg!(lcs);
+    assert_eq!(lcs.matching, vec![(2,1),(4,5),(6,9)]);
+}
+#[test]
+fn test_lcs1() {
+    let xs = vec![1,0,1,1,1,1,0,0];
+    let ys = vec![1,0,0,1,1,1,1,1,0];
+    let lcs = LCS::new(&xs, &ys);
+    assert_eq!(lcs.matching.len(), 7);
 }
