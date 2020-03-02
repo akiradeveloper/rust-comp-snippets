@@ -1,6 +1,26 @@
 use crate::complex::Complex;
 
 #[snippet = "fft"]
+pub fn multiply(a: &[i64], b: &[i64]) -> Vec<i64> {
+    let n = a.len();
+    let m = b.len();
+    let mut fa = vec![];
+    let mut fb = vec![];
+    for i in 0..n {
+        fa.push(a[i] as f64)
+    }
+    for i in 0..m {
+        fb.push(b[i] as f64)
+    }
+    let fc = convolve(&fa, &fb);
+    let mut c = vec![];
+    for x in fc {
+        c.push((x+0.5) as i64);
+    }
+    c
+}
+
+#[snippet = "fft"]
 #[doc = "convolve two waves a[x],b[y] to c[x+y]. O(nlogn)"]
 pub fn convolve(a: &[f64], b: &[f64]) -> Vec<f64> {
     let n = a.len() + b.len() - 1;
