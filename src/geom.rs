@@ -89,6 +89,7 @@ impl std::cmp::PartialEq for Vector2D {
 }
 
 #[snippet = "Geom"]
+#[derive(Clone, Copy)]
 struct Triangle {
     x: Vector2D,
     y: Vector2D,
@@ -108,7 +109,7 @@ impl Triangle {
 }
 
 #[snippet = "Geom"]
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct Circle {
     center: Vector2D,
     radius: f64,
