@@ -179,6 +179,22 @@ fn convex_hull(vs: &[Vector2D]) -> Vec<usize> {
     res.pop();
     res
 }
+#[test]
+fn test_convex_hull() {
+    let vs = vec![
+        Vector2D(-1.0, -1.0),
+        Vector2D(-1.0, 1.0),
+        Vector2D(1.0, 1.0),
+        Vector2D(1.0, -1.0),
+        Vector2D(0.0, 0.0),
+        Vector2D(0.1, 0.1),
+    ];
+
+    let mut idx = convex_hull(&vs);
+    idx.sort();
+
+    assert_eq!(&idx, &[0, 1, 2, 3]);
+}
 
 #[snippet = "closest_pair"]
 pub fn closest_pair(ps: &[(f64, f64)]) -> ((f64, f64), (f64, f64)) {
@@ -272,23 +288,6 @@ pub fn is_intersected(a: Vector2D, b: Vector2D, c: Vector2D, d: Vector2D) -> boo
     // tc * td < 0.0 && ta * tb < 0.0
 }
 
-#[test]
-fn test_convex_hull() {
-    let vs = vec![
-        Vector2D(-1.0, -1.0),
-        Vector2D(-1.0, 1.0),
-        Vector2D(1.0, 1.0),
-        Vector2D(1.0, -1.0),
-        Vector2D(0.0, 0.0),
-        Vector2D(0.1, 0.1),
-    ];
-
-    let mut idx = convex_hull(&vs);
-    idx.sort();
-
-    assert_eq!(&idx, &[0, 1, 2, 3]);
-}
-
 #[snippet = "Line2D"]
 #[derive(Clone, Copy, Debug)]
 pub struct Line2D {
@@ -299,7 +298,6 @@ pub struct Line2D {
 impl Line2D {
     pub fn intersection(a: Line2D, b: Line2D) -> Vector2D {
         let n = b.d.normal();
-        dbg!(n);
         let x = n.dot(b.p - a.p) / n.dot(a.d);
         a.p + a.d * x
     }
@@ -312,7 +310,6 @@ impl Line2D {
         (a-q).len()
     }
 }
-
 #[test]
 fn test_intersection() {
     let m = Line2D { p: Vector2D(0.,0.), d: Vector2D(1.,1.) };
