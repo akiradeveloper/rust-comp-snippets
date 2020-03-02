@@ -2,6 +2,8 @@
 
 use std;
 
+const EPS: f64 = 1e-9;
+
 #[snippet = "Vector2D"]
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[allow(dead_code)]
@@ -22,6 +24,9 @@ impl Vector2D {
     }
     pub fn det(self, other: Vector2D) -> f64 {
         Self::add(self.0 * other.1, -self.1 * other.0)
+    }
+    pub fn dist(self, other: Self) -> f64 {
+        (self - other).len()
     }
     pub fn len(&self) -> f64 {
         f64::sqrt((self.0).powi(2) + (self.1).powi(2))
@@ -72,6 +77,26 @@ impl std::ops::Div<f64> for Vector2D {
     }
 }
 
+#[snippet = "Triangle"]
+struct Triangle {
+    x: Vector2D,
+    y: Vector2D,
+    z: Vector2D,
+}
+#[snippet = "Triangle"]
+impl Triangle {
+    pub fn exists(&self) -> bool {
+        let a = (self.y-self.z).len();
+        let b = (self.x-self.z).len();
+        let c = (self.x-self.y).len();
+        if a+b-c < EPS { return false }
+        if b+c-a < EPS { return false } 
+        if c+a-b < EPS { return false }
+        true
+    }
+}
+
+#[derive(Debug)]
 #[snippet = "Circle"]
 pub struct Circle {
     center: Vector2D,
@@ -80,7 +105,16 @@ pub struct Circle {
 
 #[snippet = "Circle"]
 impl Circle {
-    pub fn inner_circle(a: Vector2D, b: Vector2D, c: Vector2D) -> Circle {
+    pub fn inner_circle(a: Vector2D, b: Vector2D, c: Vector2D) -> Option<Circle> {
+        let tri = Triangle {
+            x: a,
+            y: b,
+            z: c,
+        };
+        if !tri.exists() {
+            return None
+        }
+
         let a_bisect = Line2D {
             p: a,
             d: Vector2D::bisect(a-b, a-c),
@@ -96,30 +130,12 @@ impl Circle {
             d: b-a,
         };
         let radius = ab.distance(center);
-        Circle {
+        Some(Circle {
             center: center,
             radius: radius,
-        }
+        })
     }
-    pub fn outer_circle(a: Vector2D, b: Vector2D, c: Vector2D) -> Circle {
-        let ubn = Line2D {
-             p: (a+b) / 2.,
-             d: (a-b).normal()
-        };
-        let vbn = Line2D {
-            p: (b+c) / 2.,
-            d: (b-c).normal(),
-        };
-
-        let center = Line2D::intersection(ubn, vbn);
-        let radius = (a - center).len();
-
-        Circle {
-            center: center,
-            radius: radius,
-        }
-    }
-    pub fn outer_circle_stable(x: Vector2D, y: Vector2D, z: Vector2D) -> Option<Circle> {
+    pub fn outer_circle(x: Vector2D, y: Vector2D, z: Vector2D) -> Option<Circle> {
         let a = (y-z).len();
         let a2 = a*a;
         let b = (x-z).len();
@@ -127,10 +143,9 @@ impl Circle {
         let c = (x-y).len();
         let c2 = c*c;
 
-        let eps = 1e-9;
-        if a+b-c < eps { return None }
-        if b+c-a < eps { return None } 
-        if c+a-b < eps { return None }
+        if a+b-c < EPS { return None }
+        if b+c-a < EPS { return None } 
+        if c+a-b < EPS { return None }
 
         let X = x*(a2*(b2+c2-a2)) + y*(b2*(c2+a2-b2)) + z*(c2*(a2+b2-c2));
         let Y = a2*(b2+c2-a2) + b2*(c2+a2-b2) + c2*(a2+b2-c2);
@@ -141,6 +156,31 @@ impl Circle {
             radius: radius
         })
     }
+    pub fn intersection(p: &Self, q: &Self) -> Vec<Vector2D> {
+        let mut res = vec![];
+
+        res
+    }
+}
+#[test]
+fn test_inner_circle() {
+    let p1 = Vector2D(0.,0.);
+    let p2 = Vector2D(0.,1.);
+    let p3 = Vector2D(1.,0.);
+    let ic = Circle::inner_circle(p1, p2, p1);
+    dbg!(&ic);
+    let ic = Circle::inner_circle(p1, p2, p3);
+    dbg!(&ic);
+}
+#[test]
+fn test_outer_circle() {
+    let p1 = Vector2D(0.,0.);
+    let p2 = Vector2D(0.,1.);
+    let p3 = Vector2D(1.,0.);
+    let ic = Circle::outer_circle(p1, p2, p1);
+    dbg!(&ic);
+    let ic = Circle::outer_circle(p1, p2, p3);
+    dbg!(&ic);
 }
 
 use crate::total::Total;
