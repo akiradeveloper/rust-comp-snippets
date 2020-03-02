@@ -2,18 +2,19 @@
 
 use std;
 
+#[snippet = "Geom"]
 const EPS: f64 = 1e-9;
 
-#[snippet = "Vector2D"]
+#[snippet = "Geom"]
 #[derive(Debug, Clone, Copy)]
 #[allow(dead_code)]
 pub struct Vector2D(f64, f64);
 
-#[snippet = "Vector2D"]
+#[snippet = "Geom"]
 impl Vector2D {
     pub fn add(a: f64, b: f64) -> f64 {
         let c = a + b;
-        if c.abs() < 1e-10 {
+        if c.abs() < EPS {
             0.0
         } else {
             c
@@ -50,35 +51,35 @@ impl Vector2D {
     }
 }
 
-#[snippet = "Vector2D"]
+#[snippet = "Geom"]
 impl std::ops::Add for Vector2D {
     type Output = Vector2D;
     fn add(self, rhs: Vector2D) -> Self::Output {
         Vector2D(Vector2D::add(self.0, rhs.0), Vector2D::add(self.1, rhs.1))
     }
 }
-#[snippet = "Vector2D"]
+#[snippet = "Geom"]
 impl std::ops::Sub for Vector2D {
     type Output = Vector2D;
     fn sub(self, rhs: Vector2D) -> Self::Output {
         Vector2D(Vector2D::add(self.0, -rhs.0), Vector2D::add(self.1, -rhs.1))
     }
 }
-#[snippet = "Vector2D"]
+#[snippet = "Geom"]
 impl std::ops::Mul<f64> for Vector2D {
     type Output = Vector2D;
     fn mul(self, rhs: f64) -> Self::Output {
         Vector2D(rhs * self.0, rhs * self.1)
     }
 }
-#[snippet = "Vector2D"]
+#[snippet = "Geom"]
 impl std::ops::Div<f64> for Vector2D {
     type Output = Vector2D;
     fn div(self, rhs: f64) -> Self::Output {
         Vector2D(self.0 / rhs, self.1 / rhs)
     }
 }
-#[snippet = "Vector2D"]
+#[snippet = "Geom"]
 impl std::cmp::PartialEq for Vector2D {
     fn eq(&self, other: &Self) -> bool {
         let x = (self.0 - other.0).abs();
@@ -87,13 +88,13 @@ impl std::cmp::PartialEq for Vector2D {
     }
 }
 
-#[snippet = "Triangle"]
+#[snippet = "Geom"]
 struct Triangle {
     x: Vector2D,
     y: Vector2D,
     z: Vector2D,
 }
-#[snippet = "Triangle"]
+#[snippet = "Geom"]
 impl Triangle {
     pub fn exists(&self) -> bool {
         let a = (self.y-self.z).len();
@@ -106,13 +107,13 @@ impl Triangle {
     }
 }
 
+#[snippet = "Geom"]
 #[derive(Debug)]
-#[snippet = "Circle"]
 pub struct Circle {
     center: Vector2D,
     radius: f64,
 }
-#[snippet = "Circle"]
+#[snippet = "Geom"]
 impl Circle {
     pub fn inner_circle(a: Vector2D, b: Vector2D, c: Vector2D) -> Option<Circle> {
         let tri = Triangle {
@@ -235,6 +236,55 @@ fn test_circle_intersection() {
         radius: 0.8,
     };
     dbg!(Circle::intersection(&c1, &c2));
+}
+
+/// Is line a-b and line c-d intersected ?
+#[snippet = "Geom"]
+pub fn is_intersected(a: Vector2D, b: Vector2D, c: Vector2D, d: Vector2D) -> bool {
+    let ta = (c.0 - d.0) * (a.1 - c.1) + (c.1 - d.1) * (c.0 - a.0);
+    let tb = (c.0 - d.0) * (b.1 - c.1) + (c.1 - d.1) * (c.0 - b.0);
+    let tc = (a.0 - b.0) * (c.1 - a.1) + (a.1 - b.1) * (a.0 - c.0);
+    let td = (a.0 - b.0) * (d.1 - a.1) + (a.1 - b.1) * (a.0 - d.0);
+
+    tc * td <= 0.0 && ta * tb <= 0.0
+    // Not intersects start or end point.
+    // tc * td < 0.0 && ta * tb < 0.0
+}
+
+#[snippet = "Geom"]
+#[derive(Clone, Copy, Debug)]
+pub struct Line2D {
+    p: Vector2D,
+    d: Vector2D,
+}
+#[snippet = "Geom"]
+impl Line2D {
+    pub fn passes(a: Vector2D, b: Vector2D) -> Self {
+        unimplemented!()
+    }
+    pub fn intersection(a: Line2D, b: Line2D) -> Vector2D {
+        let n = b.d.normal();
+        let x = n.dot(b.p - a.p) / n.dot(a.d);
+        a.p + a.d * x
+    }
+    pub fn distance(self, a: Vector2D) -> f64 {
+        let perpendicular = Line2D {
+            p: a,
+            d: self.d.unit(),
+        };
+        let q = Self::intersection(self, perpendicular);
+        (a-q).len()
+    }
+}
+#[test]
+fn test_line_intersection() {
+    let m = Line2D { p: Vector2D(0.,0.), d: Vector2D(1.,1.) };
+    let l1 = Line2D { p: Vector2D(0.,2.), d: Vector2D(1.,0.) };
+    let l2 = Line2D { p: Vector2D(0.,2.), d: Vector2D(1.,-1.) };
+    let p1 = Line2D::intersection(m, l1);
+    let p2 = Line2D::intersection(m, l2);
+    assert_eq!(p1, Vector2D(2.,2.));
+    assert_eq!(p2, Vector2D(1.,1.));
 }
 
 use crate::total::Total;
@@ -367,53 +417,4 @@ pub fn closest_pair(ps: &[(f64, f64)]) -> ((f64, f64), (f64, f64)) {
     x_sort.sort_by_key(|p| Total(p.0));
     y_sort.sort_by_key(|p| Total(p.1));
     rec(&x_sort, &y_sort)
-}
-
-/// Is line a-b and line c-d intersected ?
-#[snippet = "is_intersected"]
-pub fn is_intersected(a: Vector2D, b: Vector2D, c: Vector2D, d: Vector2D) -> bool {
-    let ta = (c.0 - d.0) * (a.1 - c.1) + (c.1 - d.1) * (c.0 - a.0);
-    let tb = (c.0 - d.0) * (b.1 - c.1) + (c.1 - d.1) * (c.0 - b.0);
-    let tc = (a.0 - b.0) * (c.1 - a.1) + (a.1 - b.1) * (a.0 - c.0);
-    let td = (a.0 - b.0) * (d.1 - a.1) + (a.1 - b.1) * (a.0 - d.0);
-
-    tc * td <= 0.0 && ta * tb <= 0.0
-    // Not intersects start or end point.
-    // tc * td < 0.0 && ta * tb < 0.0
-}
-
-#[snippet = "Line2D"]
-#[derive(Clone, Copy, Debug)]
-pub struct Line2D {
-    p: Vector2D,
-    d: Vector2D,
-}
-#[snippet = "Line2D"]
-impl Line2D {
-    pub fn passes(a: Vector2D, b: Vector2D) -> Self {
-        unimplemented!()
-    }
-    pub fn intersection(a: Line2D, b: Line2D) -> Vector2D {
-        let n = b.d.normal();
-        let x = n.dot(b.p - a.p) / n.dot(a.d);
-        a.p + a.d * x
-    }
-    pub fn distance(self, a: Vector2D) -> f64 {
-        let perpendicular = Line2D {
-            p: a,
-            d: self.d.unit(),
-        };
-        let q = Self::intersection(self, perpendicular);
-        (a-q).len()
-    }
-}
-#[test]
-fn test_intersection() {
-    let m = Line2D { p: Vector2D(0.,0.), d: Vector2D(1.,1.) };
-    let l1 = Line2D { p: Vector2D(0.,2.), d: Vector2D(1.,0.) };
-    let l2 = Line2D { p: Vector2D(0.,2.), d: Vector2D(1.,-1.) };
-    let p1 = Line2D::intersection(m, l1);
-    let p2 = Line2D::intersection(m, l2);
-    assert_eq!(p1, Vector2D(2.,2.));
-    assert_eq!(p2, Vector2D(1.,1.));
 }

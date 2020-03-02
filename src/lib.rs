@@ -22,7 +22,7 @@ pub mod seg_lazy;
 pub mod sparse_table;
 pub mod fenwick;
 pub mod math;
-pub mod geometry;
+pub mod geom;
 pub mod graph;
 pub mod util;
 pub mod sequence;
