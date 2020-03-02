@@ -37,32 +37,24 @@ impl NTT {
         }
 
         let mut m = 1;
-        loop {
-            if m < n {
-                let m2 = m * 2;
-                let base = modpow(h, (n/m2) as i64, self.mo);
-                let mut w = 1;
-                for x in 0..m {
-                    let mut s = x;
-                    loop {
-                        if s < n {
-                            let u = a[s];
-                            let d = (a[s+m] * w) % self.mo;
-                            a[s] = u + d;
-                            if a[s] >= self.mo { a[s] -= self.mo; }
-                            a[s+m] = u - d;
-                            if a[s+m] < 0 { a[s+m] += self.mo; }
-                            s += m2;
-                        } else {
-                            break;
-                        }
-                    }
-                    w = (w * base) % self.mo;
+        while m < n {
+            let m2 = m * 2;
+            let base = modpow(h, (n/m2) as i64, self.mo);
+            let mut w = 1;
+            for x in 0..m {
+                let mut s = x;
+                while s < n {
+                    let u = a[s];
+                    let d = (a[s+m] * w) % self.mo;
+                    a[s] = u + d;
+                    if a[s] >= self.mo { a[s] -= self.mo; }
+                    a[s+m] = u - d;
+                    if a[s+m] < 0 { a[s+m] += self.mo; }
+                    s += m2;
                 }
-                m *= 2;
-            } else {
-                break;
+                w = (w * base) % self.mo;
             }
+            m *= 2;
         }
         for i in 0..n {
             if a[i] < 0 {
