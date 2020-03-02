@@ -225,3 +225,25 @@ fn test_ntt_multiply() {
     assert_eq!(ntt_multiply_naive(&x, &y, ten(9)+7), t1);
     assert_eq!(ntt_multiply(&x, &y, ten(9)+7), t1);
 }
+
+#[bench]
+fn bench_ntt(b: &mut test::Bencher) {
+    let mut x = vec![0;10000];
+    for i in 0..10000 {
+        x[i] = i as i64;
+    }
+    b.iter(||
+        ntt_multiply(&x, &x, 1_000_000_007)
+    )
+}
+
+#[bench]
+fn bench_ntt_naive(b: &mut test::Bencher) {
+    let mut x = vec![0;10000];
+    for i in 0..10000 {
+        x[i] = i as i64;
+    }
+    b.iter(||
+        ntt_multiply_naive(&x, &x, 1_000_000_007)
+    )
+}
