@@ -96,7 +96,6 @@ impl NTT {
     }
 }
 #[snippet = "garner"]
-#[snippet = "NTT"]
 #[doc = "compute minimum x from a list of x % m[i] = r[i]"]
 pub fn garner(mr: Vec<(i64,i64)>, mo: i64) -> i64 {
     let mut mr = mr;
