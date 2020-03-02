@@ -5,7 +5,7 @@ use std;
 const EPS: f64 = 1e-9;
 
 #[snippet = "Vector2D"]
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy)]
 #[allow(dead_code)]
 pub struct Vector2D(f64, f64);
 
@@ -24,6 +24,11 @@ impl Vector2D {
     }
     pub fn det(self, other: Vector2D) -> f64 {
         Self::add(self.0 * other.1, -self.1 * other.0)
+    }
+    pub fn complex_mul(self, other: Vector2D) -> Self {
+        let real = self.0 * other.0 - self.1 * other.1;
+        let imag = self.0 * other.1 + self.1 * other.0;
+        Vector2D(real, imag)
     }
     pub fn dist(self, other: Self) -> f64 {
         (self - other).len()
@@ -52,7 +57,6 @@ impl std::ops::Add for Vector2D {
         Vector2D(Vector2D::add(self.0, rhs.0), Vector2D::add(self.1, rhs.1))
     }
 }
-
 #[snippet = "Vector2D"]
 impl std::ops::Sub for Vector2D {
     type Output = Vector2D;
@@ -60,7 +64,6 @@ impl std::ops::Sub for Vector2D {
         Vector2D(Vector2D::add(self.0, -rhs.0), Vector2D::add(self.1, -rhs.1))
     }
 }
-
 #[snippet = "Vector2D"]
 impl std::ops::Mul<f64> for Vector2D {
     type Output = Vector2D;
@@ -68,12 +71,19 @@ impl std::ops::Mul<f64> for Vector2D {
         Vector2D(rhs * self.0, rhs * self.1)
     }
 }
-
 #[snippet = "Vector2D"]
 impl std::ops::Div<f64> for Vector2D {
     type Output = Vector2D;
     fn div(self, rhs: f64) -> Self::Output {
         Vector2D(self.0 / rhs, self.1 / rhs)
+    }
+}
+#[snippet = "Vector2D"]
+impl std::cmp::PartialEq for Vector2D {
+    fn eq(&self, other: &Self) -> bool {
+        let x = (self.0 - other.0).abs();
+        let y = (self.1 - other.1).abs();
+        x < EPS && y < EPS
     }
 }
 
@@ -102,7 +112,6 @@ pub struct Circle {
     center: Vector2D,
     radius: f64,
 }
-
 #[snippet = "Circle"]
 impl Circle {
     pub fn inner_circle(a: Vector2D, b: Vector2D, c: Vector2D) -> Option<Circle> {
@@ -156,10 +165,24 @@ impl Circle {
             radius: radius
         })
     }
-    pub fn intersection(p: &Self, q: &Self) -> Vec<Vector2D> {
-        let mut res = vec![];
-
-        res
+    pub fn intersection(c1: &Self, c2: &Self) -> Vec<Vector2D> {
+        let d = c1.center.dist(c2.center);
+        if d > c1.radius + c2.radius + EPS {
+            return vec![]
+        }
+        if c1.center == c2.center {
+            return vec![]
+        }
+        let rc: f64 = (d*d + c1.radius*c1.radius - c2.radius*c2.radius) / (2.*d);
+        let rs: f64 = f64::sqrt(c1.radius*c1.radius - rc*rc);
+        let diff: Vector2D = (c2.center - c1.center) / d;
+        let p1 = c1.center + diff.complex_mul(Vector2D(rc, rs));
+        let p2 = c1.center + diff.complex_mul(Vector2D(rc, -rs));
+        if p1 == p2 {
+            vec![p1]
+        } else {
+            vec![p1,p2]
+        }
     }
 }
 #[test]
@@ -181,6 +204,37 @@ fn test_outer_circle() {
     dbg!(&ic);
     let ic = Circle::outer_circle(p1, p2, p3);
     dbg!(&ic);
+}
+#[test]
+fn test_circle_intersection() {
+    let c1 = Circle {
+        center: Vector2D(1.,0.),
+        radius: 2.
+    };
+    let c2 = Circle {
+        center: Vector2D(-1.,0.),
+        radius: 2.
+    };
+    dbg!(Circle::intersection(&c1, &c1));
+    dbg!(Circle::intersection(&c1, &c2));
+    let c1 = Circle {
+        center: Vector2D(1.,0.),
+        radius: 1.
+    };
+    let c2 = Circle {
+        center: Vector2D(-1.,0.),
+        radius: 1.
+    };
+    dbg!(Circle::intersection(&c1, &c2));
+     let c1 = Circle {
+        center: Vector2D(1.,0.),
+        radius: 0.8,
+    };
+    let c2 = Circle {
+        center: Vector2D(-1.,0.),
+        radius: 0.8,
+    };
+    dbg!(Circle::intersection(&c1, &c2));
 }
 
 use crate::total::Total;
@@ -336,6 +390,9 @@ pub struct Line2D {
 }
 #[snippet = "Line2D"]
 impl Line2D {
+    pub fn passes(a: Vector2D, b: Vector2D) -> Self {
+        unimplemented!()
+    }
     pub fn intersection(a: Line2D, b: Line2D) -> Vector2D {
         let n = b.d.normal();
         let x = n.dot(b.p - a.p) / n.dot(a.d);
