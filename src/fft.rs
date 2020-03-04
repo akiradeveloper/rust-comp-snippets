@@ -1,7 +1,7 @@
 use crate::complex::Complex;
 
 #[snippet = "fft"]
-pub fn multiply(a: &[i64], b: &[i64]) -> Vec<i64> {
+pub fn multiply(a: &[i64], b: &[i64], mo: i64) -> Vec<i64> {
     let n = a.len();
     let m = b.len();
     let mut fa = vec![];
@@ -15,7 +15,8 @@ pub fn multiply(a: &[i64], b: &[i64]) -> Vec<i64> {
     let fc = convolve(fa, fb);
     let mut c = vec![];
     for x in fc {
-        c.push((x+0.5) as i64);
+        let v = (x+0.5) as i64;
+        c.push(v % mo);
     }
     c
 }

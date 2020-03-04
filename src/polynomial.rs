@@ -1,4 +1,4 @@
-use crate::ntt::ntt_ext;
+use crate::ntt;
 
 #[snippet = "Polynomial"]
 #[derive(Debug)]
@@ -17,7 +17,7 @@ impl Polynomial {
     pub fn multiply(&self, other: &Self) -> Self {
         assert!(self.mo == other.mo);
         Polynomial {
-            coeff: ntt_ext::multiply(&self.coeff, &other.coeff, self.mo),
+            coeff: ntt::ntt_multiply(&self.coeff, &other.coeff, self.mo),
             mo: self.mo,
         }
     }
