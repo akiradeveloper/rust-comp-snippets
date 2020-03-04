@@ -12,7 +12,7 @@ pub fn multiply(a: &[i64], b: &[i64]) -> Vec<i64> {
     for i in 0..m {
         fb.push(b[i] as f64)
     }
-    let fc = convolve(&fa, &fb);
+    let fc = convolve(fa, fb);
     let mut c = vec![];
     for x in fc {
         c.push((x+0.5) as i64);
@@ -22,7 +22,7 @@ pub fn multiply(a: &[i64], b: &[i64]) -> Vec<i64> {
 
 #[snippet = "fft"]
 #[doc = "convolve two waves a[x],b[y] to c[x+y]. O(nlogn)"]
-pub fn convolve(a: &[f64], b: &[f64]) -> Vec<f64> {
+pub fn convolve(a: Vec<f64>, b: Vec<f64>) -> Vec<f64> {
     let n = a.len() + b.len() - 1;
     let mut m = 1;
     while m < n {
@@ -36,13 +36,13 @@ pub fn convolve(a: &[f64], b: &[f64]) -> Vec<f64> {
     for i in 0..b.len() {
         y[i] = Complex::new(b[i], 0.);
     }
-    let X = fast_fourier_transform(&x, false);
-    let Y = fast_fourier_transform(&y, false);
+    let X = fast_fourier_transform(x, false);
+    let Y = fast_fourier_transform(y, false);
     let mut Z = vec![Complex::new(0.,0.); m];
     for i in 0..m {
         Z[i] = X[i] * Y[i];
     }
-    let z = fast_fourier_transform(&Z, true);
+    let z = fast_fourier_transform(Z, true);
     let mut ret = vec![0.; m];
     for i in 0..m {
         ret[i] = z[i].x;
@@ -51,7 +51,7 @@ pub fn convolve(a: &[f64], b: &[f64]) -> Vec<f64> {
 }
 
 #[snippet = "fft"]
-pub fn fast_fourier_transform(arr: &[Complex], inv: bool) -> Vec<Complex> {
+pub fn fast_fourier_transform(arr: Vec<Complex>, inv: bool) -> Vec<Complex> {
     let n = arr.len();
     assert!(n.count_ones() == 1, "the length of array is not square");
     let mut a: Vec<_> = arr.to_vec();
