@@ -56,3 +56,4 @@ pub mod seg_beats;
 pub mod ntt;
 pub mod polynomial;
 pub mod lcs;
+pub mod ntt_ext;
