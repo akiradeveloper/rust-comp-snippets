@@ -1,4 +1,4 @@
-use crate::ntt_ext::ntt_ext;
+use crate::ntt::ntt_ext;
 
 #[snippet = "Polynomial"]
 #[derive(Debug)]
