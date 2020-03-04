@@ -191,7 +191,7 @@ pub fn ntt_multiply(a: &[i64], b: &[i64], mo: i64) -> Vec<i64> {
     res
 }
 
-use crate::ntt_ext::ntt_ext;
+use crate::ntt_ext::{ntt_heia, ntt_yuya178};
 
 #[test]
 fn test_ntt_multiply() {
@@ -217,8 +217,9 @@ fn test_ntt_multiply() {
 
     assert_eq!(ntt_multiply_naive(&x, &y, ten(9)+7), t1);
     assert_eq!(ntt_multiply(&x, &y, ten(9)+7), t1);
-    assert_eq!(ntt_ext::multiply(&x, &y, ten(9)+7), t1);
-    assert_eq!(fft::multiply(&x, &y, ten(9)+7), t1);
+    assert_eq!(ntt_heia::multiply(&x, &y, ten(9)+7), t1);
+    // assert_eq!(ntt_yuya178::multiply(&x, &y, ten(9)+7), t1);
+    // assert_eq!(fft::multiply(&x, &y, ten(9)+7), t1);
 }
 
 const N: usize = 10000;
@@ -246,13 +247,24 @@ fn bench_ntt_naive(b: &mut test::Bencher) {
 }
 
 #[bench]
-fn bench_ntt_ext(b: &mut test::Bencher) {
+fn bench_ntt_heia(b: &mut test::Bencher) {
     let mut x = vec![0;N];
     for i in 0..N {
         x[i] = i as i64;
     }
     b.iter(||
-        ntt_ext::multiply(&x, &x, 1_000_000_007)
+        ntt_heia::multiply(&x, &x, 1_000_000_007)
+    )
+}
+
+#[bench]
+fn bench_ntt_yuya178(b: &mut test::Bencher) {
+    let mut x = vec![0;N];
+    for i in 0..N {
+        x[i] = i as i64;
+    }
+    b.iter(||
+        ntt_yuya178::multiply(&x, &x, 1_000_000_007)
     )
 }
 

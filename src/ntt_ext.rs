@@ -1,5 +1,5 @@
-#[snippet = "ntt_ext"]
-pub mod ntt_ext {
+#[snippet = "ntt_heia"]
+pub mod ntt_heia {
     pub trait ModI:
         Sized
         + PartialEq
@@ -288,5 +288,95 @@ pub mod ntt_ext {
             c.push(v as i64)
         }
         c
+    }
+}
+
+#[snippet = "ntt_yuya178"]
+pub mod ntt_yuya178 {
+    pub fn multiply(a: &[i64], b: &[i64], mo: i64) -> Vec<i64> {
+        let a = a.to_vec();
+        let b = b.to_vec();
+        let mut c = conv(a, b);
+        for i in 0..c.len() {
+            c[i] %= mo;
+        }
+        c
+    }
+    fn ntt(c: Vec<i64>, inv: bool, mo: i64, g: i64) -> Vec<i64>{
+        let n = c.len();
+        if n==1 {
+            return c;
+        }
+        let c1: Vec<i64> = (0..n/2).map(|x| c[2*x]).collect();
+        let c2: Vec<i64> = (0..n/2).map(|x| c[2*x+1]).collect();
+        let r1 = ntt(c1, inv, mo, g);
+        let r2 = ntt(c2, inv, mo, g);
+        let mut ret = vec![0;n];
+        let mut h = mod_pow(g,(mo-1)/(n as i64),mo);  // (h ^ n) == 1 (mod mo)
+        if inv {h = mod_inv(h,mo);}  // h = h ^ -1
+        let mut base = 1;
+        for i in 0..n {
+            ret[i] = r1[i%(n/2)] + base * r2[i%(n/2)];
+            ret[i] %= mo;
+            base = base * h % mo;
+        }
+        ret
+    }
+     
+    pub fn conv(mut a1: Vec<i64>, mut a2: Vec<i64>) -> Vec<i64> {
+        let sz = a1.len()+a2.len();
+        let mut n = 1;
+        while sz>n {n*=2;}
+        while a1.len()<n { a1.push(0);}
+        while a2.len()<n { a2.push(0);}
+     
+        // https://www.cnblogs.com/Guess2/p/8422205.html
+        let mo = 5767169; // 5767169 = 11 * 2^19 + 1
+        let g = 3;        // 5767169 の原始根
+        let f1 = ntt(a1.clone(),false,mo,g);
+        let f2 = ntt(a2.clone(),false,mo,g);
+        let c1: Vec<i64> = (0..n).map(|x| f1[x]*f2[x]%mo).collect();
+        let ans = ntt(c1.clone(),true,mo,g);
+        let A = ans.iter().map(|x| x*mod_inv(n as i64,mo)%mo).collect::<Vec<i64>>();
+     
+        let mo2 = 7340033; // 7340033 = 7 * 2^20 + 1
+        let g2 = 3;        // 7340033 の原始根
+        let f12 = ntt(a1.clone(),false,mo2,g2);
+        let f22 = ntt(a2.clone(),false,mo2,g2);
+        let c12: Vec<i64> = (0..n).map(|x| f12[x]*f22[x]%mo2).collect();
+        let ans2 = ntt(c12.clone(),true,mo2,g2);
+        let A2 = ans2.iter().map(|x| x*mod_inv(n as i64,mo2)%mo2).collect::<Vec<i64>>();
+     
+        // x % mo  == A[i]
+        // x % mo2 == A2[i]
+        // を解く
+        let mut ret = vec![0;ans.len()];
+        for i in 0..ans.len() {
+            let p = mo * mo2;
+            ret[i] = (A[i] + (A2[i]-A[i]+mo2) % mo2 * mod_inv(mo,mo2) % mo2 * mo % p) % p;
+        }
+        ret
+    }
+     
+    fn mod_pow(mut a: i64, n: i64, mo: i64) -> i64{
+        a %= mo;
+        if a == 0 {
+            return 0;
+        }
+        let mut lo = n;
+        let mut ret = 1;
+        let mut x = a;
+        while lo > 0 {
+            if lo % 2 == 1 {
+                ret = ret * x % mo;
+            }
+            x = x * x % mo;
+            lo /= 2;
+        }
+        ret
+    }
+     
+    fn mod_inv(a: i64, mo: i64) -> i64{
+        mod_pow(a,mo-2,mo)
     }
 }
