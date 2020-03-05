@@ -2,13 +2,17 @@ use std::collections::HashMap;
 
 #[snippet = "TreeCentroid"]
 pub struct Centroid {
-    g: Vec<Vec<usize>>,
+    pub g: Vec<Vec<usize>>,
+    pub centroid: Vec<usize>,
+    subsize: Vec<usize>,
 }
 #[snippet = "TreeCentroid"]
 impl Centroid {
     pub fn new(n: usize) -> Centroid {
         Centroid {
             g: vec![vec![];n],
+            centroid: vec![],
+            subsize: vec![0;n],
         }
     }
     pub fn connect(&mut self, u: usize, v: usize) {
@@ -16,8 +20,29 @@ impl Centroid {
         self.g[v].push(u);
     }
     #[doc = "O(nlogn)"]
-    pub fn find_centroid(&mut self) -> usize {
-        0
+    pub fn build(&mut self) {
+        let n = self.g.len();
+        self.rec(0, n);
+    }
+    pub fn rec(&mut self, u: usize, par: usize) {
+        let n = self.g.len();
+        self.subsize[u] = 1;
+        let mut is_centroid = true;
+        for i in 0..self.g[u].len() {
+            let ch = self.g[u][i];
+            if ch == par { continue; }
+            self.rec(ch,u);
+            if self.subsize[ch] > n/2 {
+                is_centroid = false;
+            }
+            self.subsize[u] += self.subsize[ch];
+        }
+        if n - self.subsize[u] > n/2 {
+            is_centroid = false;
+        }
+        if is_centroid {
+            self.centroid.push(u);
+        }
     }
 }
 
@@ -90,4 +115,40 @@ pub fn split_tree(tree: SubTree, root: usize) -> Vec<SubTree> {
         });
     }
     res
+}
+
+#[test]
+fn test_centroid() {
+    let e = vec![
+        (0,1),
+        (1,2),
+        (3,2),
+        (4,2),
+        (5,4),
+        (6,4),
+        (7,2),
+        (8,7),
+        (9,8),
+        (10,2),
+        (11,10),
+        (12,2),
+        (13,12),
+        (14,13),
+        (15,13),
+        (16,12),
+        (17,16),
+        (18,16),
+        (19,18),
+        (20,12),
+        (21,20),
+        (22,21),
+        (23,21),
+    ];
+    let n = 24;
+    let mut g = Centroid::new(n);
+    for (u,v) in e {
+        g.connect(u,v);
+    }
+    g.build();
+    dbg!(&g.centroid);
 }
