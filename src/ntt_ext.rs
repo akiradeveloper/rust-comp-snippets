@@ -1,4 +1,3 @@
-#[snippet = "ntt_heia"]
 pub mod ntt_heia {
     pub trait ModI:
         Sized
@@ -291,7 +290,6 @@ pub mod ntt_heia {
     }
 }
 
-#[snippet = "ntt_yuya178"]
 pub mod ntt_yuya178 {
     pub fn multiply(a: &[i64], b: &[i64], mo: i64) -> Vec<i64> {
         let a = a.to_vec();
@@ -331,15 +329,15 @@ pub mod ntt_yuya178 {
         while a2.len()<n { a2.push(0);}
      
         // https://www.cnblogs.com/Guess2/p/8422205.html
-        let mo = 5767169; // 5767169 = 11 * 2^19 + 1
-        let g = 3;        // 5767169 の原始根
+        let mo = 998244353;
+        let g = 3;
         let f1 = ntt(a1.clone(),false,mo,g);
         let f2 = ntt(a2.clone(),false,mo,g);
         let c1: Vec<i64> = (0..n).map(|x| f1[x]*f2[x]%mo).collect();
         let ans = ntt(c1.clone(),true,mo,g);
         let A = ans.iter().map(|x| x*mod_inv(n as i64,mo)%mo).collect::<Vec<i64>>();
      
-        let mo2 = 7340033; // 7340033 = 7 * 2^20 + 1
+        let mo2 = 1224736769; // 7340033 = 7 * 2^20 + 1
         let g2 = 3;        // 7340033 の原始根
         let f12 = ntt(a1.clone(),false,mo2,g2);
         let f22 = ntt(a2.clone(),false,mo2,g2);
@@ -355,6 +353,7 @@ pub mod ntt_yuya178 {
             let p = mo * mo2;
             ret[i] = (A[i] + (A2[i]-A[i]+mo2) % mo2 * mod_inv(mo,mo2) % mo2 * mo % p) % p;
         }
+        ret.truncate(sz-1);
         ret
     }
      

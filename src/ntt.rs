@@ -218,7 +218,7 @@ fn test_ntt_multiply() {
     assert_eq!(ntt_multiply_naive(&x, &y, ten(9)+7), t1);
     assert_eq!(ntt_multiply(&x, &y, ten(9)+7), t1);
     assert_eq!(ntt_heia::multiply(&x, &y, ten(9)+7), t1);
-    // assert_eq!(ntt_yuya178::multiply(&x, &y, ten(9)+7), t1);
+    assert_eq!(ntt_yuya178::multiply(&x, &y, ten(9)+7), t1);
     // assert_eq!(fft::multiply(&x, &y, ten(9)+7), t1);
 }
 
