@@ -47,6 +47,7 @@ impl Centroid {
 }
 
 #[snippet = "split_tree"]
+#[derive(Debug)]
 pub struct SubTree {
     n: usize,
     e: Vec<(usize,usize)>,
@@ -146,9 +147,22 @@ fn test_centroid() {
     ];
     let n = 24;
     let mut g = Centroid::new(n);
-    for (u,v) in e {
+    for &(u,v) in &e {
         g.connect(u,v);
     }
     g.build();
-    dbg!(&g.centroid);
+    g.centroid.sort();
+    assert_eq!(g.centroid, vec![2,12]);
+
+    let mut nodeid = vec![0;24];
+    for i in 0..24 {
+        nodeid[i] = i;
+    }
+    let tree = SubTree {
+        n: 24,
+        e: e,
+        nodeid: nodeid,
+    };
+    let subtrees = split_tree(tree, 2);
+    dbg!(subtrees);
 }
