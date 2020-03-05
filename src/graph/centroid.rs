@@ -24,7 +24,7 @@ impl Centroid {
         let n = self.g.len();
         self.rec(0, n);
     }
-    pub fn rec(&mut self, u: usize, par: usize) {
+    fn rec(&mut self, u: usize, par: usize) {
         let n = self.g.len();
         self.subsize[u] = 1;
         let mut is_centroid = true;
