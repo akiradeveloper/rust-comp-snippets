@@ -168,19 +168,14 @@ macro_rules! define_modint {
         impl <T: Into<$n>> std::ops::Sub<T> for $n {
             type Output = $n;
             fn sub(self, rhs: T) -> Self::Output {
-                let rhs_mod: $n = rhs.into();
-                if self.0 >= rhs_mod.0 {
-                    $n::new(self.0 - rhs_mod.0)
-                } else {
-                    $n::new($m - rhs_mod.0 + self.0)
-                }
+                $n::new(self.0 - rhs.into().0 + $m)
             }
         }
 
         impl <T: Into<$n>> std::ops::Mul<T> for $n {
             type Output = $n;
             fn mul(self, rhs: T) -> Self::Output {
-                $n::new(self.0 + rhs.into().0)
+                $n::new(self.0 * rhs.into().0)
             }
         }
 
@@ -228,4 +223,4 @@ macro_rules! define_modint {
         }
     };
 }
-define_modint!(Mod, 1000000007);
+define_modint!(Mod, 1_000_000_007);
