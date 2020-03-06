@@ -175,20 +175,47 @@ fn test_imosu_2d() {
 struct Imosu1d {
     n: usize,
     dp: Vec<i64>,
+    diffmemo: Vec<i64>,
 }
 impl Imosu1d {
     pub fn new(n: usize) -> Imosu1d {
         Imosu1d {
             n: n,
             dp: vec![0;n+1],
-            
+            diffmemo: vec![0;n+1],
         }
     }
     #[doc = "y=ax+b"]
     pub fn add_line(&mut self, l: usize, r: usize, a: i64, b: i64) {
-
+        self.dp[l] += b;
+        self.dp[r] -= b;
+        self.diffmemo[r] -= (r-l) as i64 * a;
+    }
+    fn get(&self, k: usize) -> i64 {
+        self.dp[k]
+    }
+    fn sweep(&mut self) {
+        let mut cur = 0;
+        for i in 0..self.n+1 {
+            cur += self.dp[i];
+            self.dp[i] = cur;
+        }
     }
     pub fn build(&mut self) {
-
+        self.sweep();
+        dbg!(&self.dp);
+        for i in 0..self.n+1 {
+            self.dp[i] += self.diffmemo[i];
+        }
+        self.sweep();
     }
+}
+
+#[test]
+fn test_imosu_1d() {
+    let mut imosu = Imosu1d::new(5);
+    imosu.add_line(0,3,1,2);
+    // imosu.add_line(1,5,-2,-1);
+    imosu.build();
+    dbg!(&imosu.dp);
 }
