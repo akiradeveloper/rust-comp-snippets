@@ -6,6 +6,7 @@ struct Line {
 }
 #[snippet = "ConvexHullTrick"]
 impl Line {
+    #[doc = "y=ax+b"]
     pub fn new(a: i64, b: i64) -> Line {
         Line {
             a: a,

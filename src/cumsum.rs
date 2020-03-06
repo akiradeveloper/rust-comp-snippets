@@ -102,16 +102,16 @@ fn test_cum2() {
     assert_eq!(cum2.query(0, 1, 0, 2), 3);
 }
 
-#[snippet = "Imosu"]
-struct Imosu {
+#[snippet = "Imosu2d"]
+struct Imosu2d {
     n: usize,
     m: usize,
     dp: Vec<Vec<i64>>,
 }
-#[snippet = "Imosu"]
-impl Imosu {
-    pub fn new(n: usize, m: usize) -> Imosu {
-        Imosu {
+#[snippet = "Imosu2d"]
+impl Imosu2d {
+    pub fn new(n: usize, m: usize) -> Imosu2d {
+        Imosu2d {
             n: n,
             m: m,
             dp: vec![vec![0;m+1];n+1],
@@ -124,6 +124,7 @@ impl Imosu {
         self.dp[i1][j0] += -x;
         self.dp[i1][j1] += x;
     }
+    #[doc = "O(n+m)"]
     pub fn build(&mut self) {
         // right sweep
         for i in 0..self.n+1 {
@@ -143,9 +144,9 @@ impl Imosu {
     }
 }
 #[test]
-fn test_imosu() {
+fn test_imosu_2d() {
     let mut tbl = vec![vec![0;5];5];
-    let mut imosu = Imosu::new(5,5);
+    let mut imosu = Imosu2d::new(5,5);
 
     let tests = vec![
         (0,3,0,3,5),
@@ -168,5 +169,26 @@ fn test_imosu() {
         for j in 0..5 {
             assert_eq!(imosu.get(i,j), tbl[i][j]);
         }
+    }
+}
+
+struct Imosu1d {
+    n: usize,
+    dp: Vec<i64>,
+}
+impl Imosu1d {
+    pub fn new(n: usize) -> Imosu1d {
+        Imosu1d {
+            n: n,
+            dp: vec![0;n+1],
+            
+        }
+    }
+    #[doc = "y=ax+b"]
+    pub fn add_line(&mut self, l: usize, r: usize, a: i64, b: i64) {
+
+    }
+    pub fn build(&mut self) {
+
     }
 }
