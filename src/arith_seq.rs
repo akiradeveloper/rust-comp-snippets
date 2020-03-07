@@ -1,7 +1,7 @@
 #[snippet = "ArithSeq"]
 pub struct ArithSeq {
-    a: i64,
-    b: i64,
+    pub a: i64,
+    pub b: i64,
 }
 #[snippet = "ArithSeq"]
 impl ArithSeq {
