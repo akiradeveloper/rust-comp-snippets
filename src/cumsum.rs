@@ -174,12 +174,14 @@ fn test_imosu_2d() {
 
 use crate::arith_seq::ArithSeq;
 
+#[snippet = "Imosu1d"]
 struct Imosu1d {
     n: usize,
     dp1: Vec<i64>,
     dp2: Vec<i64>,
     dp3: Vec<i64>,
 }
+#[snippet = "Imosu1d"]
 impl Imosu1d {
     pub fn new(n: usize) -> Imosu1d {
         Imosu1d {
