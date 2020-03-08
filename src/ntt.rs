@@ -1,4 +1,5 @@
 use crate::number::{modinv, modpow};
+use crate::garner::garner;
 
 #[snippet = "NTT"]
 struct NTT {
@@ -95,24 +96,6 @@ impl NTT {
         c
     }
 }
-#[snippet = "garner"]
-#[doc = "compute minimum x from a list of x % m[i] = r[i]"]
-pub fn garner(mr: Vec<(i64,i64)>, mo: i64) -> i64 {
-    let mut mr = mr;
-    mr.push((mo, 0));
-    let mut coef = vec![1; mr.len()];
-    let mut constants = vec![0; mr.len()];
-    for i in 0..mr.len() - 1 {
-        let v = (mr[i].1 + mr[i].0 - constants[i]) * modinv(coef[i], mr[i].0) % mr[i].0;
-        for j in i + 1..mr.len() {
-            constants[j] += coef[j] * v;
-            constants[j] %= mr[j].0;
-            coef[j] *= mr[i].0;
-            coef[j] %= mr[j].0;
-        }
-    }
-    constants[mr.len() - 1]
-}
 pub fn ntt_multiply_naive(a: &[i64], b: &[i64], mo: i64) -> Vec<i64> {
     let mut a = a.to_vec();
     let mut b = b.to_vec();
@@ -135,12 +118,12 @@ pub fn ntt_multiply_naive(a: &[i64], b: &[i64], mo: i64) -> Vec<i64> {
     let L = x.len();
     let mut res = vec![0;L];
     for i in 0..L {
-        let mr = vec![
-            (ntt1.mo, x[i]),
-            (ntt2.mo, y[i]),
-            (ntt3.mo, z[i]),
+        let rm = vec![
+            (x[i], ntt1.mo),
+            (y[i], ntt2.mo),
+            (z[i], ntt3.mo),
         ];
-        res[i] = garner(mr, mo);
+        res[i] = garner(rm, mo);
     }
     res.truncate(n+m-1);
     res
