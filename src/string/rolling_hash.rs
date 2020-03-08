@@ -144,8 +144,8 @@ fn test_roliha_connect() {
     }
     let roli = RoLiHa::new(&s);
     for i in 0..=n {
-        for j in i+2..=n {
-            for m in i+1..j {
+        for j in i..=n {
+            for m in i..j {
                 let h1 = roli.get(i, m);
                 let h2 = roli.get(m, j);
                 let h3 = roli.get(i, j);
