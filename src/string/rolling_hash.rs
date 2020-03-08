@@ -103,6 +103,10 @@ impl RoLiHa {
         return Self::calcmod(self.hash[r] + ROLIHA_P - Self::mul(self.hash[l], self.powMemo[r-l]));
     }
 
+    pub fn connect(&self, h1: u64, h2: u64, h2len: usize) -> u64 {
+        return Self::calcmod(Self::mul(h1, self.powMemo[h2len]) + h2)
+    }
+
     fn mul(l: u64, r: u64) -> u64 {
         let lu = l >> 31;
         let ld = l & ROLIHA_MASK31;
@@ -122,12 +126,34 @@ impl RoLiHa {
 }
 
 #[test]
-fn test_roliha() {
+fn test_roliha_get() {
     let seq: Vec<u64> = "abcabc".chars().map(|c| c as u64).collect();
     let rh = RoLiHa::new(&seq);
     assert_eq!(rh.get(0, 3), rh.get(3, 6));
     assert_ne!(rh.get(0, 4), rh.get(3, 6));
     assert_ne!(rh.get(0, 3), rh.get(2, 5));
+}
+
+#[test]
+fn test_roliha_connect() {
+    let mut rng = Xorshift::new();
+    let mut s = vec![];
+    let n = 300;
+    for _ in 0..n {
+        s.push(rng.rand(52));
+    }
+    let roli = RoLiHa::new(&s);
+    for i in 0..=n {
+        for j in i+2..=n {
+            for m in i+1..j {
+                let h1 = roli.get(i, m);
+                let h2 = roli.get(m, j);
+                let h3 = roli.get(i, j);
+                let h4 = roli.connect(h1,h2,j-m);
+                assert_eq!(h4, h3);
+            }
+        }
+    }
 }
 
 fn mk_str(n: usize) -> Vec<u64> {
