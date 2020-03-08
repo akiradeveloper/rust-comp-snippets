@@ -1,64 +1,5 @@
-/// https://github.com/hatoo/competitive-rust-snippet
- 
-#[snippet = "RollingHash"]
-#[allow(dead_code)]
-pub struct RollingHash {
-    hash_pow_list: Vec<(u64, Vec<(u64, u64)>)>,
-}
-
-#[snippet = "RollingHash"]
-#[allow(dead_code)]
-impl RollingHash {
-    pub fn new(s: &[u64]) -> RollingHash {
-        RollingHash::with_base_mod_pairs(s, &[(1009, 1_000_000_007), (9973, 999_999_937)])
-    }
-
-    pub fn with_base_mod_pairs(s: &[u64], base_mod_pairs: &[(u64, u64)]) -> RollingHash {
-        let hp_list = base_mod_pairs
-            .iter()
-            .map(|&(base, m)| {
-                let mut hp = Vec::with_capacity(s.len() + 1);
-                hp.push((0, 1));
-
-                for (i, &x) in s.iter().enumerate() {
-                    let (h, p) = hp[i];
-                    hp.push(((h + x) * base % m, p * base % m));
-                }
-                (m, hp)
-            })
-            .collect();
-
-        RollingHash {
-            hash_pow_list: hp_list,
-        }
-    }
-
-    // [l, r)
-    pub fn get(&self, l: usize, r: usize) -> u64 {
-        self.hash_pow_list
-            .iter()
-            .map(|&(m, ref hp)| (hp[r].0 + m - hp[l].0 * hp[r - l].1 % m) % m)
-            .fold(0, |a, b| a ^ b)
-    }
-
-    pub fn len(&self) -> usize {
-        self.hash_pow_list
-            .first()
-            .map(|v| v.1.len() - 1)
-            .unwrap_or(0)
-    }
-}
-
-#[test]
-fn test_rolling_hash() {
-    let seq: Vec<u64> = "abcabc".chars().map(|c| c as u64).collect();
-    let rh = RollingHash::new(&seq);
-    assert_eq!(rh.get(0, 3), rh.get(3, 6));
-    assert_ne!(rh.get(0, 4), rh.get(3, 6));
-    assert_ne!(rh.get(0, 3), rh.get(2, 5));
-}
-
 // https://qiita.com/keymoon/items/11fac5627672a6d6a9f6
+
 use crate::xorshift::Xorshift;
 #[snippet = "RoLiHa"]
 struct RoLiHa {
@@ -156,6 +97,20 @@ fn test_roliha_connect() {
     }
 }
 
+#[bench]
+fn bench_roliha(b: &mut test::Bencher) {
+    let s = mk_str(1_000_000);
+    let qs = mk_queries(1_000_000);
+    b.iter(move ||
+        for i in 0..1 {
+            let rh = RoLiHa::new(&s);
+            for (l,r) in &qs {
+                rh.get(*l,*r);
+            }
+        }
+    )
+}
+
 fn mk_str(n: usize) -> Vec<u64> {
     let mut rng = Xorshift::new();
     let mut r = vec![];
@@ -180,32 +135,4 @@ fn mk_queries(n: usize) -> Vec<(usize,usize)> {
         v.push((x,y))
     }
     v
-}
-
-#[bench]
-fn bench_rolling_hash(b: &mut test::Bencher) {
-    let s = mk_str(1_000_000);
-    let qs = mk_queries(1_000_000);
-    b.iter(move ||
-        for i in 0..1 {
-            let rh = RollingHash::new(&s);
-            for (l,r) in &qs {
-                rh.get(*l,*r);
-            }
-        }
-    )
-}
-
-#[bench]
-fn bench_roliha(b: &mut test::Bencher) {
-    let s = mk_str(1_000_000);
-    let qs = mk_queries(1_000_000);
-    b.iter(move ||
-        for i in 0..1 {
-            let rh = RoLiHa::new(&s);
-            for (l,r) in &qs {
-                rh.get(*l,*r);
-            }
-        }
-    )
 }
