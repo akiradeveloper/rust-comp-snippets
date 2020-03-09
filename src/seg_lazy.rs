@@ -21,14 +21,18 @@ struct SEGLazy<T: SEGLazyImpl> {
 
 #[snippet = "SEG_LAZY"]
 impl <T: SEGLazyImpl> SEGLazy<T> {
-    pub fn new(init: T::Monoid, n: usize) -> SEGLazy<T> {
+    pub fn new(n: usize, init: T::Monoid) -> SEGLazy<T> {
+        let weights = vec![1;n];
+        Self::with_weight(n, init, weights)
+    }
+    pub fn with_weight(n: usize, init: T::Monoid, weights: Vec<usize>) -> Self {
         let mut m = 1;
         while m < n { m *= 2; }
         SEGLazy {
             n: m,
             data: vec![init; m*2],
             lazy: vec![T::om0(); m*2],
-            weight: Self::mk_weight(&vec![1;n]),
+            weight: Self::mk_weight(&weights),
         }
     }
     fn mk_weight(xs: &[usize]) -> Vec<usize> {
@@ -45,9 +49,6 @@ impl <T: SEGLazyImpl> SEGLazy<T> {
             res[k] = res[l]+res[r];
         }
         res
-    }
-    fn set_weight(&mut self, weight: &[usize]) {
-        self.weight = Self::mk_weight(weight);
     }
     fn propagate(&mut self, k: usize, len: usize) {
         let len = self.weight[k];
@@ -125,7 +126,7 @@ impl SEGLazyImpl for MAX_RUQ {
 }
 #[test]
 fn test_MAX_RUQ() {
-    let mut seg: SEGLazy<MAX_RUQ> = SEGLazy::new(MAX_RUQ::m0(), 10);
+    let mut seg: SEGLazy<MAX_RUQ> = SEGLazy::new(10, MAX_RUQ::m0());
     assert_eq!(seg.query(0, 3), 0);
     seg.update(0, 2, 10); // [10,10,0,...]
     assert_eq!(seg.query(0, 3), 10);
@@ -161,7 +162,7 @@ impl SEGLazyImpl for MIN_RUQ {
 }
 #[test]
 fn test_MIN_RUQ() { // DSL_2_D
-    let mut seg: SEGLazy<MIN_RUQ> = SEGLazy::new(MIN_RUQ::m0(), 8);
+    let mut seg: SEGLazy<MIN_RUQ> = SEGLazy::new(8, MIN_RUQ::m0());
     seg.update(1,7,5);
     seg.update(2,8,2);
     seg.update(2,6,7);
@@ -198,7 +199,7 @@ impl SEGLazyImpl for SUM_RUQ {
 }
 #[test]
 fn test_SUM_RUQ() { // DSL_1_I
-    let mut seg: SEGLazy<SUM_RUQ> = SEGLazy::new(SUM_RUQ::m0(), 8);
+    let mut seg: SEGLazy<SUM_RUQ> = SEGLazy::new(8, SUM_RUQ::m0());
     seg.update(1,7,-5);
     seg.update(2,5,-9);
     assert_eq!(seg.query(2,4),-18);
@@ -235,7 +236,7 @@ impl SEGLazyImpl for SUM_RAQ {
 }
 #[test]
 fn test_SUM_RAQ() {
-    let mut seg: SEGLazy<SUM_RAQ> = SEGLazy::new(0, 10);
+    let mut seg: SEGLazy<SUM_RAQ> = SEGLazy::new(10, 0);
     assert_eq!(seg.query(0, 3), 0);
     seg.update(0,5,10);
     assert_eq!(seg.query(0, 1), 10);
@@ -295,7 +296,7 @@ impl SEGLazyImpl for MIN_RAQ {
 }
 #[test]
 fn test_rmq_raq() { // DSL_2_H
-    let mut seg: SEGLazy<MIN_RAQ> = SEGLazy::new(0, 6);
+    let mut seg: SEGLazy<MIN_RAQ> = SEGLazy::new(6, 0);
     seg.update(1,4,1);
     seg.update(2,5,-2);
     assert_eq!(seg.query(0,6),-2);
