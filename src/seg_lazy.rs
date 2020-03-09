@@ -7,7 +7,7 @@ trait SEGLazyImpl {
     fn m0() -> Self::Monoid;
     fn om0() -> Self::OperatorMonoid;
     fn f(x: Self::Monoid, y: Self::Monoid) -> Self::Monoid;
-    fn g(x: Self::Monoid, y: Self::OperatorMonoid, len: usize) -> Self::Monoid;
+    fn g(x: Self::Monoid, y: Self::OperatorMonoid, weight: usize) -> Self::Monoid;
     fn h(x: Self::OperatorMonoid, y: Self::OperatorMonoid) -> Self::OperatorMonoid;
 }
 
@@ -50,24 +50,24 @@ impl <T: SEGLazyImpl> SEGLazy<T> {
         }
         res
     }
-    fn propagate(&mut self, k: usize, len: usize) {
-        let len = self.weight[k];
+    fn propagate(&mut self, k: usize) {
+        let weight = self.weight[k];
         if self.lazy[k] != T::om0() {
             if k < self.n {
                 self.lazy[2*k+0] = T::h(self.lazy[2*k+0], self.lazy[k]);
                 self.lazy[2*k+1] = T::h(self.lazy[2*k+1], self.lazy[k]);
             }
-            self.data[k] = T::g(self.data[k], self.lazy[k], len);
+            self.data[k] = T::g(self.data[k], self.lazy[k], weight);
             self.lazy[k] = T::om0();
         }
     }
     fn do_update(&mut self, a: usize, b: usize, x: T::OperatorMonoid, k: usize, l: usize, r: usize) -> T::Monoid {
-        self.propagate(k, r-l);
+        self.propagate(k);
         if r <= a || b <= l {
             self.data[k]
         } else if a <= l && r <= b {
             self.lazy[k] = T::h(self.lazy[k], x);
-            self.propagate(k, r-l);
+            self.propagate(k);
             self.data[k]
         } else {
             self.data[k] = T::f(
@@ -83,7 +83,7 @@ impl <T: SEGLazyImpl> SEGLazy<T> {
         self.do_update(l, r, x, 1, 0, n)
     }
     fn do_query(&mut self, a: usize, b: usize, k: usize, l: usize, r: usize) -> T::Monoid {
-        self.propagate(k, r-l);
+        self.propagate(k);
         if r <= a || b <= l {
             T::m0()
         } else if a <= l && r <= b {
@@ -117,7 +117,7 @@ impl SEGLazyImpl for MAX_RUQ {
     fn f(x: Self::Monoid, y: Self::Monoid) -> Self::Monoid {
         std::cmp::max(x, y)
     }
-    fn g(x: Self::Monoid, y: Self::OperatorMonoid, len: usize) -> Self::Monoid {
+    fn g(x: Self::Monoid, y: Self::OperatorMonoid, _: usize) -> Self::Monoid {
         y
     }
     fn h(x: Self::OperatorMonoid, y: Self::OperatorMonoid) -> Self::OperatorMonoid {
@@ -153,7 +153,7 @@ impl SEGLazyImpl for MIN_RUQ {
     fn f(x: Self::Monoid, y: Self::Monoid) -> Self::Monoid {
         std::cmp::min(x, y)
     }
-    fn g(x: Self::Monoid, y: Self::OperatorMonoid, len: usize) -> Self::Monoid {
+    fn g(x: Self::Monoid, y: Self::OperatorMonoid, _: usize) -> Self::Monoid {
         y
     }
     fn h(x: Self::OperatorMonoid, y: Self::OperatorMonoid) -> Self::OperatorMonoid {
@@ -190,8 +190,8 @@ impl SEGLazyImpl for SUM_RUQ {
     fn f(x: Self::Monoid, y: Self::Monoid) -> Self::Monoid {
         x + y
     }
-    fn g(x: Self::Monoid, y: Self::OperatorMonoid, len: usize) -> Self::Monoid {
-        len as i64 * y
+    fn g(x: Self::Monoid, y: Self::OperatorMonoid, weight: usize) -> Self::Monoid {
+        weight as i64 * y
     }
     fn h(x: Self::OperatorMonoid, y: Self::OperatorMonoid) -> Self::OperatorMonoid {
         y
@@ -227,8 +227,8 @@ impl SEGLazyImpl for SUM_RAQ {
     fn f(x: Self::Monoid, y: Self::Monoid) -> Self::Monoid {
         x + y
     }
-    fn g(x: Self::Monoid, y: Self::OperatorMonoid, len: usize) -> Self::Monoid {
-        x + (len as i64) * y
+    fn g(x: Self::Monoid, y: Self::OperatorMonoid, weight: usize) -> Self::Monoid {
+        x + (weight as i64) * y
     }
     fn h(x: Self::OperatorMonoid, y: Self::OperatorMonoid) -> Self::OperatorMonoid {
         x + y
@@ -264,7 +264,7 @@ impl SEGLazyImpl for MAX_RAQ {
     fn f(x: Self::Monoid, y: Self::Monoid) -> Self::Monoid {
         std::cmp::max(x, y)
     }
-    fn g(x: Self::Monoid, y: Self::OperatorMonoid, len: usize) -> Self::Monoid {
+    fn g(x: Self::Monoid, y: Self::OperatorMonoid, _: usize) -> Self::Monoid {
         x + y
     }
     fn h(x: Self::OperatorMonoid, y: Self::OperatorMonoid) -> Self::OperatorMonoid {
@@ -287,7 +287,7 @@ impl SEGLazyImpl for MIN_RAQ {
     fn f(x: Self::Monoid, y: Self::Monoid) -> Self::Monoid {
         std::cmp::min(x, y)
     }
-    fn g(x: Self::Monoid, y: Self::OperatorMonoid, len: usize) -> Self::Monoid {
+    fn g(x: Self::Monoid, y: Self::OperatorMonoid, _: usize) -> Self::Monoid {
         x + y
     }
     fn h(x: Self::OperatorMonoid, y: Self::OperatorMonoid) -> Self::OperatorMonoid {

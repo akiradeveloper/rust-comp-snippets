@@ -32,17 +32,7 @@ fn test_bitpos() {
     assert_eq!(bitpos(0b11000001), [0,6,7]);
 }
 
-#[snippet = "lsb"]
-fn lsb(x: i64) -> i64 {
-    x & (-x)
-}
-#[test]
-fn test_lsb() {
-    assert_eq!(lsb(3), 1);
-    assert_eq!(lsb(5), 1);
-    assert_eq!(lsb(6), 2);
-    assert_eq!(lsb(4), 4);
-}
+
 
 #[snippet = "bin_digits"]
 #[doc = "O(|A|)"]
@@ -95,25 +85,32 @@ fn test_range_decomposition() {
     assert_eq!(res, [(0b00000,0b1111),(0b10000,0b10011),(0b10100,0b10100),(0b10101,0b10101)]);
 }
 
+#[snippet = "BitMask"]
 struct BitMask {
     x: i64,
 }
+#[snippet = "BitMask"]
 impl BitMask {
-    fn new(x: i64) -> BitMask {
+    pub fn new(x: i64) -> Self {
         BitMask { x: x }
     }
-    fn check(&self, k: usize) -> bool {
+    pub fn check(&self, k: usize) -> bool {
         self.x & (1<<k) > 0
     }
-    fn on(&self, k: usize) -> i64 {
+    pub fn on(&self, k: usize) -> i64 {
         self.x | (1<<k)
     }
-    fn off(&self, k: usize) -> i64 {
+    pub fn off(&self, k: usize) -> i64 {
         let mask = !(1<<k);
         self.x & mask
     }
-    fn flip(&self, k: usize) -> i64 {
+    pub fn flip(&self, k: usize) -> i64 {
         self.x ^ (1<<k)
+    }
+    #[doc = "0b1110 -> 0b10"]
+    pub fn lsb(&self) -> i64 {
+        let x = self.x;
+        x & -x
     }
 }
 
@@ -126,4 +123,12 @@ fn test_bitmask() {
     assert_eq!(x.on(0), 0b1101);
     assert_eq!(x.on(1), 0b1111);
     assert_eq!(x.on(2), 0b1101);
+}
+
+#[test]
+fn test_lsb() {
+    assert_eq!(BitMask::new(3).lsb(), 1);
+    assert_eq!(BitMask::new(5).lsb(), 1);
+    assert_eq!(BitMask::new(6).lsb(), 2);
+    assert_eq!(BitMask::new(4).lsb(), 4);
 }
