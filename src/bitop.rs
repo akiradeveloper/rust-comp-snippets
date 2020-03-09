@@ -1,80 +1,35 @@
 #[snippet = "submasks"]
-struct SubMasks {
-    mask: i64,
-    smask: i64,
-}
-#[snippet = "submasks"]
-impl Iterator for SubMasks {
-    type Item = i64;
-    fn next(&mut self) -> Option<Self::Item> {
-        let old = self.smask;
-        if old == 0 {
-            return None
-        }
-        self.smask = (self.smask-1) & self.mask;
-        return Some(old)
+fn submasks(mask: i64) -> Vec<i64> {
+    let mut res = vec![];
+    let mut smask = mask;
+    while smask > 0 {
+        res.push(smask);
+        smask = (smask-1) & mask;
     }
-}
-#[snippet = "submasks"]
-#[doc = "iterate all sub masks except 0. O(2^K) where K is the number of bit positions."]
-fn submasks(mask: i64) -> SubMasks {
-    SubMasks {
-        mask: mask,
-        smask: mask,
-    }
+    res.reverse();
+    return res
 }
 #[test]
 fn test_submasks() {
-    let mut v = vec![];
-    for mask in submasks(13) {
-        v.push(mask);
-    }
-    v.sort();
-    assert_eq!(v, [1,4,5,8,9,12,13]);
+    assert_eq!(submasks(13), [1,4,5,8,9,12,13]);
 }
 
 #[snippet = "bitpos"]
-struct BitPos {
-    curpos: usize,
-    x: i64,
-}
-#[snippet = "bitpos"]
-impl Iterator for BitPos {
-    type Item = usize;
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.x == 0 {
-            return None;
+fn bitpos(x: i64) -> Vec<usize> {
+    let mut p = vec![];
+    let mut cur = x;
+    for i in 0.. {
+        if x & (1<<i) > 0 {
+            p.push(i)
         }
-        if self.x & 1 > 0 {
-            let old = self.curpos;
-            self.curpos += 1;
-            self.x >>= 1;
-            return Some(old);
-        }
-        let n = i64::trailing_zeros(self.x) as usize;
-        self.curpos += n;
-        self.x >>= n;
-        let old = self.curpos;
-        self.curpos += 1;
-        self.x >>= 1;
-        return Some(old);
+        cur >>= 1;
+        if cur == 0 { break }
     }
-}
-#[snippet = "bitpos"]
-#[doc = "iterate the bit positions in an integer. O(K) where K is the number of bit positions."]
-fn bitpos(x: i64) -> BitPos {
-    BitPos {
-        curpos: 0,
-        x: x,
-    }
+    p
 }
 #[test]
 fn test_bitpos() {
-    let mut v = vec![];
-    for i in bitpos(0b11000001) {
-        v.push(i);
-    }
-    assert_eq!(v, [0,6,7]);
+    assert_eq!(bitpos(0b11000001), [0,6,7]);
 }
 
 #[snippet = "lsb"]
@@ -138,4 +93,37 @@ fn range_decomposition(x: i64) -> Vec<(i64,i64)> {
 fn test_range_decomposition() {
     let mut res = range_decomposition(0b10101);
     assert_eq!(res, [(0b00000,0b1111),(0b10000,0b10011),(0b10100,0b10100),(0b10101,0b10101)]);
+}
+
+struct BitMask {
+    x: i64,
+}
+impl BitMask {
+    fn new(x: i64) -> BitMask {
+        BitMask { x: x }
+    }
+    fn check(&self, k: usize) -> bool {
+        self.x & (1<<k) > 0
+    }
+    fn on(&self, k: usize) -> i64 {
+        self.x | (1<<k)
+    }
+    fn off(&self, k: usize) -> i64 {
+        let mask = !(1<<k);
+        self.x & mask
+    }
+    fn flip(&self, k: usize) -> i64 {
+        self.x ^ (1<<k)
+    }
+}
+
+#[test]
+fn test_bitmask() {
+    let x = BitMask::new(0b1101);
+    assert_eq!(x.flip(2), 0b1001);
+    assert_eq!(x.flip(1), 0b1111);
+    assert_eq!(x.off(0), 0b1100);
+    assert_eq!(x.on(0), 0b1101);
+    assert_eq!(x.on(1), 0b1111);
+    assert_eq!(x.on(2), 0b1101);
 }
