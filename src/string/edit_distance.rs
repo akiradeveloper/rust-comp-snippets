@@ -5,7 +5,12 @@ pub fn edit_distance<T: Eq>(s: Vec<T>, t: Vec<T>) -> Vec<Vec<usize>> {
     let n = s.len();
     let m = t.len();
     let mut dp = vec![vec![1<<30; m+1]; n+1];
-    dp[0][0] = 0;
+    for i in 0..=n {
+        dp[i][0] = i;
+    }
+    for j in 0..=m {
+        dp[0][j] = j;
+    }
     for i in 0..n {
         for j in 0..m {
             let change = if s[i] == t[j] {
