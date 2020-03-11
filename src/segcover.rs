@@ -32,6 +32,7 @@ impl MaxCover {
     pub fn add(&mut self, x: usize, y: usize, a: i64) {
         self.segs.push((x,y,a));
     }
+    #[doc = "O(mlogm + mlogn). m is the # of segments"]
     pub fn query(&mut self) -> i64 {
         let m = self.segs.len();
         self.segs.sort_by_key(|a| a.0);
