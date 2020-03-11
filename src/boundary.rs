@@ -23,3 +23,8 @@ pub fn valid4u(h: usize, w: usize, ps: Vec<(Option<usize>, Option<usize>)>) -> V
     }
     res
 }
+#[snippet = "incl"]
+#[doc = "0..=n in old compilers"]
+pub fn incl(n: usize) -> usize {
+    n+1
+}
