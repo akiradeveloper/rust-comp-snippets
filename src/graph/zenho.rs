@@ -67,8 +67,7 @@ use std::collections::HashMap;
 trait ZenHoable: Foldable + Clone + Sized {
     type NVal: Clone;
     type EVal: Clone;
-    fn f(nvalue: Self::NVal, evalue: Self::EVal, dp: &[Self::T]) -> Self::T;
-    fn g(nvalue: Self::NVal, evalue: Self::EVal, dp: &CumRL<Self>, l: usize, r: usize) -> Self::T;
+    fn f(nvalue: Self::NVal, evalue: Self::EVal, dp: &CumRL<Self>, l: usize, r: usize) -> Self::T;
 }
 #[derive(Debug)]
 #[snippet = "ZenHo"]
@@ -110,10 +109,8 @@ impl <Z: ZenHoable> ZenHo<Z> {
                 let dpval = self.dp.get(&(v,u)).cloned().unwrap();
                 dp.push(dpval);
             }
-            // experiment: reduce Z::f
-            // let cumRL: CumRL<Z> = CumRL::new(dp);
-            // let newv = Z::g(self.nvalues[u].clone(), self.evalues.get(&(u,p)).cloned().unwrap(), &cumRL, cumRL.len(), 0);
-            let newv = Z::f(self.nvalues[u].clone(), self.evalues.get(&(u,p)).cloned().unwrap(), &dp);
+            let cumRL: CumRL<Z> = CumRL::new(dp);
+            let newv = Z::f(self.nvalues[u].clone(), self.evalues.get(&(u,p)).cloned().unwrap(), &cumRL, cumRL.len(), 0);
             self.dp.insert((u,p), newv);
         }
     }
@@ -132,7 +129,7 @@ impl <Z: ZenHoable> ZenHo<Z> {
             let v = self.g[u][i];
             let L = i;
             let R = n-1-L;
-            let newv = Z::g(self.nvalues[u].clone(), self.evalues.get(&(u,v)).cloned().unwrap(), &cum, L, R);
+            let newv = Z::f(self.nvalues[u].clone(), self.evalues.get(&(u,v)).cloned().unwrap(), &cum, L, R);
             self.dp.insert((u,v), newv);
         }
         for i in 0..self.g[u].len() {
@@ -166,15 +163,7 @@ fn test_zenho() {
     impl ZenHoable for M {
         type NVal = usize;
         type EVal = usize;
-        fn f(_: usize, _: usize, dp: &[usize]) -> usize {
-            let mut tot = 0;
-            for &x in dp {
-                tot += x
-            }
-            tot += 1;
-            tot
-        }
-        fn g(_: usize, _: usize, cum: &CumRL<Self>, l: usize, r: usize) -> usize {
+        fn f(_: usize, _: usize, cum: &CumRL<Self>, l: usize, r: usize) -> usize {
             let mut tot = 0;
             tot += cum.lcum(l);
             tot += cum.rcum(r);
