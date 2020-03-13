@@ -8,6 +8,7 @@ pub fn valid4(h: usize, w: usize, ps: Vec<(i64,i64)>) -> Vec<(usize,usize)> {
     }
     res
 }
+
 #[snippet = "valid4u"]
 pub fn valid4u(h: usize, w: usize, ps: Vec<(Option<usize>, Option<usize>)>) -> Vec<(usize, usize)> {
     let mut res = vec![];
@@ -23,8 +24,41 @@ pub fn valid4u(h: usize, w: usize, ps: Vec<(Option<usize>, Option<usize>)>) -> V
     }
     res
 }
+
 #[snippet = "incl"]
 #[doc = "0..=n in old compilers"]
 pub fn incl(n: usize) -> usize {
     n+1
+}
+
+#[snippet = "sub_or_max"]
+#[doc = "max(x-y, z)"]
+pub fn sub_or_max(x: usize, y: usize, z: usize) -> usize {
+    // x-y > z
+    if x > y+z {
+        x-y
+    } else {
+        z
+    }
+}
+#[test]
+fn test_sub_or_max() {
+    assert_eq!(sub_or_max(3, 2, 0), 1);
+    assert_eq!(sub_or_max(3, 4, 0), 0);
+}
+
+#[snippet = "add_or_min"]
+#[doc = "min(x+y, z)"]
+pub fn add_or_min(x: usize, y: usize, z: usize) -> usize {
+    // x+y < z
+    if x+y < z {
+        x+y
+    } else {
+        z
+    }
+}
+#[test]
+fn test_add_or_min() {
+    assert_eq!(add_or_min(4, 6, 8),8);
+    assert_eq!(add_or_min(4, 6, 12),10);
 }
