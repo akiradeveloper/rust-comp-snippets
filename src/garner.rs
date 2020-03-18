@@ -1,6 +1,7 @@
+use cargo_snippet::snippet;
 use crate::number::{gcd, modinv};
 
-#[snippet = "garner"]
+#[snippet("garner")]
 #[doc = "compute minimum x from a list of x = r[i] (mod m[i]) all m[i] are co-primes and some r[i] should be non-zero."]
 pub fn garner(rm: Vec<(i64,i64)>, mo: i64) -> i64 {
     let mut rm = rm;
@@ -18,7 +19,7 @@ pub fn garner(rm: Vec<(i64,i64)>, mo: i64) -> i64 {
     }
     constants[rm.len() - 1]
 }
-#[snippet = "garner"]
+#[snippet("garner")]
 #[doc = "none if there is no such x"]
 pub fn pre_garner(rm: &mut Vec<(i64,i64)>, mo: i64) -> Option<i64> {
     let n = rm.len();

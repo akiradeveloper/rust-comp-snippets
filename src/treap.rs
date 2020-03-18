@@ -1,6 +1,8 @@
 /// https://www.slideshare.net/iwiwi/2-12188757
 
-#[snippet = "Treap"]
+use cargo_snippet::snippet;
+
+#[snippet("Treap")]
 mod treap {
     #[derive(Clone, Debug)]
     pub struct Node {
@@ -122,12 +124,12 @@ mod treap {
 
 use crate::xorshift::Xorshift;
 
-#[snippet = "Treap"]
+#[snippet("Treap")]
 struct Treap {
     rng: Xorshift,
     t: Option<Box<treap::Node>>,
 }
-#[snippet = "Treap"]
+#[snippet("Treap")]
 impl Treap {
     pub fn new() -> Treap {
         Treap {

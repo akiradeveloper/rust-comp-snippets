@@ -1,5 +1,7 @@
+use cargo_snippet::snippet;
+
+#[snippet("compare_str")]
 #[doc = "-1: s<t, 0: s=t, 1: s>t"]
-#[snippet = "compare_str"]
 pub fn compare_str(s: &[char], t: &[char]) -> i8 {
     let n = std::cmp::min(s.len(), t.len());
     for i in 0..n {

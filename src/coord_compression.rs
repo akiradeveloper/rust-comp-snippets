@@ -1,9 +1,11 @@
-#[snippet = "CoordCompression"]
+use cargo_snippet::snippet;
+
+#[snippet("CoordCompression")]
 struct CoordCompression {
     comp: std::collections::HashMap<i64,usize>,
     dcmp: std::collections::HashMap<usize,i64>,
 }
-#[snippet = "CoordCompression"]
+#[snippet("CoordCompression")]
 impl CoordCompression {
     fn new(xs: &[i64], start: usize) -> CoordCompression {
         let mut xs = xs.to_owned();

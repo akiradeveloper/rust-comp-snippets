@@ -1,7 +1,9 @@
 mod warshal_floyd {
+    use cargo_snippet::snippet;
+
     // dist could be negative as well as bellman ford
+    #[snippet("warshal_floyd")]
     #[doc = "directed matrix graph. O(V^3)"]
-    #[snippet = "warshal_floyd"]
     fn warshal_floyd(d: &mut [Vec<i64>]) {
         let n = d.len();
         for k in 0..n {

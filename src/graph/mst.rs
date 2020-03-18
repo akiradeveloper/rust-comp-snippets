@@ -1,8 +1,10 @@
 /// minimum spanning tree
 
 mod prim {
-    /// O(V^2)
-    #[snippet = "prim"]
+    use cargo_snippet::snippet;
+
+    #[snippet("prim")]
+    #[doc = "O(V^2)"]
     fn prim(cost: &[Vec<u64>]) -> u64 {
         let n = cost.len();
         let inf = 1<<60;
@@ -38,15 +40,17 @@ mod prim {
 }
 
 mod kraskal {
+    use cargo_snippet::snippet;
+
     use crate::union_find;
 
-    #[snippet = "kraskal"]
+    #[snippet("kraskal")]
     struct Edge {
         u: usize,
         v: usize,
         cost: u64
     }
-    #[snippet = "kraskal"]
+    #[snippet("kraskal")]
     #[doc = "es: undirected edges. O(ElogV)"]
     fn kraskal(n: usize, es: &mut [Edge]) -> u64 {
         es.sort_by(|a, b| {
@@ -66,19 +70,17 @@ mod kraskal {
 
         total_cost
     }
-
-    #[test]
-    fn test_kraskal() {}
 }
 
 mod chu_liu_edmonds {
+    use cargo_snippet::snippet;
     use crate::graph::scc;
 
-    #[snippet = "chu_liu_edmonds"]
+    #[snippet("chu_liu_edmonds")]
     #[derive(Debug,Clone,Copy)]
     struct Edge(usize, u64);
 
-    #[snippet = "chu_liu_edmonds"]
+    #[snippet("chu_liu_edmonds")]
     fn min_edge(edges: &[Edge]) -> &Edge {
         let mut r = &edges[0];
         for e in edges {
@@ -88,9 +90,9 @@ mod chu_liu_edmonds {
         }
         r
     }
-    #[snippet = "chu_liu_edmonds"]
+    #[snippet("chu_liu_edmonds")]
     static NULL_EDGE: &'static Edge = &Edge(1<<40, 0);
-    #[snippet = "chu_liu_edmonds"]
+    #[snippet("chu_liu_edmonds")]
     fn chu_liu_edmonds(in_g: &[Vec<Edge>], root: usize) -> u64 {
         // dbg!(&in_g);
         let n = in_g.len();

@@ -3,6 +3,7 @@
 
 /// https://github.com/hatoo/competitive-rust-snippets
 
+use cargo_snippet::snippet;
 use rand::Rng;
 use std::cmp::{max, min};
 use std::ops::Range;
@@ -17,7 +18,7 @@ pub fn random_range<R: Rng>(rand: &mut R, l: usize, r: usize) -> Range<usize> {
     min(a, b)..max(a, b)
 }
 
-#[snippet = "vec_to_string"]
+#[snippet("vec_to_string")]
 pub fn vec_to_string<T: ToString>(xs: &[T]) -> Vec<String> {
     let mut res = vec![];
     for x in xs {
@@ -30,7 +31,7 @@ fn test_vec_to_string() {
     assert_eq!(vec_to_string(&vec![1,2]), vec!["1","2"]);
 }
 
-#[snippet = "ctoi"]
+#[snippet("ctoi")]
 fn ctoi(c: char) -> i64 {
     if 'A' <= c && c <= 'Z' {
         c as i64 - 'A' as i64
@@ -42,7 +43,7 @@ fn ctoi(c: char) -> i64 {
 }
 
  
-#[snippet = "itoc"]
+#[snippet("itoc")]
 fn itoc(c: i64) -> char {
     if 0 <= c && c < 26 {
         (c as u8 + 'A' as u8) as char

@@ -1,12 +1,14 @@
 /// [bluss/permutohedron](https://github.com/bluss/permutohedron)
 
-#[snippet = "LexicalPermutation"]
+use cargo_snippet::snippet;
+
+#[snippet("LexicalPermutation")]
 pub trait LexicalPermutation {
     fn next_permutation(&mut self) -> bool;
     fn prev_permutation(&mut self) -> bool;
 }
 
-#[snippet = "LexicalPermutation"]
+#[snippet("LexicalPermutation")]
 impl<T> LexicalPermutation for [T]
 where
     T: Ord,
@@ -88,7 +90,7 @@ fn test_lexical_permutation() {
     }
 }
 
-#[snippet = "cyclic_permutation"]
+#[snippet("cyclic_permutation")]
 #[doc = "allows both 0/1-indexd. O(nlogn)"]
 pub fn cyclic_permutation(a: &[usize], b: &[usize]) -> Vec<Vec<usize>> {
     let mut ab = vec![];

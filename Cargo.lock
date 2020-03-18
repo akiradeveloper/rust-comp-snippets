@@ -2,7 +2,7 @@
 # It is not intended for manual editing.
 [[package]]
 name = "cargo-snippet"
-version = "0.3.0"
+version = "0.5.0"
 
 [[package]]
 name = "fuchsia-cprng"
@@ -51,7 +51,7 @@ dependencies = [
 name = "rust-comp-snippets"
 version = "0.1.0"
 dependencies = [
- "cargo-snippet 0.3.0",
+ "cargo-snippet 0.5.0",
  "rand 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 

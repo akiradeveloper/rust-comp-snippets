@@ -1,4 +1,6 @@
-#[snippet = "submasks"]
+use cargo_snippet::snippet;
+
+#[snippet("submasks")]
 fn submasks(mask: i64) -> Vec<i64> {
     let mut res = vec![];
     let mut smask = mask;
@@ -14,7 +16,7 @@ fn test_submasks() {
     assert_eq!(submasks(13), [1,4,5,8,9,12,13]);
 }
 
-#[snippet = "bitpos"]
+#[snippet("bitpos")]
 fn bitpos(x: i64) -> Vec<usize> {
     let mut p = vec![];
     let mut cur = x;
@@ -34,7 +36,7 @@ fn test_bitpos() {
 
 
 
-#[snippet = "bin_digits"]
+#[snippet("bin_digits")]
 #[doc = "O(|A|)"]
 fn bin_digits(n: i64) -> Vec<bool> {
     if n == 0 { return vec![]; }
@@ -63,7 +65,7 @@ fn test_bin_digits() {
 }
 
 
-#[snippet = "range_decomposition"]
+#[snippet("range_decomposition")]
 #[doc = "decompose a number into range of form [X000...,X111...]"]
 fn range_decomposition(x: i64) -> Vec<(i64,i64)> {
     let mut res = vec![(x,x)];
@@ -85,11 +87,11 @@ fn test_range_decomposition() {
     assert_eq!(res, [(0b00000,0b1111),(0b10000,0b10011),(0b10100,0b10100),(0b10101,0b10101)]);
 }
 
-#[snippet = "BitMask"]
+#[snippet("BitMask")]
 struct BitMask {
     x: i64,
 }
-#[snippet = "BitMask"]
+#[snippet("BitMask")]
 impl BitMask {
     pub fn new(x: i64) -> Self {
         BitMask { x: x }

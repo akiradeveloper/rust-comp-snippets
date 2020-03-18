@@ -1,7 +1,8 @@
+use cargo_snippet::snippet;
 use std::collections::HashSet;
 
 #[doc = "undirected. paint the vertices in two colors. if impossible return None."]
-#[snippet = "is_bigraph"]
+#[snippet("is_bigraph")]
 pub fn is_bigraph(g: &[Vec<usize>]) -> Option<Vec<bool>> {
     struct Rec<'a> {
         g: &'a [Vec<usize>],
@@ -49,7 +50,7 @@ pub fn is_bigraph(g: &[Vec<usize>]) -> Option<Vec<bool>> {
 }
 
 
-#[snippet = "bipartite_matching"]
+#[snippet("bipartite_matching")]
 #[doc = "O(V(V+E))"]
 fn bipartite_matching(g_list: &[HashSet<usize>]) -> Vec<(usize,usize)> {
     fn dfs(v: usize, g_list: &[HashSet<usize>], used: &mut [bool], matching: &mut [Option<usize>]) -> bool {
@@ -86,12 +87,12 @@ fn bipartite_matching(g_list: &[HashSet<usize>]) -> Vec<(usize,usize)> {
     res
 }
 
-#[snippet = "bipartite_matching"]
+#[snippet("bipartite_matching")]
 struct BipartiteMatching {
     g: Vec<HashSet<usize>>,
 }
 #[doc = "find the pair of vertices which is maximum possible."]
-#[snippet = "bipartite_matching"]
+#[snippet("bipartite_matching")]
 impl BipartiteMatching {
     pub fn new(n: usize) -> BipartiteMatching {
         BipartiteMatching {

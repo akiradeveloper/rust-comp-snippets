@@ -1,4 +1,6 @@
-#[snippet = "valid4"]
+use cargo_snippet::snippet;
+
+#[snippet("valid4")]
 pub fn valid4u(h: usize, w: usize, ps: Vec<(Option<usize>, Option<usize>)>) -> Vec<(usize, usize)> {
     let mut res = vec![];
     for (x, y) in ps {
@@ -14,13 +16,13 @@ pub fn valid4u(h: usize, w: usize, ps: Vec<(Option<usize>, Option<usize>)>) -> V
     res
 }
 
-#[snippet = "incl"]
+#[snippet("incl")]
 #[doc = "0..=n in old compilers"]
 pub fn incl(n: usize) -> usize {
     n+1
 }
 
-#[snippet = "sub_or_max"]
+#[snippet("sub_or_max")]
 #[doc = "max(x-y, z)"]
 pub fn sub_or_max(x: usize, y: usize, z: usize) -> usize {
     // x-y > z
@@ -36,7 +38,7 @@ fn test_sub_or_max() {
     assert_eq!(sub_or_max(3, 4, 0), 0);
 }
 
-#[snippet = "add_or_min"]
+#[snippet("add_or_min")]
 #[doc = "min(x+y, z)"]
 pub fn add_or_min(x: usize, y: usize, z: usize) -> usize {
     // x+y < z

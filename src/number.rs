@@ -1,6 +1,8 @@
 /// https://github.com/hatoo/competitive-rust-snippets
  
-#[snippet = "into_digits"]
+use cargo_snippet::snippet;
+
+#[snippet("into_digits")]
 fn into_digits(b: i64, n: i64) -> Vec<i64> {
     let mut r = vec![];
     let mut n = n;
@@ -18,7 +20,7 @@ fn test_into_digits() {
     assert_eq!(into_digits(10, 21), [1,2]);
 }
 
-#[snippet = "gcd"]
+#[snippet("gcd")]
 #[allow(dead_code)]
 pub fn gcd(a: i64, b: i64) -> i64 {
     if b == 0 {
@@ -28,14 +30,14 @@ pub fn gcd(a: i64, b: i64) -> i64 {
     }
 }
 
-#[snippet = "lcm"]
+#[snippet("lcm")]
 #[allow(dead_code)]
 pub fn lcm(a: i64, b: i64) -> i64 {
     a / gcd(a, b) * b
 }
 
+#[snippet("extgcd")]
 #[doc = "ax+by=gcd(a,b) returns (gcd, x, y)"]
-#[snippet = "extgcd"]
 #[allow(dead_code)]
 pub fn extgcd(a: i64, b: i64) -> (i64, i64, i64) {
     if b == 0 {
@@ -54,15 +56,15 @@ fn test_extgcg() {
     // dbg!(gcd, x, y);
 }
 
+#[snippet("modinv")]
 #[doc = "ay=1 (mod m) -> y=a^{-1}"]
-#[snippet = "modinv"]
 pub fn modinv(a: i64, m: i64) -> i64 {
     let (_, x, _) = extgcd(a, m);
     (m + x % m) % m
 }
 
-#[snippet = "ModComb"]
-#[snippet = "modpow"]
+#[snippet("ModComb")]
+#[snippet("modpow")]
 #[allow(dead_code)]
 /// x ^ n % m
 pub fn modpow(x: i64, n: i64, m: i64) -> i64 {
@@ -89,7 +91,7 @@ fn test_modpow() {
     }
 }
 
-#[snippet = "factorial"]
+#[snippet("factorial")]
 fn factorial(a: i64, p: i64) -> i64 {
     if a == 0 {
         return 1
@@ -104,7 +106,7 @@ fn factorial(a: i64, p: i64) -> i64 {
     n
 }
 
-#[snippet = "divisors"]
+#[snippet("divisors")]
 #[doc = "O(root N)"]
 fn divisors(n: i64) -> Vec<i64> {
     let mut res = vec![];

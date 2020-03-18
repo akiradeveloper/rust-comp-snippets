@@ -1,9 +1,11 @@
-#[snippet = "LongestDistance"]
+use cargo_snippet::snippet;
+
+#[snippet("LongestDistance")]
 struct LongestDistance {
     ing: Vec<Vec<usize>>,
     dp: Vec<Option<usize>>,
 }
-#[snippet = "LongestDistance"]
+#[snippet("LongestDistance")]
 impl LongestDistance {
     #[doc = "DAG"]
     pub fn new(n: usize) -> LongestDistance {

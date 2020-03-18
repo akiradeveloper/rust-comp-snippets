@@ -1,7 +1,8 @@
+use cargo_snippet::snippet;
 use std::collections::HashSet;
 
 // verified: GRL_4_A
-#[snippet = "CycleDetection"]
+#[snippet("CycleDetection")]
 fn cycle_detection_directed(g: &[Vec<usize>]) -> bool {
     let n = g.len();
     let mut in_g = vec![HashSet::new();n];
@@ -31,11 +32,11 @@ fn cycle_detection_directed(g: &[Vec<usize>]) -> bool {
 
     m != n
 }
-#[snippet = "CycleDetection"]
+#[snippet("CycleDetection")]
 struct CycleDetection {
     g: Vec<Vec<usize>>,
 }
-#[snippet = "CycleDetection"]
+#[snippet("CycleDetection")]
 impl CycleDetection {
     pub fn new(n: usize) -> CycleDetection {
         CycleDetection {

@@ -1,10 +1,12 @@
-#[snippet = "LCA"]
+use cargo_snippet::snippet;
+
+#[snippet("LCA")]
 struct LCA {
     tree: Vec<Vec<usize>>,
     parent: Vec<Vec<Option<usize>>>,
     depth: Vec<usize>,
 }
-#[snippet = "LCA"]
+#[snippet("LCA")]
 impl LCA {
     pub fn new(n: usize) -> Self {
         let mut log_n = (n as f64).log2().ceil() as usize;

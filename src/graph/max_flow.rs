@@ -1,20 +1,22 @@
 // verified: GRL_6_A
 mod ford_fulkerson {
-    #[snippet = "ford_fulkerson"]
+    use cargo_snippet::snippet;
+
+    #[snippet("ford_fulkerson")]
     #[derive(Clone,Copy,Debug)]
     struct Edge {
         to: usize,
         cap: i64,
         rev: usize,
     }
-    #[snippet = "ford_fulkerson"]
+    #[snippet("ford_fulkerson")]
     struct Network {
         g: Vec<Vec<Edge>>,
         used: Vec<bool>,
     }
 
+    #[snippet("ford_fulkerson")]
     #[doc = "directed flow graph. O(FE)"]
-    #[snippet = "ford_fulkerson"]
     impl Network {
         pub fn new(n: usize) -> Network {
             Network {
@@ -100,21 +102,23 @@ mod ford_fulkerson {
 
 // verified: GRL_6_A
 mod dinic {
-    #[snippet = "dinic"]
+    use cargo_snippet::snippet;
+
+    #[snippet("dinic")]
     #[derive(Clone,Copy,Debug)]
     struct Edge {
         to: usize,
         cap: i64,
         rev: usize,
     }
-    #[snippet = "dinic"]
+    #[snippet("dinic")]
     struct Network {
         g: Vec<Vec<Edge>>,
         level: Vec<Option<usize>>,
         iter: Vec<usize>,
     }
+    #[snippet("dinic")]
     #[doc = "direct flow graph. O(EV^2)"]
-    #[snippet = "dinic"]
     impl Network {
         pub fn new(n: usize) -> Network {
             Network {

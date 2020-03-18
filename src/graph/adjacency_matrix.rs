@@ -1,8 +1,10 @@
-#[snippet = "AdjacencyMatrix"]
+use cargo_snippet::snippet;
+
+#[snippet("AdjacencyMatrix")]
 struct AdjacencyMatrix {
     a: Vec<Vec<i64>>,
 }
-#[snippet = "AdjacencyMatrix"]
+#[snippet("AdjacencyMatrix")]
 impl AdjacencyMatrix {
     pub fn new(n: usize, inf: i64) -> AdjacencyMatrix {
         AdjacencyMatrix {

@@ -1,6 +1,7 @@
+use cargo_snippet::snippet;
 use std::collections::VecDeque;
 
-#[snippet = "HLDecomposition"]
+#[snippet("HLDecomposition")]
 struct HLDecomposition {
     n: usize,
     g: Vec<Vec<usize>>,
@@ -13,7 +14,7 @@ struct HLDecomposition {
     pub virt_to_real: Vec<usize>,
 }
 
-#[snippet = "HLDecomposition"]
+#[snippet("HLDecomposition")]
 impl HLDecomposition {
 
     pub fn new(n: usize) -> Self {

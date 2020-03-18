@@ -1,4 +1,6 @@
-#[snippet = "grundy_def"]
+use cargo_snippet::snippet;
+
+#[snippet("grundy_def")]
 pub fn grundy_def(xs: Vec<i64>) -> i64 {
     let mut xs = xs;
     xs.sort();

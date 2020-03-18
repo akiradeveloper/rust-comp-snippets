@@ -1,11 +1,12 @@
+use cargo_snippet::snippet;
 use crate::number::{modinv, modpow};
 use crate::garner::garner;
 
-#[snippet = "NTT"]
+#[snippet("NTT")]
 struct NTT {
     pub mo: i64,
 }
-#[snippet = "NTT"]
+#[snippet("NTT")]
 impl NTT {
     pub fn new(mo: i64) -> NTT {
         NTT {
@@ -128,7 +129,7 @@ pub fn ntt_multiply_naive(a: &[i64], b: &[i64], mo: i64) -> Vec<i64> {
     res.truncate(n+m-1);
     res
 }
-#[snippet = "NTT"]
+#[snippet("NTT")]
 pub fn ntt_multiply(a: &[i64], b: &[i64], mo: i64) -> Vec<i64> {
     let mut a = a.to_vec();
     let mut b = b.to_vec();

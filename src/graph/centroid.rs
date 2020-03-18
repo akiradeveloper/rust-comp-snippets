@@ -1,12 +1,13 @@
+use cargo_snippet::snippet;
 use std::collections::HashMap;
 
-#[snippet = "TreeCentroid"]
+#[snippet("TreeCentroid")]
 pub struct Centroid {
     pub g: Vec<Vec<usize>>,
     pub centroid: Vec<usize>,
     subsize: Vec<usize>,
 }
-#[snippet = "TreeCentroid"]
+#[snippet("TreeCentroid")]
 impl Centroid {
     pub fn new(n: usize) -> Centroid {
         Centroid {
@@ -46,14 +47,14 @@ impl Centroid {
     }
 }
 
-#[snippet = "split_tree"]
+#[snippet("split_tree")]
 #[derive(Debug)]
 pub struct SubTree {
     n: usize,
     e: Vec<(usize,usize)>,
     nodeid: Vec<usize>,
 }
-#[snippet = "split_tree"]
+#[snippet("split_tree")]
 #[doc = "O(n)"]
 pub fn split_tree(tree: SubTree, root: usize) -> Vec<SubTree> {
     struct Rec<'a> {

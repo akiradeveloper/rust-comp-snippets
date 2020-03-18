@@ -1,7 +1,9 @@
 mod bfs01 {
+    use cargo_snippet::snippet;
+    
     // connected[i][i] == false
+    #[snippet("bfs01")]
     #[doc = "shortest path from directed matrix graph with 0/1 cost. O(E)"]
-    #[snippet = "bfs01"]
     fn bfs01(g: &[Vec<i64>], s: usize, inf: i64) -> Vec<i64> {
         use std::collections::VecDeque;
         let n = g.len();
@@ -107,15 +109,17 @@ mod dijkstra {
 }
 
 mod djikstra_heap {
-    #[snippet = "dijkstra"]
+    use cargo_snippet::snippet;
+    
+    #[snippet("dijkstra")]
     #[derive(Clone,Copy,Debug)]
     struct Edge {
         to: usize,
         cost: i64,
     }
 
+    #[snippet("dijkstra")]
     #[doc = "g: directed adjacent graph with non-negative costs. O(ElogV)"]
-    #[snippet = "dijkstra"]
     fn dijkstra_heap(g: &[Vec<Edge>], s: usize, inf: i64) -> Vec<i64> {
         let n = g.len();
         let mut queue = std::collections::BinaryHeap::new(); // max-heap
@@ -147,7 +151,9 @@ mod djikstra_heap {
 }
 
 mod bellman_ford {
-    #[snippet = "bellman_ford"]
+    use cargo_snippet::snippet;
+
+    #[snippet("bellman_ford")]
     #[derive(Clone,Copy,Debug)]
     struct Edge {
         from: usize,
@@ -156,7 +162,7 @@ mod bellman_ford {
     }
 
     #[doc = "es: directed edges. negative costs allowed. O(V^2)"]
-    #[snippet = "bellman_ford"]
+    #[snippet("bellman_ford")]
     fn bellman_ford(n: usize, es: &[Edge], source: usize) -> Vec<i64> {
         const INF: i64 = 1<<60;
         let mut d = vec![INF; n];
@@ -176,7 +182,7 @@ mod bellman_ford {
         d
     }
 
-    #[snippet = "bellman_ford"]
+    #[snippet("bellman_ford")]
     fn find_negative_loop(n: usize, es: &[Edge]) -> bool {
         let mut d = vec![0; n];
         for i in 0..n {

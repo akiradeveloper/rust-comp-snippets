@@ -1,4 +1,6 @@
-#[snippet = "Lowlink"]
+use cargo_snippet::snippet;
+
+#[snippet("Lowlink")]
 struct LowLink {
     g: Vec<Vec<usize>>,
     used: Vec<bool>,
@@ -7,7 +9,7 @@ struct LowLink {
     pub articulation: Vec<usize>,
     pub bridge: Vec<(usize, usize)>,
 }
-#[snippet = "Lowlink"]
+#[snippet("Lowlink")]
 #[doc = "find articulation points and bridges at the same time"]
 impl LowLink {
     fn minmax(p: (usize, usize)) -> (usize, usize) {

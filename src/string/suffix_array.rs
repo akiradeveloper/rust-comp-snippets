@@ -1,10 +1,12 @@
-#[snippet = "SuffixArray"]
+use cargo_snippet::snippet;
+
+#[snippet("SuffixArray")]
 struct SuffixArray {
     // sのうち前からSA[i]個消したやつが辞書順i番目のsuffixである
     sa: Vec<usize>,
     s: Vec<u64>
 }
-#[snippet = "SuffixArray"]
+#[snippet("SuffixArray")]
 impl SuffixArray {
     #[doc = "O(nlogn)"]
     pub fn new(s: Vec<u64>) -> Self {

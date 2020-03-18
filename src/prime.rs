@@ -1,4 +1,6 @@
-#[snippet = "is_prime"]
+use cargo_snippet::snippet;
+
+#[snippet("is_prime")]
 #[doc = "O(root N)"]
 fn is_prime(n: i64) -> bool {
     let mut d = 1;
@@ -17,8 +19,8 @@ fn is_prime(n: i64) -> bool {
     res
 }
 
+#[snippet("prime_decomposition")]
 #[doc = "O(root(N))"]
-#[snippet = "prime_decomposition"]
 fn prime_decomposition(n: i64) -> std::collections::HashMap<i64, i64> {
     fn root_int(n: i64) -> i64 {
         let mut d = 1;
@@ -50,8 +52,8 @@ fn test_prime_decomposition() {
     dbg!(prime_decomposition(15));
 }
 
+#[snippet("factorial_prime_count")]
 #[doc = "O(n). how many prime p found in n!"]
-#[snippet = "factorial_prime_count"]
 fn factorial_prime_count(n: i64, p: i64, mo: i64) -> i64 {
     let mut acc = 0;
     for k in 1.. {
@@ -71,7 +73,7 @@ fn test_prime_count() {
     assert_eq!(factorial_prime_count(6, 5, std::i64::MAX), 1);
 }
 
-#[snippet = "factor_table"]
+#[snippet("factor_table")]
 #[doc = "compute the maximum factor for each number. O(N log log N)"]
 #[allow(dead_code)]
 pub fn factor_table(max_n: usize) -> Vec<usize> {
@@ -98,8 +100,8 @@ fn test_factor_table() {
     }
 }
 
+#[snippet("eratosthenes")]
 #[doc = "O(N log log N)"]
-#[snippet = "eratosthenes"]
 fn eratosthenes(n_max: usize) -> Vec<usize> {
     let mut res = vec![];
     let mut v = vec![0; n_max+1];

@@ -1,12 +1,13 @@
+use cargo_snippet::snippet;
 use crate::ntt;
 
-#[snippet = "Polynomial"]
+#[snippet("Polynomial")]
 #[derive(Debug)]
 struct Polynomial {
     coeff: Vec<i64>,
     mo: i64,
 }
-#[snippet = "Polynomial"]
+#[snippet("Polynomial")]
 impl Polynomial {
     pub fn new(coeff: Vec<i64>, mo: i64) -> Polynomial {
         Polynomial {

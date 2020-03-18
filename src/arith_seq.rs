@@ -1,9 +1,11 @@
-#[snippet = "ArithSeq"]
+use cargo_snippet::snippet;
+
+#[snippet("ArithSeq")]
 pub struct ArithSeq {
     pub a: i64,
     pub b: i64,
 }
-#[snippet = "ArithSeq"]
+#[snippet("ArithSeq")]
 impl ArithSeq {
     #[doc = "y=ax+b"]
     pub fn new(a: i64, b: i64) -> Self {

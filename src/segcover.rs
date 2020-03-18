@@ -1,8 +1,10 @@
+use cargo_snippet::snippet;
+
 use crate::seg::{SEG, Monoid};
 
-#[snippet = "MaxCover"]
+#[snippet("MaxCover")]
 struct MAX;
-#[snippet = "MaxCover"]
+#[snippet("MaxCover")]
 impl Monoid for MAX {
     type T = i64;
     fn id() -> Self::T {
@@ -13,13 +15,13 @@ impl Monoid for MAX {
     }
 }
 
-#[snippet = "MaxCover"]
+#[snippet("MaxCover")]
 struct MaxCover {
     n: usize,
     dp: SEG<MAX>,
     segs: Vec<(usize,usize,i64)>,
 }
-#[snippet = "MaxCover"]
+#[snippet("MaxCover")]
 impl MaxCover {
     pub fn new(n: usize) -> Self {
         MaxCover {

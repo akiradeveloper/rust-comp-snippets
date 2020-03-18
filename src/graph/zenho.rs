@@ -1,18 +1,20 @@
 // Verified: ECR64-D
 
-#[snippet = "CumRL"]
+use cargo_snippet::snippet;
+
+#[snippet("CumRL")]
 trait Foldable {
     type T: Clone + std::fmt::Debug;
     fn id() -> Self::T;
     fn fold(acc: Self::T, x: Self::T) -> Self::T;
 }
-#[snippet = "CumRL"]
+#[snippet("CumRL")]
 #[derive(Clone, Debug)]
 struct CumRL<F: Foldable> {
     lcum: Vec<F::T>,
     rcum: Vec<F::T>,
 }
-#[snippet = "CumRL"]
+#[snippet("CumRL")]
 impl <F: Foldable> CumRL<F> {
     pub fn new(elems: Vec<F::T>) -> CumRL<F> {
         let n = elems.len();
@@ -63,21 +65,21 @@ fn test_cumrl() {
 
 use std::collections::HashMap;
 
-#[snippet = "ZenHo"]
+#[snippet("ZenHo")]
 trait ZenHoable: Foldable + Clone + Sized {
     type NVal: Clone;
     type EVal: Clone;
     fn f(nvalue: Self::NVal, evalue: Self::EVal, dp: &CumRL<Self>, l: usize, r: usize) -> Self::T;
 }
+#[snippet("ZenHo")]
 #[derive(Debug)]
-#[snippet = "ZenHo"]
 struct ZenHo<Z: ZenHoable> {
     g: Vec<Vec<usize>>,
     nvalues: Vec<Z::NVal>,
     evalues: HashMap<(usize,usize), Z::EVal>,
     dp: HashMap<(usize,usize), Z::T>,
 }
-#[snippet = "ZenHo"]
+#[snippet("ZenHo")]
 impl <Z: ZenHoable> ZenHo<Z> {
     pub fn new(nvalues: Vec<Z::NVal>) -> ZenHo<Z> {
         let n = nvalues.len();

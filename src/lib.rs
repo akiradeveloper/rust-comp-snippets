@@ -1,7 +1,7 @@
 #![feature(custom_inner_attributes)]
 #![feature(plugin)]
+#![feature(proc_macro_hygiene)]
 #![feature(test)]
-#![plugin(cargo_snippet)]
 
 /// https://github.com/hatoo/competitive-rust-snippets
  

@@ -1,9 +1,11 @@
-#[snippet = "UnionFind"]
+use cargo_snippet::snippet;
+
+#[snippet("UnionFind")]
 pub struct UnionFind {
     par: Vec<usize>,
     rank: Vec<usize> }
 
-#[snippet = "UnionFind"]
+#[snippet("UnionFind")]
 impl UnionFind {
     pub fn new(n: usize) -> UnionFind {
         UnionFind {
@@ -73,14 +75,14 @@ fn test_union_find() {
     assert_eq!(s.size(0), 5);
 }
 
-#[snippet = "WeighedUnionFind"]
+#[snippet("WeighedUnionFind")]
 struct WeightedUnionFind {
     par: Vec<usize>,
     rank: Vec<usize>,
     diff_weight: Vec<i32>,
 }
 
-#[snippet = "WeighedUnionFind"]
+#[snippet("WeighedUnionFind")]
 impl WeightedUnionFind {
     fn new(n: usize) -> WeightedUnionFind {
         WeightedUnionFind {

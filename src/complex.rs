@@ -1,4 +1,6 @@
-#[snippet = "complex"]
+use cargo_snippet::snippet;
+
+#[snippet("complex")]
 mod complex {
     #[derive(Clone, Copy, Debug)]
     pub struct Complex {
@@ -45,6 +47,5 @@ mod complex {
     impl MulAssign for Complex { fn mul_assign(&mut self, rhs: Self) { *self = *self * rhs } }
     impl DivAssign for Complex { fn div_assign(&mut self, rhs: Self) { *self = *self / rhs } }
 }
-
-#[snippet = "complex"]
+#[snippet("complex")]
 pub type Complex = complex::Complex;

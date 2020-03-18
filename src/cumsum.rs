@@ -1,9 +1,11 @@
-#[snippet = "cumsum1"]
+use cargo_snippet::snippet;
+
+#[snippet("cumsum1")]
 struct CumSum1 {
     base: Vec<i64>,
     dp: Vec<i64>,
 }
-#[snippet = "cumsum1"]
+#[snippet("cumsum1")]
 impl CumSum1 {
     fn new(n: usize) -> CumSum1 {
         CumSum1 {
@@ -48,12 +50,12 @@ fn test_cumsum1() {
     assert_eq!(cs.query(0,4), 4);
 }
 
-#[snippet = "cumsum2"]
+#[snippet("cumsum2")]
 struct CumSum2 {
     base: Vec<Vec<i64>>,
     dp: Vec<Vec<i64>>,
 }
-#[snippet = "cumsum2"]
+#[snippet("cumsum2")]
 impl CumSum2 {
     fn new(n: usize, m: usize) -> CumSum2 {
         CumSum2 {
@@ -102,13 +104,13 @@ fn test_cum2() {
     assert_eq!(cum2.query(0, 1, 0, 2), 3);
 }
 
-#[snippet = "Imosu2d"]
+#[snippet("Imosu2d")]
 struct Imosu2d {
     n: usize,
     m: usize,
     dp: Vec<Vec<i64>>,
 }
-#[snippet = "Imosu2d"]
+#[snippet("Imosu2d")]
 impl Imosu2d {
     pub fn new(n: usize, m: usize) -> Imosu2d {
         Imosu2d {
@@ -174,14 +176,14 @@ fn test_imosu_2d() {
 
 use crate::arith_seq::ArithSeq;
 
-#[snippet = "Imosu1d"]
+#[snippet("Imosu1d")]
 struct Imosu1d {
     n: usize,
     dp1: Vec<i64>,
     dp2: Vec<i64>,
     dp3: Vec<i64>,
 }
-#[snippet = "Imosu1d"]
+#[snippet("Imosu1d")]
 impl Imosu1d {
     pub fn new(n: usize) -> Imosu1d {
         Imosu1d {

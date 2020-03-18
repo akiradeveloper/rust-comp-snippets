@@ -1,10 +1,12 @@
-#[snippet = "BinarySearchf64"]
+use cargo_snippet::snippet;
+
+#[snippet("BinarySearchf64")]
 struct BinarySearchf64<F> {
     lb: f64,
     ub: f64,
     f: F,
 }
-#[snippet = "BinarySearchf64"]
+#[snippet("BinarySearchf64")]
 impl <F: FnMut(f64) -> bool> BinarySearchf64<F> {
     const eps: f64 = 1e-9;
     fn new(lb: f64, ub: f64, f: F) -> BinarySearchf64<F> {
@@ -29,14 +31,14 @@ impl <F: FnMut(f64) -> bool> BinarySearchf64<F> {
     }
 }
 
-#[snippet = "BinarySearch"]
+#[snippet("BinarySearch")]
 #[doc = "lower,upper are inclusive range"]
 pub struct BinarySearch<F> {
     pub p: F,
     pub lower: i64,
     pub upper: i64,
 }
-#[snippet = "BinarySearch"]
+#[snippet("BinarySearch")]
 impl <F: FnMut(i64) -> bool> BinarySearch<F> {
     #[doc = "O(log(upper-lower))"]
     pub fn lower_bound(&mut self) -> i64 {

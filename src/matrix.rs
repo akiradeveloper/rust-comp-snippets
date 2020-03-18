@@ -1,4 +1,6 @@
-#[snippet = "Matrix"]
+use cargo_snippet::snippet;
+
+#[snippet("Matrix")]
 pub mod matrix {
     #[derive(Clone)]
     pub struct Matrix {
@@ -122,8 +124,7 @@ pub mod matrix {
         }
     }
 }
-
-#[snippet = "Matrix"]
+#[snippet("Matrix")]
 pub type Matrix = matrix::Matrix;
 
 #[test]

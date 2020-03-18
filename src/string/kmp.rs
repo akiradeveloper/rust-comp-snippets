@@ -1,9 +1,11 @@
-#[snippet = "KMP"]
+use cargo_snippet::snippet;
+
+#[snippet("KMP")]
 struct KMP {
     pat: Vec<u64>,
     tbl: Vec<i64>
 }
-#[snippet = "KMP"]
+#[snippet("KMP")]
 impl KMP {
     #[doc = "O(K)"]
     fn new(pat: Vec<u64>) -> Self {

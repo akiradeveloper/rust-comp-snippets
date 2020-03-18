@@ -1,6 +1,7 @@
+use cargo_snippet::snippet;
 use std::cmp::min;
 
-#[snippet = "edit_distance"]
+#[snippet("edit_distance")]
 pub fn edit_distance<T: Eq>(s: Vec<T>, t: Vec<T>) -> Vec<Vec<usize>> {
     let n = s.len();
     let m = t.len();

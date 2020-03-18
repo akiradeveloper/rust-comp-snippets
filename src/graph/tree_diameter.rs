@@ -1,16 +1,18 @@
+use cargo_snippet::snippet;
+
 // Verified with GRA_5_A
 
+#[snippet("tree_diameter")]
 #[derive(Clone, Copy)]
-#[snippet = "tree_diameter"]
 struct Edge {
     dst: usize,
     weight: i64,
 }
-#[snippet = "tree_diameter"]
+#[snippet("tree_diameter")]
 struct FindFurthestPair {
     g: Vec<Vec<Edge>>
 }
-#[snippet = "tree_diameter"]
+#[snippet("tree_diameter")]
 impl FindFurthestPair {
     fn find(&self, v: usize) -> (usize, i64) {
         self.find_rec(None, v)
@@ -29,11 +31,11 @@ impl FindFurthestPair {
         r
     }
 }
-#[snippet = "tree_diameter"]
+#[snippet("tree_diameter")]
 struct TreeDiameter {
     g: Vec<Vec<Edge>>,
 }
-#[snippet = "tree_diameter"]
+#[snippet("tree_diameter")]
 impl TreeDiameter {
     pub fn new(n: usize) -> TreeDiameter {
         TreeDiameter {

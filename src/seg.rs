@@ -1,4 +1,6 @@
-#[snippet = "SEG"]
+use cargo_snippet::snippet;
+
+#[snippet("SEG")]
 #[allow(dead_code)]
 pub trait Monoid {
     type T: Clone;
@@ -6,14 +8,14 @@ pub trait Monoid {
     fn op(a: &Self::T, b: &Self::T) -> Self::T;
 }
 
-#[snippet = "SEG"]
+#[snippet("SEG")]
 #[allow(dead_code)]
 pub struct SEG<M: Monoid> {
     n: usize,
     buf: Vec<M::T>,
 }
 
-#[snippet = "SEG"]
+#[snippet("SEG")]
 impl<M: Monoid> SEG<M> {
     #[allow(dead_code)]
     pub fn new(n: usize) -> SEG<M> {
@@ -62,10 +64,10 @@ impl<M: Monoid> SEG<M> {
     }
 }
 
-#[snippet = "SEG_SUM"]
+#[snippet("SEG_SUM")]
 #[allow(dead_code)]
 struct SUM;
-#[snippet = "SEG_SUM"]
+#[snippet("SEG_SUM")]
 impl Monoid for SUM {
     type T = i64;
     fn id() -> Self::T {
@@ -91,10 +93,10 @@ fn test_seg_sum() {
     assert_eq!(seg.query(2, 4), 7);
 }
 
-#[snippet = "SEG_MIN"]
+#[snippet("SEG_MIN")]
 #[allow(dead_code)]
 struct MIN;
-#[snippet = "SEG_MIN"]
+#[snippet("SEG_MIN")]
 impl Monoid for MIN {
     type T = i64;
     fn id() -> Self::T {
@@ -104,9 +106,9 @@ impl Monoid for MIN {
         std::cmp::min(*a, *b)
     }
 }
-#[snippet = "SEG_MAX"]
+#[snippet("SEG_MAX")]
 struct MAX;
-#[snippet = "SEG_MAX"]
+#[snippet("SEG_MAX")]
 impl Monoid for MAX {
     type T = i64;
     fn id() -> Self::T {

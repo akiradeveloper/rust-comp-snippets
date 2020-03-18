@@ -1,4 +1,6 @@
-#[snippet = "modint"]
+use cargo_snippet::snippet;
+
+#[snippet("modint")]
 pub mod modular {
     const M: i64 = 1_000_000_007;
     #[derive(Debug, Clone, Copy, Default, PartialOrd, Ord, PartialEq, Eq)]
@@ -87,7 +89,7 @@ pub mod modular {
     }
 }
 
-#[snippet = "modint"]
+#[snippet("modint")]
 pub type Mod = modular::Mod;
 
 // #[snippet = "modint"]

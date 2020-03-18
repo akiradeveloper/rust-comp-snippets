@@ -1,6 +1,7 @@
+use cargo_snippet::snippet;
 use crate::complex::Complex;
 
-#[snippet = "fft"]
+#[snippet("fft")]
 pub fn multiply(a: &[i64], b: &[i64], mo: i64) -> Vec<i64> {
     let n = a.len();
     let m = b.len();
@@ -21,7 +22,7 @@ pub fn multiply(a: &[i64], b: &[i64], mo: i64) -> Vec<i64> {
     c
 }
 
-#[snippet = "fft"]
+#[snippet("fft")]
 #[doc = "convolve two waves a[x],b[y] to c[x+y]. O(nlogn)"]
 pub fn convolve(a: Vec<f64>, b: Vec<f64>) -> Vec<f64> {
     let n = a.len() + b.len() - 1;
@@ -51,7 +52,7 @@ pub fn convolve(a: Vec<f64>, b: Vec<f64>) -> Vec<f64> {
     ret
 }
 
-#[snippet = "fft"]
+#[snippet("fft")]
 pub fn fast_fourier_transform(arr: Vec<Complex>, inv: bool) -> Vec<Complex> {
     let n = arr.len();
     assert!(n.count_ones() == 1, "the length of array is not square");

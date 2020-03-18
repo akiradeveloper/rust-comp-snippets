@@ -1,6 +1,8 @@
 /// https://ei1333.github.io/luzhiled/snippets/structure/segment-tree.html
 
-#[snippet = "SEG_LAZY"]
+use cargo_snippet::snippet;
+
+#[snippet("SEG_LAZY")]
 trait SEGLazyImpl {
     type Monoid: Copy;
     type OperatorMonoid: Copy + PartialEq;
@@ -11,7 +13,7 @@ trait SEGLazyImpl {
     fn h(x: Self::OperatorMonoid, y: Self::OperatorMonoid) -> Self::OperatorMonoid;
 }
 
-#[snippet = "SEG_LAZY"]
+#[snippet("SEG_LAZY")]
 struct SEGLazy<T: SEGLazyImpl> {
     n: usize,
     data: Vec<T::Monoid>,
@@ -19,7 +21,7 @@ struct SEGLazy<T: SEGLazyImpl> {
     weight: Vec<usize>,
 }
 
-#[snippet = "SEG_LAZY"]
+#[snippet("SEG_LAZY")]
 impl <T: SEGLazyImpl> SEGLazy<T> {
     pub fn new(n: usize, init: T::Monoid) -> SEGLazy<T> {
         let weights = vec![1;n];
@@ -102,9 +104,9 @@ impl <T: SEGLazyImpl> SEGLazy<T> {
     }
 }
 
-#[snippet = "SEG_LAZY_MAX_RUQ"]
+#[snippet("SEG_LAZY_MAX_RUQ")]
 struct MAX_RUQ;
-#[snippet = "SEG_LAZY_MAX_RUQ"]
+#[snippet("SEG_LAZY_MAX_RUQ")]
 impl SEGLazyImpl for MAX_RUQ {
     type Monoid = i64;
     type OperatorMonoid = i64;
@@ -138,9 +140,9 @@ fn test_MAX_RUQ() {
     assert_eq!(seg.query(0, 1), 5);
 }
 
-#[snippet = "SEG_LAZY_MIN_RUQ"]
+#[snippet("SEG_LAZY_MIN_RUQ")]
 struct MIN_RUQ;
-#[snippet = "SEG_LAZY_MIN_RUQ"]
+#[snippet("SEG_LAZY_MIN_RUQ")]
 impl SEGLazyImpl for MIN_RUQ {
     type Monoid = i64;
     type OperatorMonoid = i64;
@@ -175,9 +177,9 @@ fn test_MIN_RUQ() { // DSL_2_D
     seg.update(1,8,2);
 }
 
-#[snippet = "SEG_LAZY_SUM_RUQ"]
+#[snippet("SEG_LAZY_SUM_RUQ")]
 struct SUM_RUQ;
-#[snippet = "SEG_LAZY_SUM_RUQ"]
+#[snippet("SEG_LAZY_SUM_RUQ")]
 impl SEGLazyImpl for SUM_RUQ { 
     type Monoid = i64;
     type OperatorMonoid = i64;
@@ -212,9 +214,9 @@ fn test_SUM_RUQ() { // DSL_1_I
     seg.update(0,2,1);
 }
 
-#[snippet = "SEG_LAZY_SUM_RAQ"]
+#[snippet("SEG_LAZY_SUM_RAQ")]
 struct SUM_RAQ;
-#[snippet = "SEG_LAZY_SUM_RAQ"]
+#[snippet("SEG_LAZY_SUM_RAQ")]
 impl SEGLazyImpl for SUM_RAQ {
     type Monoid = i64;
     type OperatorMonoid = i64;
@@ -249,9 +251,9 @@ fn test_SUM_RAQ() {
     assert_eq!(seg.query(4, 7), 20);
 }
 
-#[snippet = "SEG_LAZY_MAX_RAQ"]
+#[snippet("SEG_LAZY_MAX_RAQ")]
 struct MAX_RAQ;
-#[snippet = "SEG_LAZY_MAX_RAQ"]
+#[snippet("SEG_LAZY_MAX_RAQ")]
 impl SEGLazyImpl for MAX_RAQ {
     type Monoid = i64;
     type OperatorMonoid = i64;
@@ -272,9 +274,9 @@ impl SEGLazyImpl for MAX_RAQ {
     }
 }
 
-#[snippet = "SEG_LAZY_MIN_RAQ"]
+#[snippet("SEG_LAZY_MIN_RAQ")]
 struct MIN_RAQ;
-#[snippet = "SEG_LAZY_MIN_RAQ"]
+#[snippet("SEG_LAZY_MIN_RAQ")]
 impl SEGLazyImpl for MIN_RAQ { 
     type Monoid = i64;
     type OperatorMonoid = i64;

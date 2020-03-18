@@ -1,20 +1,21 @@
+use cargo_snippet::snippet;
 use crate::union_find::UnionFind;
 use std::collections::HashMap;
 
-#[snippet = "Partition"]
+#[snippet("Partition")]
 #[derive(Debug)]
 struct Connected {
     n: usize,
     e: Vec<(usize,usize)>,
     nodeid: Vec<usize>,
 }
-#[snippet = "Partition"]
+#[snippet("Partition")]
 struct Partition {
     n: usize,
     e: Vec<(usize,usize)>,
     uf: UnionFind
 }
-#[snippet = "Partition"]
+#[snippet("Partition")]
 impl Partition {
     fn new(n: usize) -> Partition {
         Partition {

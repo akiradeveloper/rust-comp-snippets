@@ -1,4 +1,6 @@
-#[snippet = "partition_dp"]
+use cargo_snippet::snippet;
+
+#[snippet("partition_dp")]
 #[doc = "O(nm)"]
 #[allow(dead_code)]
 /// dp[i][j] = j th partition number of i
@@ -27,7 +29,7 @@ fn test_partition_dp() {
 }
 
 // Knuth's algorithm
-#[snippet = "nCk"]
+#[snippet("nCk")]
 #[doc = "O(b)"]
 fn nCk(a: i64, b: i64) -> Mod {
     if a < b { return 0.into(); }
@@ -49,7 +51,7 @@ fn test_knuth_nCk() {
     assert_eq!(nCk(5,5), 1.into());
 }
 
-#[snippet = "comb_table"]
+#[snippet("comb_table")]
 #[doc = "Pascal's triangle. O(N^2)"]
 fn comb_table(n_max: usize) -> Vec<Vec<i64>> {
     let mut dp = vec![vec![0; n_max+1]; n_max+1];
@@ -112,14 +114,15 @@ fn test_catalan_table() {
 }
 
 use crate::number::modpow;
-#[snippet = "ModComb"]
+
+#[snippet("ModComb")]
 struct ModComb {
     fact: Vec<i64>,
     fact_inv: Vec<i64>,
     n: usize,
     p: i64,
 }
-#[snippet = "ModComb"]
+#[snippet("ModComb")]
 impl ModComb {
     fn initialize(ft: &mut Self) {
         let n = ft.n;

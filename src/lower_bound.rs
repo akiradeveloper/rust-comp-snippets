@@ -1,15 +1,16 @@
 /// https://github.com/hatoo/competitive-rust-snippets
 
+use cargo_snippet::snippet;
 use std::cmp::Ordering;
 
-#[snippet = "lower_bound"]
+#[snippet("lower_bound")]
 /// Equivalent to std::lowerbound and std::upperbound in c++
 pub trait LowerBound<T> {
     fn lower_bound(&self, x: &T) -> usize;
     fn upper_bound(&self, x: &T) -> usize;
 }
 
-#[snippet = "lower_bound"]
+#[snippet("lower_bound")]
 impl<T: Ord> LowerBound<T> for [T] {
     fn lower_bound(&self, x: &T) -> usize {
         let mut low = 0;
@@ -57,12 +58,12 @@ fn test() {
 
 use std::collections::HashMap;
 
-#[snippet = "RangeCompression"]
+#[snippet("RangeCompression")]
 struct RangeCompression {
     inv: HashMap<i64, usize>,
     ranges: Vec<i64>,
 }
-#[snippet = "RangeCompression"]
+#[snippet("RangeCompression")]
 impl RangeCompression {
     pub fn new(ranges: Vec<i64>) -> RangeCompression {
         let n = ranges.len();

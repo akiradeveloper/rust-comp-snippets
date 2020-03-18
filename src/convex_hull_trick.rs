@@ -1,10 +1,12 @@
-#[snippet = "ConvexHullTrick"]
+use cargo_snippet::snippet;
+
+#[snippet("ConvexHullTrick")]
 #[derive(Clone,Copy)]
 struct Line {
     a: i64,
     b: i64
 }
-#[snippet = "ConvexHullTrick"]
+#[snippet("ConvexHullTrick")]
 impl Line {
     #[doc = "y=ax+b"]
     pub fn new(a: i64, b: i64) -> Line {
@@ -17,11 +19,11 @@ impl Line {
         self.a*x + self.b
     }
 }
-#[snippet = "ConvexHullTrick"]
+#[snippet("ConvexHullTrick")]
 struct ConvexHullTrick {
     lines: Vec<(i64, i64)>,
 }
-#[snippet = "ConvexHullTrick"]
+#[snippet("ConvexHullTrick")]
 impl ConvexHullTrick {
     pub fn new() -> ConvexHullTrick {
         ConvexHullTrick {

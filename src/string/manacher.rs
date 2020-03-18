@@ -1,4 +1,6 @@
-#[snippet = "manacher"]
+use cargo_snippet::snippet;
+
+#[snippet("manacher")]
 #[doc = "manacher[i] is the palindrome radius at i"]
 pub fn manacher(s: &[u64]) -> Vec<usize> {
     let mut r = vec![0; s.len()];

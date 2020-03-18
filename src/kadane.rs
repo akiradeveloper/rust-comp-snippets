@@ -1,9 +1,11 @@
-#[snippet = "Kadane"]
+use cargo_snippet::snippet;
+
+#[snippet("Kadane")]
 struct Kadane {
     lmax_table: Vec<(i64,usize)>,
     rmax_table: Vec<(i64,usize)>,
 }
-#[snippet = "Kadane"]
+#[snippet("Kadane")]
 impl Kadane {
     fn new(a: Vec<i64>) -> Kadane {
         let L = Self::build_lmax(a.clone());

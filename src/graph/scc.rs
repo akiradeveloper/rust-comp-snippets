@@ -1,6 +1,7 @@
+use cargo_snippet::snippet;
 use std::collections::VecDeque;
 
-#[snippet = "SCC"]
+#[snippet("SCC")]
 pub struct SCC {
     g: Vec<Vec<usize>>,
     r_g: Vec<Vec<usize>>,
@@ -9,7 +10,7 @@ pub struct SCC {
     pub order: Vec<usize>,
 }
 
-#[snippet = "SCC"]
+#[snippet("SCC")]
 #[doc = "nodes that communicates each others are contracted into one node"]
 impl SCC {
     pub fn new(n: usize) -> Self {

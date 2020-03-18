@@ -1,4 +1,6 @@
-#[snippet = "ternary_search"]
+use cargo_snippet::snippet;
+
+#[snippet("ternary_search")]
 #[doc = "f(x) should be upper convex function in [l,r]. find x where f(x) is the max in the range."]
 fn ternary_search<F: Fn(f64) -> f64>(f: F, l: f64, r: f64) -> f64 {
     let mut l = l;

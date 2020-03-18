@@ -1,21 +1,22 @@
 /// https://github.com/hatoo/competitive-rust-snippets
 
+use cargo_snippet::snippet;
 use std;
 
-#[snippet = "BitSet"]
+#[snippet("BitSet")]
 const TRUE: &'static bool = &true;
-#[snippet = "BitSet"]
+#[snippet("BitSet")]
 const FALSE: &'static bool = &false;
 
+#[snippet("BitSet")]
 #[derive(Clone, Debug)]
-#[snippet = "BitSet"]
 /// Efficient bool collection
 pub struct BitSet {
     buf: Vec<u64>,
     size: usize,
 }
 
-#[snippet = "BitSet"]
+#[snippet("BitSet")]
 impl BitSet {
     #[allow(dead_code)]
     pub fn new(size: usize) -> BitSet {
@@ -53,7 +54,7 @@ impl BitSet {
     }
 }
 
-#[snippet = "BitSet"]
+#[snippet("BitSet")]
 impl std::ops::Index<usize> for BitSet {
     type Output = bool;
     fn index(&self, index: usize) -> &bool {
@@ -61,7 +62,7 @@ impl std::ops::Index<usize> for BitSet {
     }
 }
 
-#[snippet = "BitSet"]
+#[snippet("BitSet")]
 impl std::ops::ShlAssign<usize> for BitSet {
     fn shl_assign(&mut self, x: usize) {
         let q = x >> 6;
@@ -93,7 +94,7 @@ impl std::ops::ShlAssign<usize> for BitSet {
     }
 }
 
-#[snippet = "BitSet"]
+#[snippet("BitSet")]
 impl std::ops::Shl<usize> for BitSet {
     type Output = Self;
 
@@ -103,7 +104,7 @@ impl std::ops::Shl<usize> for BitSet {
     }
 }
 
-#[snippet = "BitSet"]
+#[snippet("BitSet")]
 impl std::ops::ShrAssign<usize> for BitSet {
     fn shr_assign(&mut self, x: usize) {
         let q = x >> 6;
@@ -135,7 +136,7 @@ impl std::ops::ShrAssign<usize> for BitSet {
     }
 }
 
-#[snippet = "BitSet"]
+#[snippet("BitSet")]
 impl std::ops::Shr<usize> for BitSet {
     type Output = Self;
 
@@ -145,7 +146,7 @@ impl std::ops::Shr<usize> for BitSet {
     }
 }
 
-#[snippet = "BitSet"]
+#[snippet("BitSet")]
 impl<'a> std::ops::BitAndAssign<&'a BitSet> for BitSet {
     fn bitand_assign(&mut self, rhs: &'a Self) {
         for (a, b) in self.buf.iter_mut().zip(rhs.buf.iter()) {
@@ -154,7 +155,7 @@ impl<'a> std::ops::BitAndAssign<&'a BitSet> for BitSet {
     }
 }
 
-#[snippet = "BitSet"]
+#[snippet("BitSet")]
 impl<'a> std::ops::BitAnd<&'a BitSet> for BitSet {
     type Output = Self;
     fn bitand(mut self, rhs: &'a Self) -> Self {
@@ -163,7 +164,7 @@ impl<'a> std::ops::BitAnd<&'a BitSet> for BitSet {
     }
 }
 
-#[snippet = "BitSet"]
+#[snippet("BitSet")]
 impl<'a> std::ops::BitOrAssign<&'a BitSet> for BitSet {
     fn bitor_assign(&mut self, rhs: &'a Self) {
         for (a, b) in self.buf.iter_mut().zip(rhs.buf.iter()) {
@@ -173,7 +174,7 @@ impl<'a> std::ops::BitOrAssign<&'a BitSet> for BitSet {
     }
 }
 
-#[snippet = "BitSet"]
+#[snippet("BitSet")]
 impl<'a> std::ops::BitOr<&'a BitSet> for BitSet {
     type Output = Self;
     fn bitor(mut self, rhs: &'a Self) -> Self {
@@ -182,7 +183,7 @@ impl<'a> std::ops::BitOr<&'a BitSet> for BitSet {
     }
 }
 
-#[snippet = "BitSet"]
+#[snippet("BitSet")]
 impl<'a> std::ops::BitXorAssign<&'a BitSet> for BitSet {
     fn bitxor_assign(&mut self, rhs: &'a Self) {
         for (a, b) in self.buf.iter_mut().zip(rhs.buf.iter()) {
@@ -192,7 +193,7 @@ impl<'a> std::ops::BitXorAssign<&'a BitSet> for BitSet {
     }
 }
 
-#[snippet = "BitSet"]
+#[snippet("BitSet")]
 impl<'a> std::ops::BitXor<&'a BitSet> for BitSet {
     type Output = Self;
     fn bitxor(mut self, rhs: &'a Self) -> Self {

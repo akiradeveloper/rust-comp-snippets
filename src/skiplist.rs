@@ -1,4 +1,6 @@
-#[snippet = "skiplist"]
+use cargo_snippet::snippet;
+
+#[snippet("skiplist")]
 mod skiplist {
     use std;
     use std::collections::{BTreeMap, BTreeSet};

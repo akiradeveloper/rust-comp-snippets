@@ -1,9 +1,10 @@
+use cargo_snippet::snippet;
 use crate::binary_search::BinarySearch;
 
 // Verified: CFR510-D
 
+#[snippet("WaveletMatrix")]
 #[derive(Clone)]
-#[snippet = "WaveletMatrix"]
 struct FID {
     n: usize,
     n_blocks: usize,
@@ -24,7 +25,7 @@ impl std::fmt::Debug for FID {
         write!(f, "{}", s)
     }
 }
-#[snippet = "WaveletMatrix"]
+#[snippet("WaveletMatrix")]
 impl FID {
     // O(1)
     fn popcount(x: u64) -> usize {
@@ -290,12 +291,12 @@ fn test_fid_select_many_blocks() {
     assert_eq!(fid.select0(7777),7778);
 }
 
-#[snippet = "WaveletMatrix"]
+#[snippet("WaveletMatrix")]
 struct WM {
     mat: Vec<FID>,
     nzeros: Vec<usize>,
 }
-#[snippet = "WaveletMatrix"]
+#[snippet("WaveletMatrix")]
 impl WM {
     pub fn new(xs: Vec<u64>) -> WM {
         let n = xs.len();
@@ -468,12 +469,12 @@ fn test_wm_rank_all() {
     }
 }
 
-#[snippet = "WaveletMatrix"]
+#[snippet("WaveletMatrix")]
 struct WMi64 {
     offset: i64,
     wm: WM,
 }
-#[snippet = "WaveletMatrix"]
+#[snippet("WaveletMatrix")]
 impl WMi64 {
     pub fn new(xs: Vec<i64>) -> WMi64 {
         let offset = 1<<62;

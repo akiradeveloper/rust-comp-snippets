@@ -1,11 +1,13 @@
-#[snippet = "XorShift"]
+use cargo_snippet::snippet;
+
+#[snippet("XorShift")]
 #[derive(Debug, Clone)]
 #[allow(dead_code)]
 pub struct Xorshift {
     seed: u64,
 }
 
-#[snippet = "XorShift"]
+#[snippet("XorShift")]
 impl Xorshift {
     #[allow(dead_code)]
     pub fn new() -> Xorshift {

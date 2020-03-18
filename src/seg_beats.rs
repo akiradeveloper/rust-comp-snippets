@@ -1,6 +1,7 @@
+use cargo_snippet::snippet;
 use std::cmp::{max, min};
 
-#[snippet = "SEGBeats"]
+#[snippet("SEGBeats")]
 struct SEGBeats {
     max_v: Vec<i64>,
     smax_v: Vec<i64>,
@@ -14,7 +15,7 @@ struct SEGBeats {
     lval: Vec<i64>,
     n0: usize,
 }
-#[snippet = "SEGBeats"]
+#[snippet("SEGBeats")]
 impl SEGBeats {
     const inf: i64 = std::i64::MAX / 4;
     pub fn new(n: usize) -> SEGBeats {

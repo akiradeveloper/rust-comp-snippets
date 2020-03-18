@@ -1,3 +1,5 @@
+use cargo_snippet::snippet;
+
 use super::lower_bound::LowerBound;
 use super::fenwick::BIT;
 use std::cmp::{min, max};
@@ -18,7 +20,7 @@ fn test_lis() {
     dbg!(&dp);
 }
 
-#[snippet = "inversion"]
+#[snippet("inversion")]
 #[doc = "O(N log N)"]
 fn inversion(xs: &[usize]) -> Vec<usize> {
     let mut max_v = 0;
@@ -41,7 +43,7 @@ fn test_inversion() {
     assert_eq!(inversion(&xs), [0,0,1,0,2,4]);
 }
 
-#[snippet = "run_length_compression"]
+#[snippet("run_length_compression")]
 #[doc = "O(N)"]
 fn run_length_compression<T: Eq + Clone>(xs: &[T]) -> Vec<(T, usize)> {
     if xs.is_empty() {
@@ -70,7 +72,7 @@ fn test_run_length_compression() {
     assert_eq!(run_length_compression(&vec![2,3,3,3,2,2]), vec![(2,1),(3,3),(2,2)]);
 }
 
-#[snippet = "group_by_relevance"]
+#[snippet("group_by_relevance")]
 pub fn group_by_relevance<T, F: Fn(&T,&T) -> bool>(xs: Vec<T>, f: F) -> Vec<Vec<T>> {
     let mut res = vec![];
 
@@ -110,7 +112,7 @@ fn test_group_by_relevance() {
     assert_eq!(group_by_relevance(vec![1,1,2,2,3,3], |&x,&y| { x == y }), vec![vec![1,1],vec![2,2],vec![3,3]]);
 }
 
-#[snippet = "neighbour_table"]
+#[snippet("neighbour_table")]
 pub fn neighbour_table(xs: &[usize]) -> (Vec<Option<usize>>, Vec<Option<usize>>) {
     let n = xs.len();
     let mut m = 0;
@@ -148,13 +150,13 @@ fn test_neighbour_table() {
     assert_eq!(next[9], None);
 }
 
-#[snippet = "split_sequence"]
+#[snippet("split_sequence")]
 #[derive(Debug)]
 pub enum SplitComp<T> {
     Seq(Vec<T>),
     Splitter(T),
 }
-#[snippet = "split_sequence"]
+#[snippet("split_sequence")]
 pub fn split_sequence<T, F: Fn(&T) -> bool>(xs: Vec<T>, splitter: F) -> Vec<SplitComp<T>> {
     let mut res = vec![];
     let mut xs = xs;

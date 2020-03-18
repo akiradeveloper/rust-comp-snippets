@@ -1,7 +1,8 @@
+use cargo_snippet::snippet;
 use std::collections::VecDeque;
 
+#[snippet("TopologicalSort")]
 #[doc = "if there is a loop len(out) will be 0"]
-#[snippet = "TopologicalSort"]
 struct TopologicalSort {
     g: Vec<Vec<usize>>,
     colors: Vec<bool>,
@@ -10,7 +11,7 @@ struct TopologicalSort {
     out: Vec<usize>,
 }
 
-#[snippet = "TopologicalSort"]
+#[snippet("TopologicalSort")]
 impl TopologicalSort {
     pub fn new(n: usize) -> Self {
         let mut colors = vec![false; n];

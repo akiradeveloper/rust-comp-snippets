@@ -1,11 +1,12 @@
+use cargo_snippet::snippet;
 use crate::number::modinv;
 
-#[snippet = "GaussianElimination"]
+#[snippet("GaussianElimination")]
 struct GaussianElimination {
     A: Vec<Vec<i64>>,
     rank: usize,
 }
-#[snippet = "GaussianElimination"]
+#[snippet("GaussianElimination")]
 impl GaussianElimination {
     #[doc = "Ax = y"]
     pub fn new(A: Vec<Vec<i64>>, y: Vec<i64>, mo: i64) -> GaussianElimination {

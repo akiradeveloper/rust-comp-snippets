@@ -1,4 +1,6 @@
-#[snippet = "karatsuba"]
+use cargo_snippet::snippet;
+
+#[snippet("karatsuba")]
 fn karatsuba<T>(a: &[T], b: &[T], c: &mut [T]) 
 where T: std::marker::Copy +
          std::ops::Add<Output = T> +
@@ -46,7 +48,7 @@ where T: std::marker::Copy +
     }
 }
  
-#[snippet = "karatsuba"]
+#[snippet("karatsuba")]
 pub fn multiply<T>(a: &[T], b: &[T]) -> Vec<T>
 where T: std::marker::Copy +
          std::ops::Add<Output = T> +

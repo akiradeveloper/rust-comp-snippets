@@ -1,4 +1,6 @@
-#[snippet = "SqrtDecomposition"]
+use cargo_snippet::snippet;
+
+#[snippet("SqrtDecomposition")]
 #[derive(Debug, Copy, Clone)]
 enum Bucket {
     #[doc = "b-idx"]
@@ -6,12 +8,12 @@ enum Bucket {
     #[doc = "b-idx, [to, from)"]
     Partial(usize, usize, usize),
 }
-#[snippet = "SqrtDecomposition"]
+#[snippet("SqrtDecomposition")]
 struct Buckets {
     n: usize,
     d: usize,
 }
-#[snippet = "SqrtDecomposition"]
+#[snippet("SqrtDecomposition")]
 impl Buckets {
     pub fn bucket(&self, i: usize) -> usize {
         i / self.d

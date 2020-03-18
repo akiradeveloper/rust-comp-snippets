@@ -1,6 +1,8 @@
 /// https://github.com/hatoo/competitive-rust-snippets
  
-#[snippet = "BITGeneric"]
+use cargo_snippet::snippet;
+
+#[snippet("BITGeneric")]
 #[allow(dead_code)]
 /// Generic Binary Indexed Tree
 pub struct BITGeneric<T: Clone, F: Fn(&mut T, &T) -> ()> {
@@ -9,7 +11,7 @@ pub struct BITGeneric<T: Clone, F: Fn(&mut T, &T) -> ()> {
     f: F,
 }
 
-#[snippet = "BITGeneric"]
+#[snippet("BITGeneric")]
 impl<T: Clone, F: Fn(&mut T, &T) -> ()> BITGeneric<T, F> {
     #[allow(dead_code)]
     pub fn new(n: usize, zero: &T, f: F) -> BITGeneric<T, F> {
@@ -115,14 +117,14 @@ use test::Bencher;
 //     });
 // }
 
-#[snippet = "BIT"]
+#[snippet("BIT")]
 #[allow(dead_code)]
 /// Binary Indexed Tree of usize
 pub struct BIT<T> {
     buf: Vec<T>,
 }
 
-#[snippet = "BIT"]
+#[snippet("BIT")]
 #[allow(dead_code)]
 impl <T: Clone + Default + std::ops::AddAssign> BIT<T> {
     pub fn new(n: usize) -> BIT<T> {

@@ -1,20 +1,22 @@
 // https://qiita.com/keymoon/items/11fac5627672a6d6a9f6
 
+use cargo_snippet::snippet;
+
 use crate::xorshift::Xorshift;
-#[snippet = "RoLiHa"]
+#[snippet("RoLiHa")]
 struct RoLiHa {
     powMemo: Vec<u64>,
     hash: Vec<u64>,
 }
-#[snippet = "RoLiHa"]
+#[snippet("RoLiHa")]
 const ROLIHA_MASK30: u64 = (1<<30) - 1;
-#[snippet = "RoLiHa"]
+#[snippet("RoLiHa")]
 const ROLIHA_MASK31: u64 = (1<<31) - 1;
-#[snippet = "RoLiHa"]
+#[snippet("RoLiHa")]
 const ROLIHA_MOD: u64 = (1<<61) - 1;
-#[snippet = "RoLiHa"]
+#[snippet("RoLiHa")]
 const ROLIHA_P: u64 = ROLIHA_MOD * ((1<<3) - 1);
-#[snippet = "RoLiHa"]
+#[snippet("RoLiHa")]
 impl RoLiHa {
     #[doc = "caution: the value should not contain 0"]
     fn new(s: &[u64]) -> Self {
