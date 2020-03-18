@@ -3,6 +3,7 @@
 [[package]]
 name = "cargo-snippet"
 version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "fuchsia-cprng"
@@ -51,7 +52,7 @@ dependencies = [
 name = "rust-comp-snippets"
 version = "0.1.0"
 dependencies = [
- "cargo-snippet 0.5.0",
+ "cargo-snippet 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -75,6 +76,7 @@ version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [metadata]
+"checksum cargo-snippet 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)" = "f3fc3eb1a201f3fe1a13fef1a778d2fead9f0841f829f7d08b538efb8dba3470"
 "checksum fuchsia-cprng 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)" = "a06f77d526c1a601b7c4cdd98f54b5eaabffc14d5f2f0296febdc7f357c6d3ba"
 "checksum libc 0.2.65 (registry+https://github.com/rust-lang/crates.io-index)" = "1a31a0627fdf1f6a39ec0dd577e101440b7db22672c0901fe00a9a6fbb5c24e8"
 "checksum rand 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)" = "552840b97013b1a26992c11eac34bdd778e464601a4c2054b5f0bff7c6761293"
