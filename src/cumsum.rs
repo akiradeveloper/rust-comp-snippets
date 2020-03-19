@@ -7,19 +7,28 @@ struct CumSum1 {
 }
 #[snippet("cumsum1")]
 impl CumSum1 {
-    fn new(n: usize) -> CumSum1 {
+    pub fn new(n: usize) -> Self {
         CumSum1 {
             base: vec![0; n],
             dp: vec![],
         }
     }
-    fn add(&mut self, i: usize, x: i64) {
+    pub fn from_vec(a: Vec<i64>) -> Self {
+        let n = a.len();
+        let mut x = Self::new(n);
+        for i in 0..n {
+            x.set(i,a[i]);
+        }
+        x.build();
+        x
+    }
+    pub fn add(&mut self, i: usize, x: i64) {
         self.base[i] += x;
     }
-    fn set(&mut self, i: usize, x: i64) {
+    pub fn set(&mut self, i: usize, x: i64) {
         self.base[i] = x;
     }
-    fn build(&mut self) {
+    pub fn build(&mut self) {
         let n = self.base.len();
         let mut dp = vec![0; n+1];
         let mut acc = 0;
@@ -30,7 +39,7 @@ impl CumSum1 {
         self.dp = dp;
     }
     #[doc = "[i,j)"]
-    fn query(&self, i: usize, j: usize) -> i64 {
+    pub fn query(&self, i: usize, j: usize) -> i64 {
         self.dp[j] - self.dp[i]
     }
 }
