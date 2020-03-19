@@ -1,6 +1,6 @@
 #![cargo_snippet::snippet("template")]
 
-/// https://github.com/hatoo/competitive-rust-snippets
+/// https://github.com/akiradeveloper/rust-comp-snippets
 
 #[allow(unused_imports)]
 use std::cmp::{max, min, Ordering};
