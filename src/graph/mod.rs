@@ -17,3 +17,4 @@ pub mod dijkstra_queue;
 pub mod adjacency_matrix;
 pub mod partition;
 pub mod centroid;
+pub mod euler_tour;
