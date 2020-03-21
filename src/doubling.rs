@@ -1,13 +1,17 @@
+use cargo_snippet::snippet;
+
+#[snippet("Doubling")]
 trait Doublable {
     type T: std::fmt::Debug;
     fn id() -> Self::T;
     fn f() -> Self::T;
     fn double(x: &Self::T, y: &Self::T) -> Self::T;
 }
-
+#[snippet("Doubling")]
 struct Doubling<F: Doublable> {
     pow_table: Vec<F::T>,
 }
+#[snippet("Doubling")]
 impl <F: Doublable> Doubling<F> {
     pub fn new(maxbit: usize) -> Self {
         let mut pow = vec![F::id()];
