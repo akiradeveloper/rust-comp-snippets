@@ -18,7 +18,8 @@ impl <D: Doublable> Doubling<D> {
     pub fn new(d: D, maxbit: usize) -> Self {
         let mut f = vec![d.f()];
         for i in 1..=maxbit {
-            let fx = d.ap(&f[i-1], &d.x0());
+            let x = d.x0();
+            let fx = d.ap(&f[i-1], &x);
             let ffx = d.ap(&f[i-1], &fx);
             f.push(d.inv(&ffx));
         }
