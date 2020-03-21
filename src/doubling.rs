@@ -5,7 +5,7 @@ trait Doublable {
     type T: std::fmt::Debug;
     fn id(&self) -> Self::T;
     fn f(&self) -> Self::T;
-    fn double(&self, x: &Self::T, y: &Self::T) -> Self::T;
+    fn double(&self, f: &Self::T, x: &Self::T) -> Self::T;
 }
 #[snippet("Doubling")]
 struct Doubling<F: Doublable> {
@@ -32,7 +32,7 @@ impl <F: Doublable> Doubling<F> {
         let mut i = 1;
         while k > 0 {
             if k & 1 == 1 {
-                res = self.f.double(&res, &self.pow_table[i]);
+                res = self.f.double(&self.pow_table[i], &res);
             }
             k >>= 1;
             i *= 2;
@@ -47,10 +47,9 @@ fn test_doubling() {
         type T = i64;
         fn id(&self) -> i64 { 1 }
         fn f(&self) -> i64 { 2 }
-        fn double(&self, x: &i64, y: &i64) -> i64 { x*y }
+        fn double(&self, f: &i64, x: &i64) -> i64 { f*x }
     }
-    let mut dbl = F;
-    let mut f: Doubling<F> = Doubling::new(dbl, 60);
+    let mut f = Doubling::new(F, 60);
     assert_eq!(f.pow(1), 2);
     assert_eq!(f.pow(2), 4);
     assert_eq!(f.pow(3), 8);
