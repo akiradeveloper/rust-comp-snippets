@@ -16,13 +16,11 @@ struct Doubling<D: Doublable> {
 #[snippet("Doubling")]
 impl <D: Doublable> Doubling<D> {
     pub fn new(d: D, maxbit: usize) -> Self {
-        let mut x = vec![d.x0()];
-        let mut f = vec![d.inv(&d.x0())];
-        for i in 0..=maxbit {
-            let xi = &x[i];
-            let y = d.ap(&d.f(), xi);
-            f.push(d.inv(&y));
-            x.push(y);
+        let mut f = vec![d.f()];
+        for i in 1..=maxbit {
+            let fx = d.ap(&f[i-1], &d.x0());
+            let ffx = d.ap(&f[i-1], &fx);
+            f.push(d.inv(&ffx));
         }
         Doubling {
             d: d,
@@ -32,13 +30,13 @@ impl <D: Doublable> Doubling<D> {
     pub fn pow(&self, k: i64) -> D::T {
         let mut k = k;
         let mut res = self.d.x0();
-        let mut i = 1;
+        let mut i = 0;
         while k > 0 {
             if k & 1 == 1 {
                 res = self.d.ap(&self.f_table[i], &res);
             }
             k >>= 1;
-            i *= 2;
+            i += 1;
         }
         res
     }
@@ -53,7 +51,7 @@ fn test_doubling() {
         fn ap(&self, f: &i64, x: &i64) -> i64 { f*x }
         fn inv(&self, x: &i64) -> i64 { *x }
     }
-    let mut f = Doubling::new(F, 60);
+    let mut f = Doubling::new(F, 5);
     assert_eq!(f.pow(1), 2);
     assert_eq!(f.pow(2), 4);
     assert_eq!(f.pow(3), 8);
