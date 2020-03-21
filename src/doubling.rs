@@ -3,36 +3,39 @@ use cargo_snippet::snippet;
 #[snippet("Doubling")]
 trait Doublable {
     type T: std::fmt::Debug;
-    fn id(&self) -> Self::T;
+    fn x0(&self) -> Self::T;
     fn f(&self) -> Self::T;
-    fn double(&self, f: &Self::T, x: &Self::T) -> Self::T;
+    fn ap(&self, f: &Self::T, x: &Self::T) -> Self::T;
+    fn inv(&self, x: &Self::T) -> Self::T;
 }
 #[snippet("Doubling")]
-struct Doubling<F: Doublable> {
-    f: F,
-    pow_table: Vec<F::T>,
+struct Doubling<D: Doublable> {
+    d: D,
+    f_table: Vec<D::T>,
 }
 #[snippet("Doubling")]
-impl <F: Doublable> Doubling<F> {
-    pub fn new(f: F, maxbit: usize) -> Self {
-        let mut pow = vec![f.id()];
+impl <D: Doublable> Doubling<D> {
+    pub fn new(d: D, maxbit: usize) -> Self {
+        let mut x = vec![d.x0()];
+        let mut f = vec![d.inv(&d.x0())];
         for i in 0..=maxbit {
-            let x = &pow[i];
-            let y = f.double(&f.f(), x);
-            pow.push(y);
+            let xi = &x[i];
+            let y = d.ap(&d.f(), xi);
+            f.push(d.inv(&y));
+            x.push(y);
         }
         Doubling {
-            f: f,
-            pow_table: pow,
+            d: d,
+            f_table: f,
         }
     }
-    pub fn pow(&self, k: i64) -> F::T {
+    pub fn pow(&self, k: i64) -> D::T {
         let mut k = k;
-        let mut res = self.f.id();
+        let mut res = self.d.x0();
         let mut i = 1;
         while k > 0 {
             if k & 1 == 1 {
-                res = self.f.double(&self.pow_table[i], &res);
+                res = self.d.ap(&self.f_table[i], &res);
             }
             k >>= 1;
             i *= 2;
@@ -45,9 +48,10 @@ fn test_doubling() {
     struct F;
     impl Doublable for F {
         type T = i64;
-        fn id(&self) -> i64 { 1 }
+        fn x0(&self) -> i64 { 1 }
         fn f(&self) -> i64 { 2 }
-        fn double(&self, f: &i64, x: &i64) -> i64 { f*x }
+        fn ap(&self, f: &i64, x: &i64) -> i64 { f*x }
+        fn inv(&self, x: &i64) -> i64 { *x }
     }
     let mut f = Doubling::new(F, 60);
     assert_eq!(f.pow(1), 2);
