@@ -4,6 +4,8 @@ use super::lower_bound::LowerBound;
 use super::fenwick::BIT;
 use std::cmp::{min, max};
 
+#[snippet("lis")]
+#[doc = "O(nlogn)"]
 fn lis<T: Ord + Clone>(xs: &[T], inf: T) -> Vec<T> {
     let n = xs.len();
     let mut dp = vec![inf; n];

@@ -45,30 +45,34 @@ mod kraskal {
     use crate::union_find;
 
     #[snippet("kraskal")]
-    struct Edge {
+    pub struct Edge {
         u: usize,
         v: usize,
         cost: u64
     }
     #[snippet("kraskal")]
     #[doc = "es: undirected edges. O(ElogV)"]
-    fn kraskal(n: usize, es: &mut [Edge]) -> u64 {
+    pub fn kraskal(n: usize, es: Vec<Edge>) -> (Vec<Edge>, Vec<Edge>) {
+        let mut used = vec![];
+        let mut unused = vec![];
+
+        let mut es = es;
         es.sort_by(|a, b| {
             a.cost.cmp(&b.cost)
         });
 
         let mut uf = crate::union_find::UnionFind::new(n);
 
-        let mut total_cost = 0;
-
         for e in es {
             if !uf.same(e.u, e.v) {
                 uf.merge(e.u, e.v);
-                total_cost += e.cost;
+                used.push(e);
+            } else {
+                unused.push(e);
             }
         }
 
-        total_cost
+        (used, unused)
     }
 }
 
