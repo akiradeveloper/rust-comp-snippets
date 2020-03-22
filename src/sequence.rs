@@ -6,20 +6,27 @@ use std::cmp::{min, max};
 
 #[snippet("lis")]
 #[doc = "O(nlogn)"]
-fn lis<T: Ord + Clone>(xs: &[T], inf: T) -> Vec<T> {
+pub fn lis<T: Ord + Clone>(xs: &[T], inf: T) -> Vec<T> {
     let n = xs.len();
-    let mut dp = vec![inf; n];
+    let mut dp = vec![inf.clone(); n];
     for x in xs {
         let i = dp.lower_bound(&x);
         dp[i] = min(dp[i].clone(), x.clone());
     }
+    let mut l = 0;
+    for i in 0..n {
+        if dp[i] < inf {
+            l += 1;
+        }
+    }
+    dp.truncate(l);
     return dp;
 }
 #[test]
 fn test_lis() {
     let xs = vec![1,3,2,4,6,5];
     let dp = lis(&xs, 1<<30);
-    dbg!(&dp);
+    assert_eq!(dp.len(), 4);
 }
 
 #[snippet("inversion")]
