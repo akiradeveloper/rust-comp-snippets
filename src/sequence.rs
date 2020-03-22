@@ -5,7 +5,7 @@ use super::fenwick::BIT;
 use std::cmp::{min, max};
 
 #[snippet("lis")]
-#[doc = "O(nlogn)"]
+#[doc = "O(NlogN)"]
 pub fn lis<T: Ord + Clone>(xs: &[T], inf: T) -> Vec<T> {
     let n = xs.len();
     let mut dp = vec![inf.clone(); n];
@@ -30,8 +30,8 @@ fn test_lis() {
 }
 
 #[snippet("inversion")]
-#[doc = "O(N log N)"]
-fn inversion(xs: &[usize]) -> Vec<usize> {
+#[doc = "O(NlogN)"]
+pub fn inversion(xs: &[usize]) -> Vec<usize> {
     let mut max_v = 0;
     for &x in xs {
         max_v = max(max_v, x);
