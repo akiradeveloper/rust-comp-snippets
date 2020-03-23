@@ -1,21 +1,19 @@
-// verified: GRL_6_A
-mod ford_fulkerson {
-    use cargo_snippet::snippet;
+use cargo_snippet::snippet;
 
-    #[snippet("ford_fulkerson")]
+// verified: GRL_6_A
+#[snippet("ford_fulkerson")]
+mod ford_fulkerson {
     #[derive(Clone,Copy,Debug)]
     struct Edge {
         to: usize,
         cap: i64,
         rev: usize,
     }
-    #[snippet("ford_fulkerson")]
-    struct Network {
+    pub struct Network {
         g: Vec<Vec<Edge>>,
         used: Vec<bool>,
     }
 
-    #[snippet("ford_fulkerson")]
     #[doc = "directed flow graph. O(FE)"]
     impl Network {
         pub fn new(n: usize) -> Network {
@@ -78,46 +76,43 @@ mod ford_fulkerson {
             }
         }
     }
-    #[test]
-    fn test_ford_fulkerson() {
-        let mut nw = Network::new(5);
+}
+#[test]
+fn test_ford_fulkerson() {
+    use ford_fulkerson::*;
+    let mut nw = Network::new(5);
 
-        let conns = [
-            (0, 1, 10),
-            (0, 2, 2),
-            (1, 2, 6),
-            (1, 3, 6),
-            (3, 2, 3),
-            (2, 4, 5),
-            (3, 4, 8),
-        ];
+    let conns = [
+        (0, 1, 10),
+        (0, 2, 2),
+        (1, 2, 6),
+        (1, 3, 6),
+        (3, 2, 3),
+        (2, 4, 5),
+        (3, 4, 8),
+    ];
 
-        for conn in &conns {
-            nw.add_edge(conn.0, conn.1, conn.2);
-        }
-
-        assert_eq!(nw.max_flow(0, 4), 11);
+    for conn in &conns {
+        nw.add_edge(conn.0, conn.1, conn.2);
     }
+
+    assert_eq!(nw.max_flow(0, 4), 11);
 }
 
 // verified: GRL_6_A
-mod dinic {
-    use cargo_snippet::snippet;
-
-    #[snippet("dinic")]
+#[snippet("dinic")]
+pub mod dinic {
     #[derive(Clone,Copy,Debug)]
     struct Edge {
         to: usize,
         cap: i64,
         rev: usize,
     }
-    #[snippet("dinic")]
-    struct Network {
+    pub struct Network {
         g: Vec<Vec<Edge>>,
         level: Vec<Option<usize>>,
         iter: Vec<usize>,
     }
-    #[snippet("dinic")]
     #[doc = "direct flow graph. O(EV^2)"]
     impl Network {
         pub fn new(n: usize) -> Network {
@@ -190,25 +185,25 @@ mod dinic {
             }
         }
     }
+}
+#[test]
+fn test_dinic() {
+    use dinic::*;
+    let mut nw = Network::new(5);
 
-    #[test]
-    fn test_dinic() {
-      let mut nw = Network::new(5);
+    let conns = [
+        (0, 1, 10),
+        (0, 2, 2),
+        (1, 2, 6),
+        (1, 3, 6),
+        (3, 2, 3),
+        (2, 4, 5),
+        (3, 4, 8),
+    ];
 
-        let conns = [
-            (0, 1, 10),
-            (0, 2, 2),
-            (1, 2, 6),
-            (1, 3, 6),
-            (3, 2, 3),
-            (2, 4, 5),
-            (3, 4, 8),
-        ];
-
-        for conn in &conns {
-            nw.add_edge(conn.0, conn.1, conn.2);
-        }
-
-        assert_eq!(nw.max_flow(0, 4), 11);
+    for conn in &conns {
+        nw.add_edge(conn.0, conn.1, conn.2);
     }
+
+    assert_eq!(nw.max_flow(0, 4), 11);
 }
