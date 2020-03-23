@@ -1,11 +1,11 @@
 /// minimum spanning tree
 
-mod prim {
-    use cargo_snippet::snippet;
+use cargo_snippet::snippet;
 
-    #[snippet("prim")]
+#[snippet("prim")]
+pub mod prim {
     #[doc = "O(V^2)"]
-    fn prim(cost: &[Vec<u64>]) -> u64 {
+    pub fn prim(cost: &[Vec<u64>]) -> u64 {
         let n = cost.len();
         let inf = 1<<60;
         let mut mincost = vec![inf; n];
@@ -39,18 +39,16 @@ mod prim {
     }
 }
 
+#[snippet("kraskal")]
 mod kraskal {
-    use cargo_snippet::snippet;
-
     use crate::union_find;
 
-    #[snippet("kraskal")]
     pub struct Edge {
         u: usize,
         v: usize,
         cost: u64
     }
-    #[snippet("kraskal")]
+
     #[doc = "es: undirected edges. O(ElogV)"]
     pub fn kraskal(n: usize, es: Vec<Edge>) -> (Vec<Edge>, Vec<Edge>) {
         let mut used = vec![];
@@ -76,15 +74,14 @@ mod kraskal {
     }
 }
 
+#[snippet("chu_liu_edmonds")]
 mod chu_liu_edmonds {
     use cargo_snippet::snippet;
     use crate::graph::scc;
 
-    #[snippet("chu_liu_edmonds")]
     #[derive(Debug,Clone,Copy)]
-    struct Edge(usize, u64);
+    pub struct Edge(pub usize, pub u64);
 
-    #[snippet("chu_liu_edmonds")]
     fn min_edge(edges: &[Edge]) -> &Edge {
         let mut r = &edges[0];
         for e in edges {
@@ -94,10 +91,8 @@ mod chu_liu_edmonds {
         }
         r
     }
-    #[snippet("chu_liu_edmonds")]
     static NULL_EDGE: &'static Edge = &Edge(1<<40, 0);
-    #[snippet("chu_liu_edmonds")]
-    fn chu_liu_edmonds(in_g: &[Vec<Edge>], root: usize) -> u64 {
+    pub fn chu_liu_edmonds(in_g: &[Vec<Edge>], root: usize) -> u64 {
         // dbg!(&in_g);
         let n = in_g.len();
         let mut min_in_g: Vec<&Edge> = vec![];
@@ -184,31 +179,32 @@ mod chu_liu_edmonds {
 
         contracted_cost + chu_liu_edmonds(&new_in_g, new_root)
     }
+}
+#[test]
+fn test_chu_liu_edmonds_0() {
+    use chu_liu_edmonds::*;
+    let in_g = vec![
+        vec![],
+        vec![Edge(0, 5)],
+        vec![Edge(0, 6)],
+        vec![Edge(1, 5), Edge(2, 1)],
+    ];
+    assert_eq!(chu_liu_edmonds(&in_g, 0), 12);
+}
 
-    #[test]
-    fn test_0() {
-        let in_g = vec![
-            vec![],
-            vec![Edge(0, 5)],
-            vec![Edge(0, 6)],
-            vec![Edge(1, 5), Edge(2, 1)],
-        ];
-        assert_eq!(chu_liu_edmonds(&in_g, 0), 12);
-    }
-
-    #[test]
-    fn test_1() {
-        let in_g = vec![
-            vec![],
-            vec![Edge(0,2),Edge(4,3)],
-            vec![Edge(0,4),Edge(1,5),Edge(4,3)],
-            vec![Edge(1,3),Edge(4,4)],
-            vec![Edge(5,7),Edge(7,5)],
-            vec![Edge(2,6)],
-            vec![Edge(3,5),Edge(4,4)],
-            vec![Edge(5,1),Edge(6,3)],
-            vec![Edge(5,4),Edge(7,6)],
-        ];
-        assert_eq!(chu_liu_edmonds(&in_g, 0), 29);
-    }
+#[test]
+fn test_chu_liu_edmonds_1() {
+    use chu_liu_edmonds::*;
+    let in_g = vec![
+        vec![],
+        vec![Edge(0,2),Edge(4,3)],
+        vec![Edge(0,4),Edge(1,5),Edge(4,3)],
+        vec![Edge(1,3),Edge(4,4)],
+        vec![Edge(5,7),Edge(7,5)],
+        vec![Edge(2,6)],
+        vec![Edge(3,5),Edge(4,4)],
+        vec![Edge(5,1),Edge(6,3)],
+        vec![Edge(5,4),Edge(7,6)],
+    ];
+    assert_eq!(chu_liu_edmonds(&in_g, 0), 29);
 }
