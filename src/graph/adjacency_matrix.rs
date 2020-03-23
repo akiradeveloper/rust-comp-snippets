@@ -6,9 +6,13 @@ struct AdjacencyMatrix {
 }
 #[snippet("AdjacencyMatrix")]
 impl AdjacencyMatrix {
-    pub fn new(n: usize, inf: i64) -> AdjacencyMatrix {
+    pub fn new(n: usize, inf: i64) -> Self {
+        let mut a = vec![vec![inf;n];n];
+        for i in 0..n {
+            a[i][i] = 0;
+        }
         AdjacencyMatrix {
-            a: vec![vec![inf;n];n]
+            a: a,
         }
     }
     pub fn add_edge(&mut self, u: usize, v: usize, cost: i64) {

@@ -47,7 +47,7 @@ mod kraskal {
     pub struct Edge {
         pub u: usize,
         pub v: usize,
-        pub cost: u64
+        pub cost: i64
     }
 
     #[doc = "es: undirected edges. O(ElogV)"]
@@ -56,9 +56,7 @@ mod kraskal {
         let mut unused = vec![];
 
         let mut es = es;
-        es.sort_by(|a, b| {
-            a.cost.cmp(&b.cost)
-        });
+        es.sort_by_key(|x| x.cost);
 
         let mut uf = UnionFind::new(n);
 
