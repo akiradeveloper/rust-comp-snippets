@@ -43,6 +43,7 @@ pub mod prim {
 mod kraskal {
     use crate::union_find::UnionFind;
 
+    #[derive(Clone,Copy,Debug)]
     pub struct Edge {
         pub u: usize,
         pub v: usize,
