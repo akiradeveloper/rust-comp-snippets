@@ -121,6 +121,37 @@ fn test_group_by_relevance() {
     assert_eq!(group_by_relevance(vec![1,1,2,2,3,3], |&x,&y| { x == y }), vec![vec![1,1],vec![2,2],vec![3,3]]);
 }
 
+#[snippet("split_by_condition")]
+pub fn split_by_condition<T, F: FnMut(&T) -> bool>(xs: Vec<T>, mut p: F) -> Vec<Vec<T>> {
+    let mut res = vec![];
+    let mut tmp = vec![];
+    for x in xs {
+        if !p(&x) {
+            res.push(tmp);
+            tmp = vec![x];
+        } else {
+            tmp.push(x);
+        }
+    }
+    if tmp.len() > 0 {
+        res.push(tmp);
+    }
+    res
+}
+#[test]
+fn test_split_by_condition() {
+    let mut acc = 0;
+    let xs = vec![1,3,2,4,1,5,2,3];
+    let res = split_by_condition(xs, |&x| {
+        acc += x;
+        if acc > 6 {
+            acc = x;
+            false
+        } else { true }
+    });
+    assert_eq!(res, vec![vec![1,3,2],vec![4,1],vec![5],vec![2,3]]);
+}
+
 #[snippet("neighbour_table")]
 pub fn neighbour_table(xs: &[usize]) -> (Vec<Option<usize>>, Vec<Option<usize>>) {
     let n = xs.len();
