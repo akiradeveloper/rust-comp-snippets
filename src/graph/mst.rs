@@ -41,12 +41,12 @@ pub mod prim {
 
 #[snippet("kraskal")]
 mod kraskal {
-    use crate::union_find;
+    use crate::union_find::UnionFind;
 
     pub struct Edge {
-        u: usize,
-        v: usize,
-        cost: u64
+        pub u: usize,
+        pub v: usize,
+        pub cost: u64
     }
 
     #[doc = "es: undirected edges. O(ElogV)"]
@@ -59,7 +59,7 @@ mod kraskal {
             a.cost.cmp(&b.cost)
         });
 
-        let mut uf = crate::union_find::UnionFind::new(n);
+        let mut uf = UnionFind::new(n);
 
         for e in es {
             if !uf.same(e.u, e.v) {
@@ -76,8 +76,7 @@ mod kraskal {
 
 #[snippet("chu_liu_edmonds")]
 mod chu_liu_edmonds {
-    use cargo_snippet::snippet;
-    use crate::graph::scc;
+    use crate::graph::scc::SCC;
 
     #[derive(Debug,Clone,Copy)]
     pub struct Edge(pub usize, pub u64);
@@ -107,7 +106,7 @@ mod chu_liu_edmonds {
             min_out_g[e.0].push(to);
         }
 
-        let mut scc = scc::SCC::new(n);
+        let mut scc = SCC::new(n);
         for u in 0..n {
             for i in 0..min_out_g[u].len() {
                 let v = min_out_g[u][i];
