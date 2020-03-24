@@ -58,3 +58,4 @@ pub mod ntt_ext;
 pub mod garner;
 pub mod segcover;
 pub mod doubling;
+pub mod lexical_permutation;
