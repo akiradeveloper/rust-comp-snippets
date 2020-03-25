@@ -58,7 +58,7 @@ pub fn prefix_decomposition(b: i64, n: i64) -> Vec<(Vec<i64>, Vec<i64>)> {
 
     let mut res = vec![];
     for i in 0..digits.len() {
-        if digits[m-1-i] == 0 { continue; }
+        if m-1-i > 0 && digits[m-1-i] == 0 { continue; }
         let rnum = from_digits(&r);
         let mut y = into_digits(b, rnum-1);
         let mut x = y.clone();
@@ -79,14 +79,16 @@ pub fn prefix_decomposition(b: i64, n: i64) -> Vec<(Vec<i64>, Vec<i64>)> {
 }
 #[test]
 fn test_prefix_decomposition() {
-    let res = prefix_decomposition(10, 12345);
+    let res = prefix_decomposition(10, 0);
     dbg!(&res);
-    let res = prefix_decomposition(10, 10101);
-    dbg!(&res);
-    let res = prefix_decomposition(2, 20);
-    dbg!(&res);
-    let res = prefix_decomposition(2, 100000000000000);
-    dbg!(&res);
+    // let res = prefix_decomposition(10, 12345);
+    // dbg!(&res);
+    // let res = prefix_decomposition(10, 10101);
+    // dbg!(&res);
+    // let res = prefix_decomposition(2, 20);
+    // dbg!(&res);
+    // let res = prefix_decomposition(2, 100000000000000);
+    // dbg!(&res);
 }
 
 #[snippet("gcd")]
