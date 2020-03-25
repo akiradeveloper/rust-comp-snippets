@@ -3,7 +3,7 @@
 use cargo_snippet::snippet;
 
 #[snippet("into_digits")]
-fn into_digits(b: i64, n: i64) -> Vec<i64> {
+pub fn into_digits(b: i64, n: i64) -> Vec<i64> {
     let mut r = vec![];
     let mut n = n;
     while n>0 {
@@ -18,6 +18,75 @@ fn into_digits(b: i64, n: i64) -> Vec<i64> {
 fn test_into_digits() {
     assert_eq!(into_digits(2, 6), [0,1,1]);
     assert_eq!(into_digits(10, 21), [1,2]);
+}
+
+#[snippet("PowTable")]
+struct PowTable {
+    dp: Vec<i64>,
+}
+#[snippet("PowTable")]
+impl PowTable {
+    pub fn new(x: i64, maxbit: usize, mo: i64) -> Self {
+        let mut dp = vec![1];
+        for i in 0..maxbit {
+            let v = (dp[i] * x) % mo;
+            dp.push(v);
+        }
+        PowTable {
+            dp: dp
+        }
+    }
+    pub fn pow(&self, k: usize) -> i64 {
+        self.dp[k]
+    }
+}
+
+#[snippet("prefix_decomposition")]
+pub fn prefix_decomposition(b: i64, n: i64) -> Vec<(Vec<i64>, Vec<i64>)> {
+    let digits = into_digits(b, n);
+    let m = digits.len();
+    let mut r = into_digits(b, n+1);
+    let pow = PowTable::new(b, r.len(), std::i64::MAX);
+    let from_digits = |x: &[i64]| {
+        let m = x.len();
+        let mut sum = 0;
+        for i in 0..m {
+            sum += pow.pow(i) * x[i];
+        }
+        sum
+    };
+
+    let mut res = vec![];
+    for i in 0..digits.len() {
+        if digits[m-1-i] == 0 { continue; }
+        let rnum = from_digits(&r);
+        let mut y = into_digits(b, rnum-1);
+        let mut x = y.clone();
+        for j in 0..std::cmp::min(i+1,x.len()) {
+            x[j] = 0;
+        }
+        for _ in x.len()..m {
+            x.push(0);
+        }
+        for _ in y.len()..m {
+            y.push(0);
+        }
+        r = x.clone();
+        res.push((x,y));
+    }
+    res.reverse();
+    res
+}
+#[test]
+fn test_prefix_decomposition() {
+    let res = prefix_decomposition(10, 12345);
+    dbg!(&res);
+    let res = prefix_decomposition(10, 10101);
+    dbg!(&res);
+    let res = prefix_decomposition(2, 20);
+    dbg!(&res);
+    let res = prefix_decomposition(2, 100000000000000);
+    dbg!(&res);
 }
 
 #[snippet("gcd")]
