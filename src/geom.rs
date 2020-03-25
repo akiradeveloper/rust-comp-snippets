@@ -44,7 +44,7 @@ impl Vector2D {
     }
     #[doc = "orthogonal vector"]
     pub fn normal(self) -> Vector2D {
-        Vector2D(self.1, -self.0)
+        Vector2D(self.1, -self.0).unit()
     }
     #[doc = "bisection of the angle"]
     pub fn bisect(a: Vector2D, b: Vector2D) -> Vector2D {
@@ -127,20 +127,20 @@ impl Circle {
             return None
         }
 
-        let a_bisect = Line2D {
-            p: a,
-            d: Vector2D::bisect(a-b, a-c),
-        };
-        let b_bisect = Line2D {
-            p: b,
-            d: Vector2D::bisect(b-a, b-c),
-        };
+        let a_bisect = Line2D::pd(
+            a,
+            Vector2D::bisect(a-b, a-c),
+        );
+        let b_bisect = Line2D::pd(
+            b,
+            Vector2D::bisect(b-a, b-c),
+        );
 
         let center = Line2D::intersection(a_bisect, b_bisect);
-        let ab = Line2D {
-            p: a,
-            d: b-a,
-        };
+        let ab = Line2D::pd(
+            a,
+            b-a,
+        );
         let radius = ab.distance(center);
         Some(Circle {
             center: center,
@@ -261,8 +261,17 @@ pub struct Line2D {
 }
 #[snippet("Geom")]
 impl Line2D {
-    pub fn passes(a: Vector2D, b: Vector2D) -> Self {
-        unimplemented!()
+    pub fn pd(p: Vector2D, d: Vector2D) -> Self {
+        Line2D {
+            p: p,
+            d: d.unit()
+        }
+    }
+    pub fn from_two_points(a: Vector2D, b: Vector2D) -> Self {
+        Line2D {
+            p: a,
+            d: b-a
+        }
     }
     pub fn intersection(a: Line2D, b: Line2D) -> Vector2D {
         let n = b.d.normal();
@@ -270,23 +279,26 @@ impl Line2D {
         a.p + a.d * x
     }
     pub fn distance(self, a: Vector2D) -> f64 {
-        let perpendicular = Line2D {
-            p: a,
-            d: self.d.unit(),
-        };
+        let perpendicular = Self::pd(a, self.d.normal());
         let q = Self::intersection(self, perpendicular);
         (a-q).len()
     }
 }
 #[test]
 fn test_line_intersection() {
-    let m = Line2D { p: Vector2D(0.,0.), d: Vector2D(1.,1.) };
-    let l1 = Line2D { p: Vector2D(0.,2.), d: Vector2D(1.,0.) };
-    let l2 = Line2D { p: Vector2D(0.,2.), d: Vector2D(1.,-1.) };
+    let m = Line2D::pd(Vector2D(0.,0.), Vector2D(1.,1.));
+    let l1 = Line2D::pd(Vector2D(0.,2.), Vector2D(1.,0.));
+    let l2 = Line2D::pd(Vector2D(0.,2.), Vector2D(1.,-1.));
     let p1 = Line2D::intersection(m, l1);
     let p2 = Line2D::intersection(m, l2);
     assert_eq!(p1, Vector2D(2.,2.));
     assert_eq!(p2, Vector2D(1.,1.));
+}
+#[test]
+fn test_line_distance() {
+    let l = Line2D::from_two_points(Vector2D(-1.,1.), Vector2D(1.,1.));
+    let p = Vector2D(0.,0.);
+    assert_eq!(l.distance(p), 1.);
 }
 
 use crate::total::Total;
