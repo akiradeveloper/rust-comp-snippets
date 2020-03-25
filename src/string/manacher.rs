@@ -69,7 +69,7 @@ impl Manacher {
         if len%2 == 0 {
             let i = (l+r)/2;
             let r = len/2;
-            dbg!(self.radius_even(i)) >= r
+            self.radius_even(i) >= r
         } else {
             let i = (l+r)/2;
             let r = (len+1)/2;
