@@ -46,14 +46,13 @@ pub fn prefix_decomposition(b: i64, n: i64) -> Vec<(Vec<i64>, Vec<i64>)> {
     if n==0 {
         return vec![(vec![0], vec![0])];
     }
-    let mut r = into_digits(b, n+1);
     let mut x = into_digits(b, n);
     let m = x.len();
     let mut p = vec![];
     for i in 0..x.len() {
         if x[i] > 0 { p.push(i); }
     }
-    let pow = PowTable::new(b, r.len(), std::i64::MAX);
+    let pow = PowTable::new(b, x.len(), std::i64::MAX);
     let from_digits = |x: &[i64]| {
         let m = x.len();
         let mut sum = 0;
@@ -62,7 +61,8 @@ pub fn prefix_decomposition(b: i64, n: i64) -> Vec<(Vec<i64>, Vec<i64>)> {
         }
         sum
     };
-    let mut res = vec![];
+    let mut r = into_digits(b, n);
+    let mut res = vec![(r.clone(),r.clone())];
     for i in p {
         x[i] = 0;
         let numy = from_digits(&r) - 1;
@@ -80,12 +80,12 @@ pub fn prefix_decomposition(b: i64, n: i64) -> Vec<(Vec<i64>, Vec<i64>)> {
 fn test_prefix_decomposition() {
     let res = prefix_decomposition(10, 12001);
     dbg!(&res);
-    let res = prefix_decomposition(10, 0);
-    dbg!(&res);
-    let res = prefix_decomposition(10, 1000);
-    dbg!(&res);
-    let res = prefix_decomposition(10, 12345);
-    dbg!(&res);
+    // let res = prefix_decomposition(10, 0);
+    // dbg!(&res);
+    // let res = prefix_decomposition(10, 1000);
+    // dbg!(&res);
+    // let res = prefix_decomposition(10, 12345);
+    // dbg!(&res);
 }
 
 #[snippet("gcd")]
