@@ -69,11 +69,12 @@ use std::collections::HashMap;
 trait ZenHoable: Foldable + Clone + Sized {
     type NVal: Clone;
     type EVal: Clone;
-    fn f(nvalue: Self::NVal, evalue: Self::EVal, dp: &CumRL<Self>, l: usize, r: usize) -> Self::T;
+    fn f(&self, nvalue: Self::NVal, evalue: Self::EVal, dp: &CumRL<Self>, l: usize, r: usize) -> Self::T;
 }
 #[snippet("ZenHo")]
 #[derive(Debug)]
 struct ZenHo<Z: ZenHoable> {
+    z: Z,
     g: Vec<Vec<usize>>,
     nvalues: Vec<Z::NVal>,
     evalues: HashMap<(usize,usize), Z::EVal>,
@@ -81,9 +82,10 @@ struct ZenHo<Z: ZenHoable> {
 }
 #[snippet("ZenHo")]
 impl <Z: ZenHoable> ZenHo<Z> {
-    pub fn new(nvalues: Vec<Z::NVal>) -> ZenHo<Z> {
+    pub fn new(z: Z, nvalues: Vec<Z::NVal>) -> ZenHo<Z> {
         let n = nvalues.len();
         ZenHo {
+            z: z,
             g: vec![vec![]; n],
             nvalues: nvalues, 
             evalues: HashMap::new(),
@@ -112,7 +114,7 @@ impl <Z: ZenHoable> ZenHo<Z> {
                 dp.push(dpval);
             }
             let cumRL: CumRL<Z> = CumRL::new(dp);
-            let newv = Z::f(self.nvalues[u].clone(), self.evalues.get(&(u,p)).cloned().unwrap(), &cumRL, cumRL.len(), 0);
+            let newv = self.z.f(self.nvalues[u].clone(), self.evalues.get(&(u,p)).cloned().unwrap(), &cumRL, cumRL.len(), 0);
             self.dp.insert((u,p), newv);
         }
     }
@@ -131,7 +133,7 @@ impl <Z: ZenHoable> ZenHo<Z> {
             let v = self.g[u][i];
             let L = i;
             let R = n-1-L;
-            let newv = Z::f(self.nvalues[u].clone(), self.evalues.get(&(u,v)).cloned().unwrap(), &cum, L, R);
+            let newv = self.z.f(self.nvalues[u].clone(), self.evalues.get(&(u,v)).cloned().unwrap(), &cum, L, R);
             self.dp.insert((u,v), newv);
         }
         for i in 0..self.g[u].len() {
@@ -165,7 +167,7 @@ fn test_zenho() {
     impl ZenHoable for M {
         type NVal = usize;
         type EVal = usize;
-        fn f(_: usize, _: usize, cum: &CumRL<Self>, l: usize, r: usize) -> usize {
+        fn f(&self, _: usize, _: usize, cum: &CumRL<Self>, l: usize, r: usize) -> usize {
             let mut tot = 0;
             tot += cum.lcum(l);
             tot += cum.rcum(r);
@@ -173,7 +175,7 @@ fn test_zenho() {
             tot
         }
     }
-    let mut zenho: ZenHo<M> = ZenHo::new(vec![0;5]);
+    let mut zenho: ZenHo<M> = ZenHo::new(M, vec![0;5]);
     let E = vec![(0,1),(0,2),(0,3),(2,4)];
     for (u,v) in E {
         zenho.add_edge(u, v, 0);
