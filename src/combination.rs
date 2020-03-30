@@ -116,6 +116,7 @@ fn test_catalan_table() {
 use crate::number::modpow;
 
 #[snippet("ModComb")]
+#[derive(Clone)]
 struct ModComb {
     fact: Vec<i64>,
     fact_inv: Vec<i64>,
