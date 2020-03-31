@@ -2,8 +2,8 @@ use cargo_snippet::snippet;
 
 #[snippet("Kadane")]
 struct Kadane {
-    lmax_table: Vec<(i64,usize)>,
-    rmax_table: Vec<(i64,usize)>,
+    lmax_table: Vec<(usize,i64)>,
+    rmax_table: Vec<(usize,i64)>,
 }
 #[snippet("Kadane")]
 impl Kadane {
@@ -18,17 +18,19 @@ impl Kadane {
             rmax_table: R,
         }
     }
-    fn lmax(&self, r: usize) -> (i64, usize) {
-        self.lmax_table[r]
-    }
-    fn rmax(&self, l: usize) -> (i64, usize) {
+    #[doc = "max{sum[l,*)}"]
+    pub fn rmax(&self, l: usize) -> (usize, i64) {
         self.rmax_table[l]
     }
-    fn build_lmax(a: Vec<i64>) -> Vec<(i64, usize)> {
+    #[doc = "max{sum[*,r)}"]
+    pub fn lmax(&self, r: usize) -> (usize, i64) {
+        self.lmax_table[r]
+    }
+    fn build_lmax(a: Vec<i64>) -> Vec<(usize, i64)> {
         let n = a.len();
         let mut res = vec![(0,0)];
         for r in 1..n+1 {
-            let (ma, L) = res[r-1];
+            let (L,ma) = res[r-1];
             let i = r-1;
             let x = a[i];
             let y = ma+a[i];
@@ -36,9 +38,9 @@ impl Kadane {
             if z > x && z > y {
                 res.push((0,0));
             } else if x > y {
-                res.push((x,1));
+                res.push((1,x));
             } else {
-                res.push((y,L+1));
+                res.push((L+1,y));
             }
         }
         res
@@ -48,10 +50,10 @@ impl Kadane {
 fn test_kadane() {
     let a = vec![1,-2,3,-4,5,6];
     let kdn = Kadane::new(a);
-    assert_eq!(kdn.rmax(0), (9,6));
-    assert_eq!(kdn.lmax(6), (11,2));
-    assert_eq!(kdn.lmax(5), (5,1));
+    assert_eq!(kdn.rmax(0), (6,9));
+    assert_eq!(kdn.lmax(6), (2,11));
+    assert_eq!(kdn.lmax(5), (1,5));
     assert_eq!(kdn.lmax(2), (0,0));
     assert_eq!(kdn.lmax(4), (0,0));
-    assert_eq!(kdn.lmax(3), (3,1));
+    assert_eq!(kdn.lmax(3), (1,3));
 }
