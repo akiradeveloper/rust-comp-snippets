@@ -7,7 +7,7 @@ struct Kadane {
 }
 #[snippet("Kadane")]
 impl Kadane {
-    fn new(a: Vec<i64>) -> Kadane {
+    pub fn new(a: Vec<i64>) -> Kadane {
         let L = Self::build_lmax(a.clone());
         let mut a = a;
         a.reverse();
@@ -20,11 +20,13 @@ impl Kadane {
     }
     #[doc = "max{sum[l,*)}"]
     pub fn rmax(&self, l: usize) -> (usize, i64) {
-        self.rmax_table[l]
+        let (len,sum) = self.rmax_table[l];
+        (l+len,sum)
     }
     #[doc = "max{sum[*,r)}"]
     pub fn lmax(&self, r: usize) -> (usize, i64) {
-        self.lmax_table[r]
+        let (len,sum) = self.lmax_table[r];
+        (r-len,sum)
     }
     fn build_lmax(a: Vec<i64>) -> Vec<(usize, i64)> {
         let n = a.len();
@@ -35,9 +37,9 @@ impl Kadane {
             let x = a[i];
             let y = ma+a[i];
             let z = 0;
-            if z > x && z > y {
+            if z >= x && z >= y {
                 res.push((0,0));
-            } else if x > y {
+            } else if x >= y {
                 res.push((1,x));
             } else {
                 res.push((L+1,y));
@@ -51,9 +53,15 @@ fn test_kadane() {
     let a = vec![1,-2,3,-4,5,6];
     let kdn = Kadane::new(a);
     assert_eq!(kdn.rmax(0), (6,9));
-    assert_eq!(kdn.lmax(6), (2,11));
-    assert_eq!(kdn.lmax(5), (1,5));
-    assert_eq!(kdn.lmax(2), (0,0));
-    assert_eq!(kdn.lmax(4), (0,0));
-    assert_eq!(kdn.lmax(3), (1,3));
+    assert_eq!(kdn.lmax(6), (4,11));
+    assert_eq!(kdn.lmax(5), (4,5));
+    assert_eq!(kdn.lmax(2), (2,0));
+    assert_eq!(kdn.lmax(4), (4,0));
+    assert_eq!(kdn.lmax(3), (2,3));
+}
+#[test]
+fn test_kadane_shortest_match() {
+    let a = vec![0,-1,1];
+    let kdn = Kadane::new(a);
+    assert_eq!(kdn.rmax(0), (0,0));
 }
