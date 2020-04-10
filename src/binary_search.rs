@@ -34,30 +34,27 @@ impl <F: FnMut(f64) -> bool> BinarySearchf64<F> {
 #[snippet("BinarySearch")]
 #[doc = "lower,upper are inclusive range"]
 pub struct BinarySearch<F> {
-    pub p: F,
-    pub lower: i64,
-    pub upper: i64,
+    pub f: F,
+    pub l: i64,
+    pub r: i64,
 }
 #[snippet("BinarySearch")]
 impl <F: FnMut(i64) -> bool> BinarySearch<F> {
     #[doc = "O(log(upper-lower))"]
     pub fn lower_bound(&mut self) -> i64 {
-        let lower = self.lower;
-        let upper = self.upper;
-        assert!(lower<=upper);
-
-        let mut lb = lower - 1; 
-        let mut ub = upper + 1;
-        while ub - lb > 1 {
+        assert!(self.l<=self.r);
+        let mut lb = self.l;
+        let mut ub = self.r;
+        while ub > lb {
             let mid = (lb+ub)/2;
-            let ok = (self.p)(mid);
+            let ok = (self.f)(mid);
             if ok {
                 ub = mid;
             } else {
-                lb = mid;
+                lb = mid + 1;
             }
         }
-        ub
+        lb
     }
 }
 
@@ -66,25 +63,25 @@ fn test_binary_search() {
     let xs = vec![1,2,2,2,2,2,3,4,5];
     let p0 = |i: i64| { xs[i as usize] >= 2 };
     let mut bs0 = BinarySearch {
-        p: p0,
-        lower: 0,
-        upper: xs.len() as i64 - 1,
+        f: p0,
+        l: 0,
+        r: xs.len() as i64,
     };
     assert_eq!(bs0.lower_bound(), 1);
 
     let p1 = |i: i64| { xs[i as usize] > 2 };
     let mut bs1 = BinarySearch {
-        p: p1,
-        lower: 0,
-        upper: xs.len() as i64 - 1,
+        f: p1,
+        l: 0,
+        r: xs.len() as i64,
     };
     assert_eq!(bs1.lower_bound(), 6);
 
     let p2 = |i: i64| { xs[i as usize] >= 0 };
     let mut bs2 = BinarySearch {
-        p: p2,
-        lower: 0,
-        upper: xs.len() as i64 - 1,
+        f: p2,
+        l: 0,
+        r: xs.len() as i64,
     };
     assert_eq!(bs2.lower_bound(), 0);
 
@@ -94,9 +91,9 @@ fn test_binary_search() {
         xs[i as usize] >= 100
     };
     let mut bs3 = BinarySearch {
-        p: p3,
-        lower: 0,
-        upper: xs.len() as i64 - 1,
+        f: p3,
+        l: 0,
+        r: xs.len() as i64,
     };
     assert_eq!(bs3.lower_bound(), 9);
 }

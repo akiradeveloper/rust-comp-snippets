@@ -91,9 +91,9 @@ impl FID {
     #[doc = "query the index of k-th 0 (0-indexed)"]
     pub fn select0(&self, k: usize) -> usize {
         let mut bs = BinarySearch {
-            lower: 0,
-            upper: (self.n-1) as i64,
-            p: |i: i64| {
+            l: 0,
+            r: self.n as i64,
+            f: |i: i64| {
                 let r = self.rank0(i as usize);
                 r >= k+1
             },
@@ -103,9 +103,9 @@ impl FID {
     #[doc = "query the index of k-th 1 (0-indexed)"]
     pub fn select1(&self, k: usize) -> usize {
         let mut bs = BinarySearch {
-            lower: 0,
-            upper: (self.n-1) as i64,
-            p: |i: i64| {
+            l: 0,
+            r: self.n as i64,
+            f: |i: i64| {
                 let r = self.rank1(i as usize);
                 r >= k+1
             },
@@ -359,9 +359,9 @@ impl WM {
     #[doc = "the position of k-th x (0-indexed). O(logn)"]
     pub fn select(&self, x: u64, k: usize) -> usize {
         let mut bs = BinarySearch {
-            lower: 0,
-            upper: (self.mat[0].n - 1) as i64,
-            p: |i: i64| {
+            l: 0,
+            r: self.mat[0].n as i64,
+            f: |i: i64| {
                 let cnt = self.rank(x, i as usize);
                 cnt >= k+1
             },
