@@ -43,18 +43,18 @@ impl <F: FnMut(i64) -> bool> BinarySearch<F> {
     #[doc = "O(log(upper-lower))"]
     pub fn lower_bound(&mut self) -> i64 {
         assert!(self.l<=self.r);
-        let mut lb = self.l;
-        let mut ub = self.r;
-        while ub > lb {
-            let mid = (lb+ub)/2;
+        let mut l= self.l;
+        let mut r = self.r;
+        while r > l {
+            let mid = (l+r)/2;
             let ok = (self.f)(mid);
             if ok {
-                ub = mid;
+                r = mid;
             } else {
-                lb = mid + 1;
+                l = mid + 1;
             }
         }
-        lb
+        l
     }
 }
 
