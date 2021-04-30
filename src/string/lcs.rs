@@ -1,10 +1,17 @@
 use cargo_snippet::snippet;
 
+/// 2つの文字列のマッチング（連続でなくともよい）のうち
+/// 最大のものを求める。
+/// 
+/// 計算量 O(MN)
+/// 空間量 O(MN)
+
 #[snippet("LCS")]
 #[derive(Debug)]
 struct LCS<T> {
     max_matching: Vec<Vec<usize>>,
-    matching: Vec<(usize,usize)>,
+    /// 最大マッチングを作るインデックスのペア
+    pub matching: Vec<(usize,usize)>,
     phantom: std::marker::PhantomData<T>,
 }
 #[snippet("LCS")]

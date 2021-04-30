@@ -1,8 +1,11 @@
 use cargo_snippet::snippet;
 
+/// 各iを中心にした回文半径を計算する。
+/// 回文半径は、(直径+1)/2で計算される。（つまり中心を含む）
+/// ここで直径は常に奇数
+
 #[snippet("Manacher")]
-#[doc = "manacher[i] is the palindrome radius at i"]
-pub fn manacher(s: &[u64]) -> Vec<usize> {
+fn manacher(s: &[u64]) -> Vec<usize> {
     let mut r = vec![0; s.len()];
     let mut i = 0;
     let mut j = 0;
@@ -43,6 +46,7 @@ impl Manacher {
         let sep = 1<<60;
         let n = s.len();
         let m = 2*n+1;
+        // sepを挟む工夫
         // sep,s[0],sep,s[1],...,s[n-1],sep
         let mut t = vec![sep; m];
         for i in 0..n {
@@ -54,11 +58,14 @@ impl Manacher {
             a: a,
         }
     }
+    /// 通常のmanacher
+    /// ある文字を中心とした半径
     pub fn radius_odd(&self, i: usize) -> usize {
         let k = (2*i)+1;
         let r = self.a[k];
         r/2
     }
+    /// 仕切りを中心とした半径
     pub fn radius_even(&self, i: usize) -> usize {
         let k = 2*i;
         let r = self.a[k];

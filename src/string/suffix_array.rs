@@ -1,5 +1,19 @@
 use cargo_snippet::snippet;
 
+/// 各suffixを列挙し、その辞書順
+/// suffix -> 順番
+/// を構築する。
+/// 
+/// 構築計算量 O(|S| log |S|)
+/// 
+/// ある文字列Tがどれかのsuffixとprefixが一致するとき、
+/// マッチングが検索出来ていることになる。
+/// 従って、suffixについて二分探索をすることによって、
+/// マッチングしたインデックスを調べることが出来る。
+/// 
+/// 計算量 O(|T| log |S|)
+
+
 #[snippet("SuffixArray")]
 struct SuffixArray {
     // sのうち前からSA[i]個消したやつが辞書順i番目のsuffixである
@@ -8,7 +22,6 @@ struct SuffixArray {
 }
 #[snippet("SuffixArray")]
 impl SuffixArray {
-    #[doc = "O(nlogn)"]
     pub fn new(s: Vec<u64>) -> Self {
         let mut s = s;
         s.push('$' as u64);

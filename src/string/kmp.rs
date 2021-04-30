@@ -1,5 +1,11 @@
 use cargo_snippet::snippet;
 
+/// パターン文字列についてテーブルを構築
+/// 構築計算量 O(|P|)
+/// 
+/// 文字列SからPを全検索
+/// 計算量 O(|S|)
+
 #[snippet("KMP")]
 struct KMP {
     pat: Vec<u64>,
@@ -31,8 +37,7 @@ impl KMP {
             tbl: tbl,
         }
     }
-    #[doc = "Find all the appearance of the pattern string. O(N)"]
-    fn search(&self, s: &[u64]) -> Vec<usize> {
+    pub fn search(&self, s: &[u64]) -> Vec<usize> {
         let mut res = vec![];
         let mut head: i64 = 0;
         let mut j: i64 = 0;

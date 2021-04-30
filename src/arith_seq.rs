@@ -21,7 +21,7 @@ impl ArithSeq {
     pub fn y(&self, x: i64) -> i64 {
         self.a * x + self.b
     }
-    #[doc = "x such that f(x) >= y and f(x-1) < y"]
+    #[doc = "f(x-1) < y かつ f(x) >= y となるようなx"]
     pub fn lower_bound(&self, y: i64) -> i64 {
         assert!(self.a != 0);
         let a = self.a;
@@ -40,7 +40,7 @@ impl ArithSeq {
             mirror.lower_bound(y)
         }
     }
-    #[doc = "x such that f(x) < y and f(x+1) >= y"]
+    #[doc = "f(x) < y かつ f(x+1) >= y となるようなx"]
     pub fn upper_bound(&self, y: i64) -> i64 {
         unimplemented!()
     }

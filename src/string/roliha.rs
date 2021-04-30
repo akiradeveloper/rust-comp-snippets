@@ -18,7 +18,7 @@ const ROLIHA_MOD: u64 = (1<<61) - 1;
 const ROLIHA_P: u64 = ROLIHA_MOD * ((1<<3) - 1);
 #[snippet("RoLiHa")]
 impl RoLiHa {
-    #[doc = "caution: the value should not contain 0"]
+    #[doc = "注意: Sに0は含まれてはいけない"]
     fn new(s: &[u64]) -> Self {
         let mut randgen = Xorshift::new();
         let rand = randgen.rand(std::i64::MAX as u64);
@@ -41,7 +41,7 @@ impl RoLiHa {
         }
     }
 
-    // [l,r)
+    /// [l,r)のハッシュ値を計算する
     pub fn get(&self, l: usize, r: usize) -> u64 {
         return Self::calcmod(self.hash[r] + ROLIHA_P - Self::mul(self.hash[l], self.powMemo[r-l]));
     }
