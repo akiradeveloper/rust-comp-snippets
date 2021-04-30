@@ -1,6 +1,12 @@
 use cargo_snippet::snippet;
 use std::collections::VecDeque;
 
+/// HL分解は、木構造をパスの集合に分解する。
+/// こうして木構造をvid木上で一直線状にすることにより、
+/// セグツリーなどの配列構造に対するアルゴリズムを適用可能になる。
+/// そして、頂点や辺にvidをつける。ここで辺は子ノードの頂点vidで表される。
+/// クエリ(u,v)に対して、木上のパスに含まれるパス集合（vidベース）を列挙する。
+
 #[snippet("HLDecomposition")]
 struct HLDecomposition {
     n: usize,
@@ -113,7 +119,7 @@ impl HLDecomposition {
         }
     }
 
-    #[doc = "O(log N)"]
+    /// O(log N)
     pub fn lca(&self, u: usize, v: usize) -> usize {
         let mut l = u;
         let mut r = v;
@@ -131,7 +137,6 @@ impl HLDecomposition {
         }
     }
 
-    #[doc = "returns a list of [l,r]. O(N)"]
     pub fn vertex_decomposition(&self) -> Vec<(usize, usize)> {
         let mut vhead = vec![self.n; self.n];
         for i in 0..self.n {
@@ -148,7 +153,6 @@ impl HLDecomposition {
         res
     }
 
-    #[doc = "return a list of [l,r]. edge is represented by the child with larger virtual id. O(N)"]
     pub fn edge_decomposition(&self) -> Vec<(usize,usize)> {
         let V = self.vertex_decomposition();
         let mut res = vec![];
@@ -163,7 +167,6 @@ impl HLDecomposition {
         res
     }
 
-    #[doc = "O(logN)"]
     pub fn vertex_decomposition_between(&self, u: usize, v: usize) -> Vec<(usize, usize)> {
         let mut res = vec![];
 
@@ -183,7 +186,6 @@ impl HLDecomposition {
         res
     }
 
-    #[doc = "O(logN)"]
     pub fn edge_decomposition_between(&self, u: usize, v: usize) -> Vec<(usize, usize)> {
         let mut res = vec![];
 

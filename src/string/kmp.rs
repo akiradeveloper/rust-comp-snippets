@@ -13,7 +13,6 @@ struct KMP {
 }
 #[snippet("KMP")]
 impl KMP {
-    #[doc = "O(K)"]
     fn new(pat: Vec<u64>) -> Self {
         let n = pat.len();
         let mut tbl = vec![0; n+1];

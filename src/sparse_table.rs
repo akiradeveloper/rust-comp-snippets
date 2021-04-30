@@ -1,12 +1,15 @@
 use cargo_snippet::snippet;
 
+/// 範囲[l,r)の中の最小値のインデックスを求める
+/// 構築 O(N logN)
+/// クエリ O(1)
+
 #[snippet("SparseTable")]
 struct SparseTable {
     data: Vec<i64>,
     log_table: Vec<usize>,
     table: Vec<Vec<usize>>,
 }
-#[doc = "find the index of the RMQ. build O(nlogn). query O(1)"]
 #[snippet("SparseTable")]
 impl SparseTable {
     fn new(data: Vec<i64>) -> Self {
@@ -51,7 +54,7 @@ impl SparseTable {
         }
     }
 
-    // [a, b)
+    /// [a, b)
     fn query(&self, a: usize, b: usize) -> usize {
         let d = b - a;
         let k = self.log_table[d];
