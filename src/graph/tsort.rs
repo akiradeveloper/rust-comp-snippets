@@ -1,8 +1,24 @@
 use cargo_snippet::snippet;
 use std::collections::VecDeque;
 
+// 有向グラフにおいて
+// どの頂点も、その出力辺の先の頂点より先に来るように順序付けることを
+// トポロジカルソートという。
+// 
+// アルゴリズム:
+// indegを計算し、辺を通過した時にindegを減らしていく。
+// あるvがindeg=0になった時に
+// リストに追加し、探索キューにも追加する
+// 特殊なBFSを行うと、
+// リストに追加された時にはvよりトポロジカル順で前にあるものは
+// すでに追加されていることになる。
+//
+// ループがある場合にはその部分はoutに追加されない。
+//
+// 計算量:
+// 構築 O(V+E)
+
 #[snippet("TopologicalSort")]
-#[doc = "if there is a loop len(out) will be 0"]
 struct TopologicalSort {
     g: Vec<Vec<usize>>,
     colors: Vec<bool>,
@@ -14,8 +30,8 @@ struct TopologicalSort {
 #[snippet("TopologicalSort")]
 impl TopologicalSort {
     pub fn new(n: usize) -> Self {
-        let mut colors = vec![false; n];
-        let mut indeg = vec![0; n];
+        let colors = vec![false; n];
+        let indeg = vec![0; n];
         TopologicalSort {
             g: vec![vec![];n],
             Q: VecDeque::new(),
@@ -40,10 +56,8 @@ impl TopologicalSort {
                     self.Q.push_back(v);
                 }
             }
-
         }
     }
-    #[doc = "O(V+E)"]
     pub fn tsort(&mut self) {
         let n = self.g.len();
         for u in 0..n {
@@ -79,22 +93,4 @@ fn test_tsort() {
     }
     g.tsort();
     assert_eq!(g.out, [0,3,1,4,5,2]);
-}
-
-#[test]
-fn test_tsort_loop() {
-    let mut e = vec![
-        vec![1],
-        vec![2],
-        vec![0]
-    ];
-    let n = e.len();
-    let mut g = TopologicalSort::new(n);
-    for u in 0..n {
-        for v in e[u].clone() {
-            g.add_edge(u, v);
-        }
-    }
-    g.tsort();
-    assert_eq!(g.out.len(), 0);
 }
