@@ -17,6 +17,9 @@ use cargo_snippet::snippet;
 // FIXME:
 // Sum/Foldという一般に対して定義していますが誤ってます。
 // 例えば、[-3,-4]という配列が反例
+// 
+// TODO:
+// lmax,rmaxという名前がよくありません。
 
 #[snippet("Kadane")]
 struct Kadane<T, Sum, Fold> {
