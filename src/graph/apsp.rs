@@ -1,9 +1,22 @@
 mod warshal_floyd {
     use cargo_snippet::snippet;
 
-    // dist could be negative as well as bellman ford
+    /// ワーシャルフロイド法
+    /// 
+    /// 帰納法による証明:
+    /// あるi,jの最短距離について考える。
+    /// Gの部分集合をGとして、G_kを{0,...,k}とする。
+    /// この時、G_k U {i,j}の中でmind_k(i,j)が求まったとすると、
+    /// G_k+1 U {i,j}のmind_k+1(i,j)は、
+    /// mind_k(i,j) or i->k+1->j のどちらかとなる。
+    /// 
+    /// 従って、初期値は
+    /// d[i][i] = 0
+    /// else = inf
+    /// 
+    /// 計算量 O(V^3)
+
     #[snippet("warshal_floyd")]
-    #[doc = "directed matrix graph. O(V^3)"]
     fn warshal_floyd(d: &mut [Vec<i64>]) {
         let n = d.len();
         for k in 0..n {

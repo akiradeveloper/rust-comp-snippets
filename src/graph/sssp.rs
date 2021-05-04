@@ -1,8 +1,10 @@
 use cargo_snippet::snippet;
 
-// connected[i][i] == false
+/// 入力NxNの隣接行列
+/// 距離は1かinfのみ
+/// g[i][i] = infにする
+
 #[snippet("bfs01")]
-#[doc = "shortest path from directed matrix graph with 0/1 cost. O(E)"]
 pub fn bfs01(g: &[Vec<i64>], s: usize, inf: i64) -> Vec<i64> {
     use std::collections::VecDeque;
     let n = g.len();
@@ -73,6 +75,17 @@ fn test_bfs01() {
     dbg!(&dp);
 }
 
+
+/// キューを使ったダイクストラ法
+/// 
+/// グラフをビー玉と柔らかい紐で表現し、始点をつまんでぶら下げる。
+/// この時、全ビー玉は垂直落下するが、早く止まったものから確定していく。
+/// これがキューから取り出すことに相当。
+/// 最後に、全ビー玉が全部停止した時、計算が終了する。
+/// という物理現象をシミュレートしている。
+/// 
+/// 計算量 O(E logV)
+
 #[snippet("dijkstra")]
 pub mod djikstra_heap {
     #[derive(Clone,Copy,Debug)]
@@ -81,7 +94,6 @@ pub mod djikstra_heap {
         pub cost: i64,
     }
 
-    #[doc = "g: directed adjacent graph with non-negative costs. O(ElogV)"]
     pub fn dijkstra_heap(g: &[Vec<Edge>], s: usize, inf: i64) -> Vec<i64> {
         let n = g.len();
         let mut queue = std::collections::BinaryHeap::new(); // max-heap
@@ -109,6 +121,17 @@ pub mod djikstra_heap {
     }
 }
 
+/// ベルマンフォード法
+/// 
+/// 負辺を許す。
+/// ベルマンフォード法のアイデアは、
+/// 最悪ケースでも毎ターン1つは最短距離を確定していくということである。
+/// 毎回全辺をループして、各頂点の最短距離を更新していく。
+/// 全部でVターン繰り返せば収束するはず。
+/// 収束しないならば負ループが存在する。
+/// 
+/// 計算量 O(VE)
+
 #[snippet("bellman_ford")]
 pub mod bellman_ford {
     #[derive(Clone,Copy,Debug)]
@@ -118,7 +141,6 @@ pub mod bellman_ford {
         pub cost: i64,
     }
 
-    #[doc = "es: directed edges. negative costs allowed. O(V^2)"]
     pub fn bellman_ford(n: usize, es: &[Edge], source: usize) -> Vec<i64> {
         const INF: i64 = 1<<60;
         let mut d = vec![INF; n];

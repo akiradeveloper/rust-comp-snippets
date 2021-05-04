@@ -6,6 +6,8 @@ use std::collections::VecDeque;
 /// セグツリーなどの配列構造に対するアルゴリズムを適用可能になる。
 /// そして、頂点や辺にvidをつける。ここで辺は子ノードの頂点vidで表される。
 /// クエリ(u,v)に対して、木上のパスに含まれるパス集合（vidベース）を列挙する。
+/// 
+/// 構築 O(N)
 
 #[snippet("HLDecomposition")]
 struct HLDecomposition {
@@ -22,7 +24,6 @@ struct HLDecomposition {
 
 #[snippet("HLDecomposition")]
 impl HLDecomposition {
-
     pub fn new(n: usize) -> Self {
         HLDecomposition {
             n: n,
@@ -36,13 +37,12 @@ impl HLDecomposition {
             virt_to_real: vec![n; n],
         }
     }
-
     pub fn connect(&mut self, u: usize, v: usize) {
         self.g[u].push(v);
         self.g[v].push(u);
     }
 
-    #[doc = "O(N)"]
+    /// O(N)
     pub fn build(&mut self, root: usize) {
         self.dfs1(root);
         self.dfs2(root);
@@ -137,6 +137,7 @@ impl HLDecomposition {
         }
     }
 
+    /// O(N)
     pub fn vertex_decomposition(&self) -> Vec<(usize, usize)> {
         let mut vhead = vec![self.n; self.n];
         for i in 0..self.n {
@@ -153,6 +154,7 @@ impl HLDecomposition {
         res
     }
 
+    /// O(N)
     pub fn edge_decomposition(&self) -> Vec<(usize,usize)> {
         let V = self.vertex_decomposition();
         let mut res = vec![];

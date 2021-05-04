@@ -1,5 +1,21 @@
 use cargo_snippet::snippet;
 
+// 最大部分配列（区間と値両方）とを求める。
+// 区間は[l,r)形式
+// lmax: rを固定した時のlを求める
+// rmax: lを固定した時のrを求める
+//
+// すべてのj>0について
+// s[j] = max(s[j-1]+a[j], a[j])
+// が成り立つので、DPで解ける。
+//
+// 構築 O(N)
+// クエリ O(1)
+//
+// FIXME:
+// Sum/Foldという一般に対して定義していますが誤ってます。
+// 例えば、[-3,-4]という配列が反例
+
 #[snippet("Kadane")]
 struct Kadane<T, Sum, Fold> {
     lmax_table: Vec<(usize,Sum)>,
@@ -22,12 +38,10 @@ impl <T: Clone, Sum: std::cmp::PartialOrd + std::default::Default + Clone, Fold:
             p2: std::marker::PhantomData,
         }
     }
-    #[doc = "max{sum[l,*)}"]
     pub fn rmax(&self, l: usize) -> (usize, Sum) {
         let (len,sum) = self.rmax_table[l].clone();
         (l+len,sum)
     }
-    #[doc = "max{sum[*,r)}"]
     pub fn lmax(&self, r: usize) -> (usize, Sum) {
         let (len,sum) = self.lmax_table[r].clone();
         (r-len,sum)
