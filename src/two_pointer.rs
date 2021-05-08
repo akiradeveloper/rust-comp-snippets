@@ -1,5 +1,15 @@
 use cargo_snippet::snippet;
 
+// f(l,r) -> bool (r>=l)
+// が
+// l増についてfalse -> true
+// r増についてtrue -> false
+// の単調性を持つ時、
+// 出来るだけtrueを保つように探索を行う。
+// 全探索のO(N^2)を条件を絞ることによって削減。
+// 
+// 計算量 O(N)
+
 #[snippet("TwoPointer")]
 struct TwoPointer<F> {
     n: usize,
