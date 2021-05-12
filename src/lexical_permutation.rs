@@ -80,9 +80,13 @@ where
 }
 #[test]
 fn test_lexical_permutation() {
-    // use LexicalPermutation;
     let mut x = vec![0,1,2,3];
     loop {
+        // 0,1,2,3
+        // 0,1,3,2
+        // 0,2,1,3
+        // 0,2,3,1
+        // ...
         dbg!(&x);
         if !x.next_permutation() {
             break;

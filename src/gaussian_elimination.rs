@@ -1,6 +1,10 @@
 use cargo_snippet::snippet;
 use crate::number::modinv;
 
+/// ガウスの掃き出し法
+/// Ax = y
+/// の解xをmod Mの下で計算する。
+
 #[snippet("GaussianElimination")]
 struct GaussianElimination {
     A: Vec<Vec<i64>>,
