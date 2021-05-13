@@ -1,5 +1,18 @@
 use cargo_snippet::snippet;
 
+/// モジュラ逆元
+/// 
+/// ax = 1
+/// を満たすxをaの逆元という。
+/// 
+/// aとpが素の場合、
+/// フェルマーの小定理より
+/// a^(p-1) = 1 (mod p)
+/// だから、
+/// a a^(p-2) = 1 (mod p)
+/// がいえる。
+/// これよりa^(p-2)はaの逆元であることがいえる。
+
 #[snippet("modint")]
 pub mod modular {
     const M: i64 = 1_000_000_007;
@@ -91,138 +104,3 @@ pub mod modular {
 
 #[snippet("modint")]
 pub type Mod = modular::Mod;
-
-// #[snippet = "modint"]
-// pub trait ModI:
-//     Sized
-//     + PartialEq
-//     + Copy
-//     + std::ops::Add<Output = Self>
-//     + std::ops::Sub<Output = Self>
-//     + std::ops::Mul<Output = Self>
-//     + std::ops::Div<Output = Self>
-//     + std::ops::AddAssign
-//     + std::ops::SubAssign
-//     + std::ops::MulAssign
-//     + std::ops::DivAssign
-//     + std::default::Default
-//     + std::fmt::Display
-//     + std::fmt::Debug
-// {
-//     fn m() -> i64;
-//     fn new(x: i64) -> Self;
-//     fn pow(self, n: i64) -> Self;
-//     fn inv(&self) -> Self;
-// }
-// #[snippet = "modint"]
-// macro_rules! define_modint {
-//     ($n:ident,$m:expr) => {
-//         #[derive(Clone, Copy, Eq, PartialEq, PartialOrd, Ord)]
-//         pub struct $n(i64);
-
-//         #[allow(dead_code)]
-//         impl ModI for $n {
-//             fn m() -> i64 {
-//                 $m
-//             }
-//             fn new(x: i64) -> $n {
-//                 $n(x % $m)
-//             }
-
-//             fn pow(self, mut n: i64) -> $n {
-//                 let mut ret = $n::new(1);
-//                 let mut base = self;
-//                 while n > 0 {
-//                     if n & 1 == 1 {
-//                         ret *= base;
-//                     }
-//                     base *= base;
-//                     n >>= 1;
-//                 }
-//                 ret
-//             }
-
-//             fn inv(&self) -> $n {
-//                 self.pow($m - 2)
-//             }
-//         }
-
-//         impl std::default::Default for $n {
-//             fn default() -> $n {
-//                 $n::new(0i64)
-//             }
-//         }
-
-//         impl std::convert::From<i64> for $n {
-//             fn from(x: i64) -> $n {
-//                 $n::new(x)
-//             }
-//         }
-
-//         // Binary operator
-//         impl <T: Into<$n>> std::ops::Add<T> for $n {
-//             type Output = $n;
-//             fn add(self, rhs: T) -> Self::Output {
-//                 $n::new(self.0 + rhs.into().0)
-//             }
-//         }
-
-//         impl <T: Into<$n>> std::ops::Sub<T> for $n {
-//             type Output = $n;
-//             fn sub(self, rhs: T) -> Self::Output {
-//                 $n::new(self.0 - rhs.into().0 + $m)
-//             }
-//         }
-
-//         impl <T: Into<$n>> std::ops::Mul<T> for $n {
-//             type Output = $n;
-//             fn mul(self, rhs: T) -> Self::Output {
-//                 $n::new(self.0 * rhs.into().0)
-//             }
-//         }
-
-//         impl <T: Into<$n>> std::ops::Div<T> for $n {
-//             type Output = $n;
-//             fn div(self, rhs: T) -> Self::Output {
-//                 self * rhs.into().inv()
-//             }
-//         }
-
-//         // Assign
-//         impl <T: Into<$n>> std::ops::AddAssign<T> for $n {
-//             fn add_assign(&mut self, rhs: T) {
-//                 *self = *self + rhs;
-//             }
-//         }
-
-//         impl <T: Into<$n>> std::ops::SubAssign<T> for $n {
-//             fn sub_assign(&mut self, rhs: T) {
-//                 *self = *self - rhs;
-//             }
-//         }
-
-//         impl <T: Into<$n>> std::ops::MulAssign<T> for $n {
-//             fn mul_assign(&mut self, rhs: T) {
-//                 *self = *self * rhs;
-//             }
-//         }
-
-//         impl <T: Into<$n>> std::ops::DivAssign<T> for $n {
-//             fn div_assign(&mut self, rhs: T) {
-//                 *self = *self / rhs;
-//             }
-//         }
-
-//         impl std::fmt::Display for $n {
-//             fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-//                 write!(f, "{}", self.0)
-//             }
-//         }
-//         impl std::fmt::Debug for $n {
-//             fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-//                 write!(f, "{}", self.0)
-//             }
-//         }
-//     };
-// }
-// define_modint!(Mod, 1_000_000_007);
