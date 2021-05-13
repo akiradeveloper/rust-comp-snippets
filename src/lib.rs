@@ -34,7 +34,6 @@ pub mod math;
 pub mod matrix;
 pub mod modint;
 pub mod ntt;
-pub mod ntt_ext;
 pub mod number;
 pub mod permutation;
 pub mod polynomial;

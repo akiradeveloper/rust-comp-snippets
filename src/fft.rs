@@ -1,6 +1,16 @@
 use cargo_snippet::snippet;
 use crate::complex::Complex;
 
+/// FFTを使って多項式の掛け算を行う。
+/// 
+/// 計算量:
+/// O(N logN)
+/// 
+/// 注意:
+/// 途中でf64に落とすため大きな値は使えない。
+/// また、整数に戻す計算も裏付けが怪しい。
+/// カラツバかNTTを使うのが良いと思う。
+
 #[test]
 fn test_fft() {
     let a = vec![1,2];
@@ -31,7 +41,6 @@ pub fn multiply(a: &[i64], b: &[i64]) -> Vec<i64> {
 }
 
 #[snippet("fft")]
-#[doc = "convolve two waves a[x],b[y] to c[x+y]. O(nlogn)"]
 fn convolve(a: Vec<f64>, b: Vec<f64>) -> Vec<f64> {
     let n = a.len() + b.len() - 1;
     let mut m = 1;

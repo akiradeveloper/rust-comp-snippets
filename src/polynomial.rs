@@ -1,6 +1,9 @@
 use cargo_snippet::snippet;
 use crate::ntt;
 
+/// NTTを使った多項式の掛け算を行う。
+/// ダブリングによる乗算もサポートする。
+
 #[snippet("Polynomial")]
 #[derive(Debug)]
 struct Polynomial {

@@ -2,6 +2,17 @@ use cargo_snippet::snippet;
 use crate::number::{modinv, modpow};
 use crate::garner::garner;
 
+/// mod pの下でFTTのようなことをする。
+/// 計算量: O(N logN)
+
+#[test]
+fn test_ntt() {
+    let a = vec![1,2];
+    let b = vec![1,2,3];
+    let c = ntt_multiply(&a, &b, 1_000_000_007);
+    assert_eq!(c, vec![1,4,7,6]);
+}
+
 #[snippet("NTT")]
 struct NTT {
     pub mo: i64,
@@ -175,8 +186,6 @@ pub fn ntt_multiply(a: &[i64], b: &[i64], mo: i64) -> Vec<i64> {
     res
 }
 
-use crate::ntt_ext::{ntt_heia, ntt_yuya178};
-
 #[test]
 fn test_ntt_multiply() {
     fn ten(n: usize) -> i64 {
@@ -201,9 +210,6 @@ fn test_ntt_multiply() {
 
     assert_eq!(ntt_multiply_naive(&x, &y, ten(9)+7), t1);
     assert_eq!(ntt_multiply(&x, &y, ten(9)+7), t1);
-    assert_eq!(ntt_heia::multiply(&x, &y, ten(9)+7), t1);
-    assert_eq!(ntt_yuya178::multiply(&x, &y, ten(9)+7), t1);
-    // assert_eq!(fft::multiply(&x, &y, ten(9)+7), t1);
 }
 
 const N: usize = 10000;
@@ -231,31 +237,8 @@ fn bench_ntt_naive(b: &mut test::Bencher) {
 }
 
 #[bench]
-fn bench_ntt_heia(b: &mut test::Bencher) {
-    let mut x = vec![0;N];
-    for i in 0..N {
-        x[i] = i as i64;
-    }
-    b.iter(||
-        ntt_heia::multiply(&x, &x, 1_000_000_007)
-    )
-}
-
-#[bench]
-fn bench_ntt_yuya178(b: &mut test::Bencher) {
-    let mut x = vec![0;N];
-    for i in 0..N {
-        x[i] = i as i64;
-    }
-    b.iter(||
-        ntt_yuya178::multiply(&x, &x, 1_000_000_007)
-    )
-}
-
-use crate::fft;
-
-#[bench]
 fn bench_ntt_fft(b: &mut test::Bencher) {
+    use crate::fft;
     let mut x = vec![0;N];
     for i in 0..N {
         x[i] = i as i64;
