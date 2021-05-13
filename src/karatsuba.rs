@@ -1,5 +1,18 @@
 use cargo_snippet::snippet;
 
+/// カラツバ法
+/// 
+/// 通常、多項式の乗算をする場合にはO(N^2)の計算量が必要だが
+/// 計算を工夫することによってO(N^1.58)で計算出来る。
+
+#[test]
+fn test_karatsuba() {
+    let a = vec![1,2];
+    let b = vec![1,2,3];
+    let c = multiply(&a, &b);
+    assert_eq!(c, vec![1,4,7,6]);
+}
+
 #[snippet("karatsuba")]
 fn karatsuba<T>(a: &[T], b: &[T], c: &mut [T]) 
 where T: std::marker::Copy +

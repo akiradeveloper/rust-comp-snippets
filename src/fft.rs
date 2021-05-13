@@ -1,8 +1,16 @@
 use cargo_snippet::snippet;
 use crate::complex::Complex;
 
+#[test]
+fn test_fft() {
+    let a = vec![1,2];
+    let b = vec![1,2,3];
+    let c = multiply(&a, &b);
+    assert_eq!(c, vec![1,4,7,6]);
+}
+
 #[snippet("fft")]
-pub fn multiply(a: &[i64], b: &[i64], mo: i64) -> Vec<i64> {
+pub fn multiply(a: &[i64], b: &[i64]) -> Vec<i64> {
     let n = a.len();
     let m = b.len();
     let mut fa = vec![];
@@ -17,14 +25,14 @@ pub fn multiply(a: &[i64], b: &[i64], mo: i64) -> Vec<i64> {
     let mut c = vec![];
     for x in fc {
         let v = (x+0.5) as i64;
-        c.push(v % mo);
+        c.push(v);
     }
     c
 }
 
 #[snippet("fft")]
 #[doc = "convolve two waves a[x],b[y] to c[x+y]. O(nlogn)"]
-pub fn convolve(a: Vec<f64>, b: Vec<f64>) -> Vec<f64> {
+fn convolve(a: Vec<f64>, b: Vec<f64>) -> Vec<f64> {
     let n = a.len() + b.len() - 1;
     let mut m = 1;
     while m < n {
@@ -53,7 +61,7 @@ pub fn convolve(a: Vec<f64>, b: Vec<f64>) -> Vec<f64> {
 }
 
 #[snippet("fft")]
-pub fn fast_fourier_transform(arr: Vec<Complex>, inv: bool) -> Vec<Complex> {
+fn fast_fourier_transform(arr: Vec<Complex>, inv: bool) -> Vec<Complex> {
     let n = arr.len();
     assert!(n.count_ones() == 1, "the length of array is not square");
     let mut a: Vec<_> = arr.to_vec();

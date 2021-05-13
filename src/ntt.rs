@@ -261,6 +261,6 @@ fn bench_ntt_fft(b: &mut test::Bencher) {
         x[i] = i as i64;
     }
     b.iter(||
-        fft::multiply(&x, &x, 1_000_000_007)
+        fft::multiply(&x, &x)
     )
 }
