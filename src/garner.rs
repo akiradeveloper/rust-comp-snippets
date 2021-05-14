@@ -1,8 +1,26 @@
 use cargo_snippet::snippet;
 use crate::number::{gcd, modinv};
 
+/// 中国余剰定理の一般解法
+/// 
+/// x = r1 (mod m1)
+/// x = r2 (mod m2)
+/// ...
+/// x = rk (mod mk)
+/// を満たすxは
+/// 0以上m0m1...mk未満の中に一つ存在する。
+/// 
+/// moは素数
+
+#[test]
+fn test_garner() {
+    let mut rm = vec![(2,3),(4,5)];
+    let ok = pre_garner(&mut rm);
+    let v = garner(rm, 1_000_000_007);
+    assert_eq!(v, 14);
+}
+
 #[snippet("garner")]
-#[doc = "compute minimum x from a list of x = r[i] (mod m[i]) all m[i] are co-primes and some r[i] should be non-zero."]
 pub fn garner(rm: Vec<(i64,i64)>, mo: i64) -> i64 {
     let mut rm = rm;
     rm.push((0, mo));
@@ -19,14 +37,18 @@ pub fn garner(rm: Vec<(i64,i64)>, mo: i64) -> i64 {
     }
     constants[rm.len() - 1]
 }
+
+/// 入力の整形用関数。
+/// miを素にする。
+/// 不可能な場合はfalseを返す。
+
 #[snippet("garner")]
-#[doc = "none if there is no such x"]
-pub fn pre_garner(rm: &mut Vec<(i64,i64)>, mo: i64) -> Option<i64> {
+pub fn pre_garner(rm: &mut Vec<(i64,i64)>) -> bool {
     let n = rm.len();
     for i in 0..n {
         for j in 0..i {
             let g = gcd(rm[i].1, rm[j].1);
-            if (rm[i].0 - rm[j].0) % g != 0 { return None }
+            if (rm[i].0 - rm[j].0) % g != 0 { return false }
             rm[i].1 /= g;
             rm[j].1 /= g;
             let mut gi = gcd(rm[i].1, g);
@@ -43,9 +65,5 @@ pub fn pre_garner(rm: &mut Vec<(i64,i64)>, mo: i64) -> Option<i64> {
             rm[j].0 %= rm[j].1;
         }
     }
-    let mut lcm = 1;
-    for i in 0..n {
-        lcm = lcm * rm[i].1 % mo;
-    }
-    Some(lcm)
+    true
 }
