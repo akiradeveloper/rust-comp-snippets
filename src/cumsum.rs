@@ -59,28 +59,34 @@ fn test_cumsum1() {
     assert_eq!(cs.query(0,4), 4);
 }
 
+/// 二次元平面上の累積和
+/// dp[i][j]が[0,i)x[0,j)として計算出来ると、
+/// 任意の範囲の累積和が計算出来るようになる。
+/// 
+/// 計算量:
+/// 構築 O(N^2)
+/// クエリ O(1)
+
 #[snippet("cumsum2")]
-struct CumSum2 {
+pub struct CumSum2 {
     base: Vec<Vec<i64>>,
     dp: Vec<Vec<i64>>,
 }
 #[snippet("cumsum2")]
 impl CumSum2 {
-    fn new(n: usize, m: usize) -> CumSum2 {
+    pub fn new(n: usize, m: usize) -> CumSum2 {
         CumSum2 {
             base: vec![vec![0;m];n],
             dp: vec![]
         }
     }
-    #[doc = "i~j"]
-    fn add(&mut self, i: usize, j: usize, x: i64) {
+    pub fn add(&mut self, i: usize, j: usize, x: i64) {
         self.base[i][j] += x;
     }
-    #[doc = "i~j"]
-    fn set(&mut self, i: usize, j: usize, x: i64) {
+    pub fn set(&mut self, i: usize, j: usize, x: i64) {
         self.base[i][j] = x;
     }
-    fn build(&mut self) {
+    pub fn build(&mut self) {
         let n = self.base.len();
         let m = self.base[0].len();
         let mut dp = vec![vec![0; m+1]; n+1];
@@ -96,9 +102,8 @@ impl CumSum2 {
         }
         self.dp = dp;
     }
-    #[doc = "[i0,i1)~[j0,j1)"]
-    fn query(&self, i0: usize, i1_: usize, j0: usize, j1_: usize) -> i64 {
-        self.dp[i1_][j1_] - (self.dp[i0][j1_] + self.dp[i1_][j0] - self.dp[i0][j0])
+    pub fn query(&self, i0: usize, i1: usize, j0: usize, j1: usize) -> i64 {
+        self.dp[i1][j1] - (self.dp[i0][j1] + self.dp[i1][j0] - self.dp[i0][j0])
     }
 }
 #[test]
@@ -113,8 +118,18 @@ fn test_cum2() {
     assert_eq!(cum2.query(0, 1, 0, 2), 3);
 }
 
+/// いもす法（２次元）
+/// 
+/// [i0,i1)x[j0,j1)の領域に範囲加算をしていったあと、
+/// i,jの値を調べる。
+/// 横方向、縦方向のスイープを行うだけで構築可能。
+/// 
+/// 計算量:
+/// 構築 O(N+M)
+/// クエリ O(1)
+
 #[snippet("Imosu2d")]
-struct Imosu2d {
+pub struct Imosu2d {
     n: usize,
     m: usize,
     dp: Vec<Vec<i64>>,
@@ -128,14 +143,12 @@ impl Imosu2d {
             dp: vec![vec![0;m+1];n+1],
         }
     }
-    #[doc = "[i0,i1)~[j0,j1)"]
     pub fn add(&mut self, i0: usize, i1: usize, j0: usize, j1: usize, x: i64) {
         self.dp[i0][j0] += x;
         self.dp[i0][j1] += -x;
         self.dp[i1][j0] += -x;
         self.dp[i1][j1] += x;
     }
-    #[doc = "O(n+m)"]
     pub fn build(&mut self) {
         // right sweep
         for i in 0..self.n+1 {
@@ -185,8 +198,21 @@ fn test_imosu_2d() {
 
 use crate::arith_seq::ArithSeq;
 
+/// いもす法（１次元）
+/// 
+/// いもす法の１次元ならば、２次元の時のように均一の値ではなく、
+/// 一次式ax+yを足し合わせることが出来る。
+/// なぜならば、
+/// aの配列をスイープすることによって
+/// a,2a,3a,...の
+/// 足し合わせをO(N)で計算出来るから。
+/// 
+/// 計算量:
+/// 構築 O(N)
+/// クエリ O(1)
+
 #[snippet("Imosu1d")]
-struct Imosu1d {
+pub struct Imosu1d {
     n: usize,
     dp1: Vec<i64>,
     dp2: Vec<i64>,
@@ -197,7 +223,9 @@ impl Imosu1d {
     pub fn new(n: usize) -> Imosu1d {
         Imosu1d {
             n: n,
+            // オフセット（左端の値）についてのスイープ用
             dp1: vec![0;n+1],
+            // aに関するスイープ用
             dp2: vec![0;n+1],
             dp3: vec![0;n+1],
         }
@@ -219,9 +247,6 @@ impl Imosu1d {
         let L = r - (l+1);
         self.dp3[r] += -a * L as i64;
     }
-    pub fn get(&self, k: usize) -> i64 {
-        self.dp1[k]
-    }
     fn sweep(dp: &mut [i64]) {
         let mut cur = 0;
         for i in 0..dp.len() {
@@ -240,6 +265,9 @@ impl Imosu1d {
         for i in 0..n {
             self.dp1[i] += self.dp2[i];
         }
+    }
+    pub fn get(&self, k: usize) -> i64 {
+        self.dp1[k]
     }
 }
 
