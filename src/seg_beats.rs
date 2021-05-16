@@ -1,6 +1,10 @@
 use cargo_snippet::snippet;
 use std::cmp::{max, min};
 
+/// 範囲に対してchmin, chmax関数を適用出来るセグ木
+/// 更新は、update, add, chmin, chmax
+/// クエリは、min, max, sumをサポートする。
+
 #[snippet("SEGBeats")]
 struct SEGBeats {
     max_v: Vec<i64>,
@@ -307,12 +311,10 @@ impl SEGBeats {
     pub fn query_sum(&mut self, l: usize, r: usize) -> i64 {
         self._query_sum(l, r, 0, 0, self.n0)
     }
-    #[doc = "push up numbers in range so they are >= x"]
-    pub fn update_min(&mut self, l: usize, r: usize, x: i64) {
+    pub fn chmax(&mut self, l: usize, r: usize, x: i64) {
         self._update_min(x, l, r, 0, 0, self.n0)
     }
-    #[doc = "push down numbers in range so they are <= x"]
-    pub fn update_max(&mut self, l: usize, r: usize, x: i64) {
+    pub fn chmin(&mut self, l: usize, r: usize, x: i64) {
         self._update_max(x, l, r, 0, 0, self.n0)
     }
     pub fn add_val(&mut self, l: usize, r: usize, x: i64) {
@@ -340,23 +342,23 @@ fn test_segbeats_simple() {
     assert_eq!(seg.query_min(0, 3), 1);
 
     assert_eq!(seg.query_sum(0, 5), 15);
-    seg.update_max(0, 3, 2); // 1,2,2,4,5
+    seg.chmin(0, 3, 2); // 1,2,2,4,5
     assert_eq!(seg.query_max(0, 3), 2);
     assert_eq!(seg.query_sum(0, 5), 14);
-    seg.update_min(0, 3, 3); // 3,3,3,4,5
-    seg.update_max(0, 1, 1); 
-    seg.update_min(0, 3, 3); 
-    seg.update_max(0, 10, 10); 
+    seg.chmax(0, 3, 3); // 3,3,3,4,5
+    seg.chmin(0, 1, 1); 
+    seg.chmax(0, 3, 3); 
+    seg.chmin(0, 10, 10); 
     assert_eq!(seg.query_sum(0, 5), 18);
     assert_eq!(seg.query_min(1, 5), 3);
-    seg.update_max(2, 4, 2); // 3,3,2,2,5
+    seg.chmin(2, 4, 2); // 3,3,2,2,5
     assert_eq!(seg.query_sum(0, 5), 15);
     assert_eq!(seg.query_min(0, 5), 2);
     assert_eq!(seg.query_max(2, 4), 2);
     assert_eq!(seg.query_max(2, 5), 5);
 
-    seg.update_max(2,4,3);
-    seg.update_min(2,4,0);
+    seg.chmin(2,4,3);
+    seg.chmax(2,4,0);
     assert_eq!(seg.query_sum(0, 5), 15);
     assert_eq!(seg.query_min(0, 5), 2);
     assert_eq!(seg.query_max(2, 4), 2);
