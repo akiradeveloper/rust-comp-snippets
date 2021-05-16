@@ -22,7 +22,7 @@ trait SEGLazyImpl {
     /// x `op` y
     fn op(x: Self::Monoid, y: Self::Monoid) -> Self::Monoid;
     /// f(x)
-    fn mapping(f: Self::F, x: Self::Monoid) -> Self::Monoid;
+    fn ap(f: Self::F, x: Self::Monoid) -> Self::Monoid;
     /// f . g
     fn compose(f: Self::F, g: Self::F) -> Self::F;
 }
@@ -51,7 +51,7 @@ impl <T: SEGLazyImpl> SEGLazy<T> {
                 self.lazy[2*k+0] = T::compose(self.lazy[k], self.lazy[2*k+0]);
                 self.lazy[2*k+1] = T::compose(self.lazy[k], self.lazy[2*k+1]);
             }
-            self.data[k] = T::mapping(self.lazy[k], self.data[k]);
+            self.data[k] = T::ap(self.lazy[k], self.data[k]);
             self.lazy[k] = T::id();
         }
     }
@@ -111,7 +111,7 @@ impl SEGLazyImpl for MAX_RUQ {
     fn op(x: Self::Monoid, y: Self::Monoid) -> Self::Monoid {
         std::cmp::max(x, y)
     }
-    fn mapping(f: Self::F, x: Self::Monoid) -> Self::Monoid {
+    fn ap(f: Self::F, x: Self::Monoid) -> Self::Monoid {
         f
     }
     fn compose(f: Self::F, g: Self::F) -> Self::F {
@@ -147,7 +147,7 @@ impl SEGLazyImpl for MIN_RUQ {
     fn op(x: Self::Monoid, y: Self::Monoid) -> Self::Monoid {
         std::cmp::min(x, y)
     }
-    fn mapping(f: Self::F, x: Self::Monoid) -> Self::Monoid {
+    fn ap(f: Self::F, x: Self::Monoid) -> Self::Monoid {
         f
     }
     fn compose(f: Self::F, g: Self::F) -> Self::F {
@@ -184,7 +184,7 @@ impl SEGLazyImpl for MAX_RAQ {
     fn op(x: Self::Monoid, y: Self::Monoid) -> Self::Monoid {
         std::cmp::max(x, y)
     }
-    fn mapping(f: Self::F, x: Self::Monoid) -> Self::Monoid {
+    fn ap(f: Self::F, x: Self::Monoid) -> Self::Monoid {
         x + f
     }
     fn compose(f: Self::F, g: Self::F) -> Self::F {
@@ -207,7 +207,7 @@ impl SEGLazyImpl for MIN_RAQ {
     fn op(x: Self::Monoid, y: Self::Monoid) -> Self::Monoid {
         std::cmp::min(x, y)
     }
-    fn mapping(f: Self::F, x: Self::Monoid) -> Self::Monoid {
+    fn ap(f: Self::F, x: Self::Monoid) -> Self::Monoid {
         x + f
     }
     fn compose(f: Self::F, g: Self::F) -> Self::F {
