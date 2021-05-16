@@ -42,7 +42,6 @@ pub mod rev;
 pub mod seg;
 pub mod seg_beats;
 pub mod seg_lazy;
-pub mod segcover;
 pub mod sequence;
 pub mod skiplist;
 pub mod slide_win;
