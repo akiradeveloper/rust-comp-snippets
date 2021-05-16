@@ -12,7 +12,7 @@ trait SEGLazyImpl {
     fn op(x: Self::Monoid, y: Self::Monoid) -> Self::Monoid;
     /// f(x)
     fn mapping(f: Self::F, x: Self::Monoid) -> Self::Monoid;
-    /// g . f
+    /// f . g
     fn compose(f: Self::F, g: Self::F) -> Self::F;
 }
 
@@ -37,8 +37,8 @@ impl <T: SEGLazyImpl> SEGLazy<T> {
     fn propagate(&mut self, k: usize) {
         if self.lazy[k] != T::id() {
             if k < self.n {
-                self.lazy[2*k+0] = T::compose(self.lazy[2*k+0], self.lazy[k]);
-                self.lazy[2*k+1] = T::compose(self.lazy[2*k+1], self.lazy[k]);
+                self.lazy[2*k+0] = T::compose(self.lazy[k], self.lazy[2*k+0]);
+                self.lazy[2*k+1] = T::compose(self.lazy[k], self.lazy[2*k+1]);
             }
             self.data[k] = T::mapping(self.lazy[k], self.data[k]);
             self.lazy[k] = T::id();
@@ -49,7 +49,7 @@ impl <T: SEGLazyImpl> SEGLazy<T> {
         if r <= a || b <= l {
             self.data[k]
         } else if a <= l && r <= b {
-            self.lazy[k] = T::compose(self.lazy[k], x);
+            self.lazy[k] = T::compose(x, self.lazy[k]);
             self.propagate(k);
             self.data[k]
         } else {
@@ -104,7 +104,7 @@ impl SEGLazyImpl for MAX_RUQ {
         f
     }
     fn compose(f: Self::F, g: Self::F) -> Self::F {
-        g
+        f
     }
 }
 #[test]
@@ -140,7 +140,7 @@ impl SEGLazyImpl for MIN_RUQ {
         f
     }
     fn compose(f: Self::F, g: Self::F) -> Self::F {
-        g
+        f
     }
 }
 #[test]
@@ -177,7 +177,7 @@ impl SEGLazyImpl for MAX_RAQ {
         x + f
     }
     fn compose(f: Self::F, g: Self::F) -> Self::F {
-        f + g
+        g + f
     }
 }
 
@@ -200,7 +200,7 @@ impl SEGLazyImpl for MIN_RAQ {
         x + f
     }
     fn compose(f: Self::F, g: Self::F) -> Self::F {
-        f + g
+        g + f
     }
 }
 #[test]
