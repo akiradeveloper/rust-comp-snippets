@@ -2,6 +2,17 @@
 
 use cargo_snippet::snippet;
 
+/// 遅延セグ木
+/// 
+/// 範囲updateをサポートする。
+/// update時には作用素のみをノードに載せるのみにとどめ、
+/// query時にあるノードの作用素の値が必要になった時に作用素を伝搬する。
+/// この回数がたかだかO(logN)しかない。
+/// 
+/// 計算量:
+/// update l r f: O(logN)
+/// query l r: O(logN)
+
 #[snippet("SEG_LAZY")]
 trait SEGLazyImpl {
     type Monoid: Copy;
