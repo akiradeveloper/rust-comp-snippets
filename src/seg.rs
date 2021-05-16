@@ -1,5 +1,12 @@
 use cargo_snippet::snippet;
 
+/// フェニック木の一般化
+/// 
+/// 各ノードには最初、idに相当する値が入っている。
+/// get i: a[i]を返す
+/// update i x: a[i]=x
+/// query l r: [l,r)をカバーするノードに対してopを適用したもの
+
 #[snippet("SEG")]
 #[allow(dead_code)]
 pub trait Monoid {

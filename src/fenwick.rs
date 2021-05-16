@@ -14,6 +14,8 @@ use cargo_snippet::snippet;
 /// 
 /// sumがa1からの和を調べる特殊性から、
 /// 2Nの容量を必要としない。
+/// 
+/// 計算量だけ見れば、セグ木で十分だが、係数が軽い。
 
 #[snippet("BIT")]
 #[allow(dead_code)]
