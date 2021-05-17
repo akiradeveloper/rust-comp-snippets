@@ -5,14 +5,14 @@ use cargo_snippet::snippet;
 /// クエリ O(1)
 
 #[snippet("SparseTable")]
-struct SparseTable {
+pub struct SparseTable {
     data: Vec<i64>,
     log_table: Vec<usize>,
     table: Vec<Vec<usize>>,
 }
 #[snippet("SparseTable")]
 impl SparseTable {
-    fn new(data: Vec<i64>) -> Self {
+    pub fn new(data: Vec<i64>) -> Self {
         let n = data.len();
         let mut log_table = vec![0; n+1]; // log(k) (0<=k<=n)
         for i in 2..n+1 {
@@ -55,7 +55,7 @@ impl SparseTable {
     }
 
     /// [a, b)
-    fn query(&self, a: usize, b: usize) -> usize {
+    pub fn query(&self, a: usize, b: usize) -> usize {
         let d = b - a;
         let k = self.log_table[d];
         let first = self.table[k][a];
