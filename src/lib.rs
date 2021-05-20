@@ -54,3 +54,4 @@ pub mod union_find;
 pub mod util;
 pub mod wavelet_matrix;
 pub mod xorshift;
+pub mod dfa;
