@@ -1,5 +1,11 @@
 use cargo_snippet::snippet;
 
+/// 置換の二行記法
+/// 
+/// サイクルに分割することが出来る。
+/// 
+/// 計算量 O(N logN)
+
 #[snippet("Permutation")]
 struct Permutation {
     a: Vec<usize>,
