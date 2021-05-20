@@ -1,5 +1,16 @@
 use cargo_snippet::snippet;
 
+/// N個の配列をrootN個ずつ分割する。
+/// こうすることで、更新とクエリをO(rootN)にすることが出来る。
+/// 
+/// Nは何らかの平方数であることが望ましいので、
+/// まず、N=d*dとなるように拡張し、整理する。
+/// 
+/// buckets(l,r)は、[l,r)にオーバーラップする
+/// バケットの列を計算する。計算量はO(rootN)
+/// 
+/// セグ木に対する優位性は汎用性が高いこと。
+
 #[snippet("SqrtDecomposition")]
 #[derive(Debug, Copy, Clone)]
 enum Bucket {
@@ -25,9 +36,6 @@ impl Buckets {
     }
     pub fn n(&self) -> usize {
         self.d * self.d
-    }
-    pub fn bucket(&self, i: usize) -> usize {
-        i / self.d
     }
     #[doc = "[l, r)"]
     pub fn buckets(&self, l: usize, r: usize) -> Vec<Bucket> {
@@ -68,8 +76,6 @@ impl Buckets {
 fn test_buckets() {
     let sc = Buckets::new(10);
     assert_eq!(sc.d, 4);
-    assert_eq!(sc.bucket(0), 0);
-    assert_eq!(sc.bucket(4), 1);
     dbg!(sc.buckets(0, 3));
     dbg!(sc.buckets(0, 4));
     dbg!(sc.buckets(1, 4));
