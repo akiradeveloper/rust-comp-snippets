@@ -4,6 +4,9 @@ use crate::number::modinv;
 /// ガウスの掃き出し法
 /// Ax = y
 /// の解xをmod Mの下で計算する。
+/// 
+/// Rankというのはざっくりいうと、
+/// 実質的に何次元の一次変換かということ。
 
 #[snippet("GaussianElimination")]
 struct GaussianElimination {

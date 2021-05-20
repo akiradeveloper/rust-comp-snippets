@@ -238,7 +238,7 @@ fn bench_ntt_naive(b: &mut test::Bencher) {
 
 #[bench]
 fn bench_ntt_fft(b: &mut test::Bencher) {
-    use crate::fft;
+    use super::fft;
     let mut x = vec![0;N];
     for i in 0..N {
         x[i] = i as i64;
