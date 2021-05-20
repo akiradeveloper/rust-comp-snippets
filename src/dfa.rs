@@ -16,7 +16,7 @@ trait Dfa {
 }
 
 #[snippet("Dfa")]
-pub fn count<X: Dfa>(dfa: &X, n: usize, alphabet: &[X::Alphabet], modulo: u32) -> u32
+fn count<X: Dfa>(dfa: &X, n: usize, alphabet: &[X::Alphabet], modulo: u32) -> u32
 where
     X::Alphabet: Copy,
     X::State: Eq + Hash + Copy,
@@ -59,6 +59,24 @@ impl Dfa for Leq<'_> {
     }
     fn accept(&self, s: Self::State) -> bool {
         s != Ordering::Greater
+    }
+}
+
+#[snippet("Dfa")]
+struct Lt<'a>(&'a [u8]);
+#[snippet("Dfa")]
+impl Dfa for Lt<'_> {
+    type Alphabet = u8;
+    type State = Ordering;
+    fn init(&self) -> Self::State {
+        Ordering::Equal
+    }
+    // assumes i moves from 0 to self.0.len() - 1
+    fn next(&self, s: Self::State, a: Self::Alphabet, i: usize) -> Self::State {
+        s.then(a.cmp(&self.0[i]))
+    }
+    fn accept(&self, s: Self::State) -> bool {
+        s == Ordering::Less
     }
 }
 
