@@ -2,6 +2,17 @@
 
 use cargo_snippet::snippet;
 
+/// 全方位木DP
+///  
+/// 木において、ある頂点uの入辺v->uの値をDP[u,v]で表すことにする。
+/// これを効率的に求めるアルゴリズムである。
+/// 
+/// 解説: https://www.akiradeveloper.com/post/algorithm-rerooting/
+///
+/// 木であるが、辺は有向として、各方向に値を格納出来るようにしている。
+/// （アルゴリズムの実行のためにはbidirectionalにする必要がある）
+/// 頂点や辺の値は、DPの計算に利用することが出来る。
+
 #[snippet("CumRL")]
 trait Foldable {
     type T: Clone + std::fmt::Debug;
@@ -69,6 +80,10 @@ use std::collections::HashMap;
 trait ZenHoable: Foldable + Clone + Sized {
     type NVal: Clone;
     type EVal: Clone;
+    /// rerootingした時に新しいDP値を計算するために呼ばれる。
+    /// uの下にあったvを持ち上げてu->vの値を計算する場合、
+    /// nvalue: uの値
+    /// evalue: u->vの値
     fn f(&self, nvalue: Self::NVal, evalue: Self::EVal, dp: &CumRL<Self>, l: usize, r: usize) -> Self::T;
 }
 #[snippet("ZenHo")]
