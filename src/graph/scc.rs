@@ -1,6 +1,16 @@
 use cargo_snippet::snippet;
 use std::collections::VecDeque;
 
+/// 強連結分解
+/// 
+/// 有向グラフをお互いに行き来可能な
+/// 頂点集合に分解する。
+/// 
+/// 入力: 有向グラフ
+/// 出力: 各ノードが所属する集合
+/// 
+/// 計算量: O(V+E)
+
 #[snippet("SCC")]
 pub struct SCC {
     g: Vec<Vec<usize>>,
@@ -11,7 +21,6 @@ pub struct SCC {
 }
 
 #[snippet("SCC")]
-#[doc = "nodes that communicates each others are contracted into one node"]
 impl SCC {
     pub fn new(n: usize) -> Self {
         Self {
