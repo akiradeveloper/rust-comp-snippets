@@ -2,6 +2,12 @@ use cargo_snippet::snippet;
 use crate::union_find::UnionFind;
 use std::collections::HashMap;
 
+/// 無向グラフの連結成分分解
+/// 
+/// UnionFindを内部的に使ってるだけ。
+/// 計算量も悪いので、消してもいいかも。
+/// 有向グラフの強連結分解を使う方がよい。
+
 #[snippet("Partition")]
 #[derive(Debug)]
 struct Connected {
