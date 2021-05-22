@@ -59,7 +59,7 @@ impl Centroid {
 
 /// 木をある頂点を中心に分解する
 /// nodeidは、初期の木における頂点番号を保持していて、
-/// eは、nodeid配列内のindexを用いて辺を表現する。
+/// eは、nodeid配列内のindexを用いて無向辺を表現する。
 
 #[snippet("split_tree")]
 #[derive(Debug)]
