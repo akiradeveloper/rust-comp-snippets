@@ -1,6 +1,16 @@
 use cargo_snippet::snippet;
 use std::collections::HashMap;
 
+/// 木の重心分解
+/// 
+/// 木の重心とは、その頂点の周りにある部分木が
+/// どれも元の木の半分以下の大きさになってる頂点のことである。
+/// 
+/// アイデア:
+/// 適当な頂点から木DPをして、部分木のサイズを求める。
+/// そして、全頂点のうち、全部分木がN/2以下のサイズになってるものを列挙する。
+/// 自分を頂点とした部分木のサイズが求まれば、親ノード側の部分木のサイズも求まる。
+
 #[snippet("TreeCentroid")]
 pub struct Centroid {
     pub g: Vec<Vec<usize>>,
@@ -47,15 +57,17 @@ impl Centroid {
     }
 }
 
+/// 木をある頂点を中心に分解する
+/// nodeidは、初期の木における頂点番号を保持していて、
+/// eは、nodeid配列内のindexを用いて辺を表現する。
+
 #[snippet("split_tree")]
 #[derive(Debug)]
 pub struct SubTree {
-    n: usize,
-    e: Vec<(usize,usize)>,
     nodeid: Vec<usize>,
+    e: Vec<(usize,usize)>,
 }
 #[snippet("split_tree")]
-#[doc = "O(n)"]
 pub fn split_tree(tree: SubTree, root: usize) -> Vec<SubTree> {
     struct Rec<'a> {
         g: &'a Vec<Vec<usize>>,
@@ -76,7 +88,7 @@ pub fn split_tree(tree: SubTree, root: usize) -> Vec<SubTree> {
     }
 
     let mut res = vec![];
-    let n = tree.n;
+    let n = tree.nodeid.len();
     let mut g = vec![vec![];n];
     for (u,v) in tree.e {
         g[u].push(v);
@@ -111,9 +123,8 @@ pub fn split_tree(tree: SubTree, root: usize) -> Vec<SubTree> {
         }
 
         res.push(SubTree {
-            n: m,
-            e: e,
             nodeid: nodeid,
+            e: e,
         });
     }
     res
@@ -160,9 +171,8 @@ fn test_centroid() {
         nodeid[i] = i;
     }
     let tree = SubTree {
-        n: 24,
-        e: e,
         nodeid: nodeid,
+        e: e,
     };
     let subtrees = split_tree(tree, 2);
     dbg!(subtrees);
