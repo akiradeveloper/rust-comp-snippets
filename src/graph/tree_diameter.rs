@@ -1,6 +1,9 @@
 use cargo_snippet::snippet;
 
-// Verified with GRA_5_A
+/// 木の直径
+/// 
+/// 重み付き木（無向）において、直径を求める。
+/// アルゴリズムにはdouble-sweepという名前があるらしい。
 
 #[snippet("tree_diameter")]
 pub mod tree_diameter {
@@ -43,13 +46,13 @@ pub mod tree_diameter {
             self.g[u].push(Edge { dst: v, weight: dist });
             self.g[v].push(Edge { dst: u, weight: dist });
         }
-        pub fn solve(&self) -> i64 {
+        pub fn solve(&self) -> (usize, usize, i64) {
             let ffp = FindFurthestPair {
                 g: self.g.clone(),
             };
             let (v, _) = ffp.find(0);
-            let (_, d) = ffp.find(v);
-            d
+            let (w, d) = ffp.find(v);
+            (v, w, d)
         }
     }
 }
