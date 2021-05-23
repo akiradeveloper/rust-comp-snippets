@@ -1,19 +1,30 @@
 use cargo_snippet::snippet;
 use std::collections::HashSet;
 
+/// 有向グラフに対してサイクルの存在判定を行う。
+/// 
+/// アイデア:
+/// サイクルがあるということは、サイクル上の頂点は、
+/// indeg>0のノードから到達可能ということである。
+/// 
+/// 従って、indeg==0の頂点から辿っていき、辿るごとに辺を削除していった時、
+/// サイクル上の辺は削除されることがない。
+/// この性質を利用して、サイクルの存在を判定することが出来る。
+/// 
+/// 計算量: O(E)
+/// 最悪ケースで全辺を辿るため
+
 // verified: GRL_4_A
 #[snippet("CycleDetection")]
 fn cycle_detection_directed(g: &[Vec<usize>]) -> bool {
     let n = g.len();
     let mut in_g = vec![HashSet::new();n];
-    // O(E)
     for v in 0..n {
         for &u in &g[v] {
             in_g[u].insert(v);
         }
     }
     let mut v_indegree0 = vec![];
-    // O(V)
     for v in 0..n {
         if in_g[v].len() == 0 {
             v_indegree0.push(v);
@@ -46,7 +57,6 @@ impl CycleDetection {
     pub fn add_edge(&mut self, u: usize, v: usize) {
         self.g[u].push(v);
     }
-    #[doc = "O(E)"]
     pub fn solve(&self) -> bool {
         cycle_detection_directed(&self.g)
     }
