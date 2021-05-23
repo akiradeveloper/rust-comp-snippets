@@ -1,18 +1,24 @@
 use cargo_snippet::snippet;
 use std::collections::HashSet;
 
-#[doc = "undirected. paint the vertices in two colors. if impossible return None."]
+/// 二部グラフというのは、
+/// 頂点集合を２つに分割して、各集合の頂点はお互いに隣接しないようなグラフである。
+
+/// 隣合うノードに白黒と色をつけていくことで二部グラフかどうかを判定する。
+
 #[snippet("is_bigraph")]
-pub fn is_bigraph(g: &[Vec<usize>]) -> Option<Vec<bool>> {
+pub fn is_bigraph(g: &[Vec<usize>]) -> bool {
     struct Rec<'a> {
         g: &'a [Vec<usize>],
         color: Vec<i8>,
     }
     impl <'a> Rec<'a> {
+        // uにcolorをつけることが出来るか
         fn solve(&mut self, u: usize, color: i8) -> bool {
             self.color[u] = color;
 
             let mut ok = true;
+            // 隣り合うノードすべてに異なる色をつけられることを検証する
             for i in 0..self.g[u].len() {
                 let v = self.g[u][i];
                 if self.color[v] == 0 {
@@ -34,21 +40,18 @@ pub fn is_bigraph(g: &[Vec<usize>]) -> Option<Vec<bool>> {
         g: g,
         color: vec![0;n],
     };
-    let ok = rec.solve(0, 1);
-    if !ok {
-        return None
-    }
-    let mut res = vec![];
-    for i in 0..n {
-        if rec.color[i] == 1 {
-            res.push(true)
-        } else {
-            res.push(false)
-        }
-    }
-    Some(res)
+    rec.solve(0, 1)
 }
 
+/// 二部グラフの中から、最大マッチングを列挙する。
+/// 
+/// アイデア:
+/// 増加路を探しまくる。
+/// 増加路が存在しない <=> 最大マッチング
+/// が言える。
+/// 
+/// 計算量:
+/// O(V(V+E))
 
 #[snippet("bipartite_matching")]
 #[doc = "O(V(V+E))"]
@@ -57,6 +60,8 @@ fn bipartite_matching(g_list: &[HashSet<usize>]) -> Vec<(usize,usize)> {
         used[v] = true;
         for &u in &g_list[v] {
             let w = matching[u];
+            // 今からつなごうとしているuにマッチングwがすでにいる場合、
+            // wに他のペアを探すようにお願いする。これが増加路を探すことに相当する。
             if w.is_none() || (!used[w.unwrap()] && dfs(w.unwrap(), g_list, used, matching)) {
                 matching[v] = Some(u);
                 matching[u] = Some(v);
@@ -91,7 +96,6 @@ fn bipartite_matching(g_list: &[HashSet<usize>]) -> Vec<(usize,usize)> {
 struct BipartiteMatching {
     g: Vec<HashSet<usize>>,
 }
-#[doc = "find the pair of vertices which is maximum possible."]
 #[snippet("bipartite_matching")]
 impl BipartiteMatching {
     pub fn new(n: usize) -> BipartiteMatching {
@@ -111,17 +115,10 @@ impl BipartiteMatching {
 
 #[test]
 fn test_bipartite_matching() {
-    let mut bpm = BipartiteMatching::new(4);
-    bpm.connect(0,2);
+    let mut bpm = BipartiteMatching::new(6);
     bpm.connect(0,3);
-    bpm.connect(1,2);
-    dbg!(bpm.solve());
-}
-#[test]
-fn test_bipartite_matching_impossible() {
-    let mut bpm = BipartiteMatching::new(3);
-    bpm.connect(0,1);
-    bpm.connect(1,2);
-    bpm.connect(2,0);
+    bpm.connect(0,4);
+    bpm.connect(1,4);
+    bpm.connect(2,5);
     dbg!(bpm.solve());
 }
