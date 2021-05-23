@@ -47,6 +47,16 @@ pub mod prim {
     }
 }
 
+/// クラスカル法
+/// 
+/// 辺をコスト昇順に並べ、前から辿っていく。
+/// 辺u-vについて、uとvがまだ連結でない場合に
+/// uとvを木に加えていく。
+/// こうしていくと、最小全域木が出来上がる。
+/// 
+/// 計算量:
+/// O(E logV)
+
 #[snippet("kraskal")]
 mod kraskal {
     use crate::union_find::UnionFind;
