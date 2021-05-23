@@ -6,10 +6,10 @@ use std::collections::HashSet;
 
 /// 隣合うノードに白黒と色をつけていくことで二部グラフかどうかを判定する。
 
-#[snippet("is_bigraph")]
-pub fn is_bigraph(g: &[Vec<usize>]) -> bool {
+#[snippet("BipartiteMatching")]
+pub fn isbipartite(g: &[HashSet<usize>]) -> bool {
     struct Rec<'a> {
-        g: &'a [Vec<usize>],
+        g: &'a [HashSet<usize>],
         color: Vec<i8>,
     }
     impl <'a> Rec<'a> {
@@ -19,8 +19,7 @@ pub fn is_bigraph(g: &[Vec<usize>]) -> bool {
 
             let mut ok = true;
             // 隣り合うノードすべてに異なる色をつけられることを検証する
-            for i in 0..self.g[u].len() {
-                let v = self.g[u][i];
+            for &v in &self.g[u] {
                 if self.color[v] == 0 {
                     if !self.solve(v, -1*color) {
                         ok = false
@@ -53,9 +52,8 @@ pub fn is_bigraph(g: &[Vec<usize>]) -> bool {
 /// 計算量:
 /// O(V(V+E))
 
-#[snippet("bipartite_matching")]
-#[doc = "O(V(V+E))"]
-fn bipartite_matching(g_list: &[HashSet<usize>]) -> Vec<(usize,usize)> {
+#[snippet("BipartiteMatching")]
+fn find_max_bipartite_matching(g_list: &[HashSet<usize>]) -> Vec<(usize,usize)> {
     fn dfs(v: usize, g_list: &[HashSet<usize>], used: &mut [bool], matching: &mut [Option<usize>]) -> bool {
         used[v] = true;
         for &u in &g_list[v] {
@@ -92,11 +90,11 @@ fn bipartite_matching(g_list: &[HashSet<usize>]) -> Vec<(usize,usize)> {
     res
 }
 
-#[snippet("bipartite_matching")]
+#[snippet("BipartiteMatching")]
 struct BipartiteMatching {
     g: Vec<HashSet<usize>>,
 }
-#[snippet("bipartite_matching")]
+#[snippet("BipartiteMatching")]
 impl BipartiteMatching {
     pub fn new(n: usize) -> BipartiteMatching {
         BipartiteMatching {
@@ -108,8 +106,12 @@ impl BipartiteMatching {
         self.g[u].insert(v);
         self.g[v].insert(u);
     }
-    pub fn solve(&self) -> Vec<(usize, usize)> {
-        bipartite_matching(&self.g)
+    pub fn solve(&self) -> Option<Vec<(usize, usize)>> {
+        if isbipartite(&self.g) {
+            Some(find_max_bipartite_matching(&self.g))
+        } else {
+            None
+        }
     }
 }
 
@@ -120,5 +122,15 @@ fn test_bipartite_matching() {
     bpm.connect(0,4);
     bpm.connect(1,4);
     bpm.connect(2,5);
+    assert!(bpm.solve().is_some());
     dbg!(bpm.solve());
+}
+
+#[test]
+fn test_bipartite_matching_2() {
+    let mut bpm = BipartiteMatching::new(3);
+    bpm.connect(0, 1);
+    bpm.connect(1, 2);
+    bpm.connect(2, 0);
+    assert!(bpm.solve().is_none());
 }
