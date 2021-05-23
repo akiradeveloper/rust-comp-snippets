@@ -2,9 +2,17 @@
 
 use cargo_snippet::snippet;
 
+/// プリム法
+/// 
+/// 最小全域木に含まれる頂点集合Vとその他Wに分類し、
+/// 毎回、Vに含まれる頂点から、Wに繋がる辺のうちコスト最小のものを選んで、
+/// WからVに頂点を移動していく。
+/// 
+/// 計算量:
+/// O(V^2)
+
 #[snippet("prim")]
 pub mod prim {
-    #[doc = "O(V^2)"]
     pub fn prim(cost: &[Vec<u64>]) -> u64 {
         let n = cost.len();
         let inf = 1<<60;
