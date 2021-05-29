@@ -1,8 +1,12 @@
+use cargo_snippet::snippet;
+
 use std::collections::HashMap;
 
+#[snippet(Bag)]
 struct Bag<T> {
     h: HashMap<T, usize>,
 }
+#[snippet(Bag)]
 impl <T: Eq + std::hash::Hash> Bag<T> {
     pub fn new() -> Self {
         Self {
