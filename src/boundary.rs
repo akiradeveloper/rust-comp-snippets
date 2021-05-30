@@ -1,55 +1,49 @@
 use cargo_snippet::snippet;
 
-#[snippet("valid4")]
-pub fn valid4u(h: usize, w: usize, ps: Vec<(Option<usize>, Option<usize>)>) -> Vec<(usize, usize)> {
-    let mut res = vec![];
-    for (x, y) in ps {
-        if x.is_none() || y.is_none() {
-            continue;
+#[snippet("Boundary")]
+struct Boundary {
+    l: i64,
+    r: i64,
+}
+#[snippet("Boundary")]
+impl Boundary {
+    pub fn new(n: usize) -> Self {
+        Self {
+            l: 0,
+            r: n as i64, 
         }
-        let x = x.unwrap();
-        let y = y.unwrap();
-        if x >= h || y >= w {
-            res.push((x,y));
+    }
+    pub fn add(&self, x: usize, diff: i64) -> Option<usize> {
+        let x = x as i64;
+        let y = x + diff;
+        if y > self.r-1 {
+            None
+        } else if y < self.l {
+            None
+        } else {
+            Some(y as usize)
         }
     }
-    res
 }
-
-#[snippet("incl")]
-#[doc = "0..=n in old compilers"]
-pub fn incl(n: usize) -> usize {
-    n+1
+#[snippet("Boundary")]
+struct Boundary2d {
+    h: Boundary,
+    w: Boundary,
 }
-
-#[snippet("sub_or_max")]
-#[doc = "max(x-y, z)"]
-pub fn sub_or_max(x: usize, y: usize, z: usize) -> usize {
-    // x-y > z
-    if x > y+z {
-        x-y
-    } else {
-        z
+#[snippet("Boundary")]
+impl Boundary2d {
+    pub fn new(h: usize, w: usize) -> Self {
+        Self {
+            h: Boundary::new(h),
+            w: Boundary::new(w),
+        }
     }
-}
-#[test]
-fn test_sub_or_max() {
-    assert_eq!(sub_or_max(3, 2, 0), 1);
-    assert_eq!(sub_or_max(3, 4, 0), 0);
-}
-
-#[snippet("add_or_min")]
-#[doc = "min(x+y, z)"]
-pub fn add_or_min(x: usize, y: usize, z: usize) -> usize {
-    // x+y < z
-    if x+y < z {
-        x+y
-    } else {
-        z
+    pub fn add(&self, p: (usize,usize), diff: (i64,i64)) -> Option<(usize,usize)> {
+        let x = self.h.add(p.0, diff.0);
+        let y = self.w.add(p.1, diff.1);
+        match (x, y) {
+            (Some(a), Some(b)) => Some((a,b)),
+            _ => None,
+        }
     }
-}
-#[test]
-fn test_add_or_min() {
-    assert_eq!(add_or_min(4, 6, 8),8);
-    assert_eq!(add_or_min(4, 6, 12),10);
 }
