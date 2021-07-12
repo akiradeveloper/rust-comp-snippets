@@ -117,3 +117,31 @@ fn eratosthenes(n_max: usize) -> Vec<usize> {
     }
     res
 }
+
+/// オイラーのφ関数
+/// n以下の数でnと素なもの（1を含む）の数を求める
+/// 構築: O(N log log N)
+pub fn euler_phi_table(max_n: usize) -> Vec<usize> {
+    let mut euler = vec![0;max_n+1];
+    for i in 0..=max_n {
+        euler[i] = i;
+    }
+    for i in 2..max_n {
+        if euler[i] == i {
+            let mut j = i;
+            while j <= max_n {
+                euler[j] = euler[j] / i * (i-1);
+                j += i;
+            }
+        }
+    }
+    euler
+}
+#[test]
+fn test_euler_phi_table() {
+    let e = euler_phi_table(10000);
+    assert_eq!(e[6], 2);
+    assert_eq!(e[7], 6);
+    assert_eq!(e[8], 4);
+    assert_eq!(e[60], 16);
+}
