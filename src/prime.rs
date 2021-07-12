@@ -121,6 +121,7 @@ fn eratosthenes(n_max: usize) -> Vec<usize> {
 /// オイラーのφ関数
 /// n以下の数でnと素なもの（1を含む）の数を求める
 /// 構築: O(N log log N)
+#[snippet("euler_phi_table")]
 pub fn euler_phi_table(max_n: usize) -> Vec<usize> {
     let mut euler = vec![0;max_n+1];
     for i in 0..=max_n {
