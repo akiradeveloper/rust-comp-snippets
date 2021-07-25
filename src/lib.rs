@@ -37,6 +37,7 @@ pub mod polynomial;
 pub mod prime;
 pub mod rev;
 pub mod seg;
+pub mod seg2d;
 pub mod seg_beats;
 pub mod seg_lazy;
 pub mod sequence;
