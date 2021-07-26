@@ -70,6 +70,7 @@ impl <M: Monoid> SEG2d<M> {
     /// O(logH logW)
     pub fn query(&self, x0: usize, x1: usize, y0: usize, y1: usize) -> M::T {
         let nodes = self.tree.query_nodes(x0, x1);
+        dbg!(&nodes);
         let mut ans = M::id();
         for k in nodes {
             let l = self.index[k].lower_bound(&y0);
@@ -79,4 +80,36 @@ impl <M: Monoid> SEG2d<M> {
         }
         ans
     }
+}
+
+#[test]
+fn test_seg2d() {
+    struct MAX;
+    impl Monoid for MAX {
+        type T = i64;
+        fn id() -> Self::T {
+            std::i64::MIN
+        }
+        fn op(a: &Self::T, b: &Self::T) -> Self::T {
+            std::cmp::max(*a, *b)
+        }
+    }
+    let mut y = vec![];
+    for i in 0..5 {
+        y.push(vec![0]);
+    }
+    let mut s: SEG2d<MAX> = SEG2d::new(y);
+    s.update(0, 0, 3);
+    s.update(1, 0, 2);
+    s.update(2, 0, 1);
+    s.update(3, 0, 2);
+    s.update(4, 0, 3);
+    assert_eq!(s.query(0, 1, 0, 1), 3);
+    assert_eq!(s.query(0, 2, 0, 1), 2);
+    assert_eq!(s.query(0, 3, 0, 1), 1);
+    assert_eq!(s.query(0, 4, 0, 1), 1);
+    assert_eq!(s.query(0, 5, 0, 1), 1);
+    assert_eq!(s.query(2, 5, 0, 1), 1);
+    assert_eq!(s.query(3, 5, 0, 1), 2);
+    assert_eq!(s.query(4, 5, 0, 1), 3);
 }
