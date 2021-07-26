@@ -55,12 +55,21 @@ impl <M: Monoid> SEG2d<M> {
         for node in nodes {
             match node {
                 SEGNode::Leaf { k } => {
-                    let i = self.index[k].binary_search(&y).expect("y not found");
+                    let i = self.index[k].binary_search(&y).unwrap();
                     self.segs[k].update(i, v.clone());
                 },
-                SEGNode::Branch { k, .. } => {
-                    let i = self.index[k].binary_search(&y).expect("y not found");
-                    self.segs[k].update(i, v.clone());
+                SEGNode::Branch { k, l, r } => {
+                    let mut v = M::id();
+                    if let Ok(il) = self.index[l].binary_search(&y) {
+                        let vl = self.segs[l].get(il);
+                        v = M::op(&v, &vl);
+                    }
+                    if let Ok(ir) = self.index[r].binary_search(&y) {
+                        let vr = self.segs[r].get(ir);
+                        v = M::op(&v, &vr);
+                    }
+                    let i = self.index[k].binary_search(&y).unwrap();
+                    self.segs[k].update(i, v);
                 },
             }
         }
@@ -70,7 +79,6 @@ impl <M: Monoid> SEG2d<M> {
     /// O(logH logW)
     pub fn query(&self, x0: usize, x1: usize, y0: usize, y1: usize) -> M::T {
         let nodes = self.tree.query_nodes(x0, x1);
-        dbg!(&nodes);
         let mut ans = M::id();
         for k in nodes {
             let l = self.index[k].lower_bound(&y0);
@@ -99,17 +107,17 @@ fn test_seg2d() {
         y.push(vec![0]);
     }
     let mut s: SEG2d<MAX> = SEG2d::new(y);
-    s.update(0, 0, 3);
+    s.update(0, 0, 1);
     s.update(1, 0, 2);
-    s.update(2, 0, 1);
+    s.update(2, 0, 3);
     s.update(3, 0, 2);
-    s.update(4, 0, 3);
-    assert_eq!(s.query(0, 1, 0, 1), 3);
+    s.update(4, 0, 1);
+    assert_eq!(s.query(0, 1, 0, 1), 1);
     assert_eq!(s.query(0, 2, 0, 1), 2);
-    assert_eq!(s.query(0, 3, 0, 1), 1);
-    assert_eq!(s.query(0, 4, 0, 1), 1);
-    assert_eq!(s.query(0, 5, 0, 1), 1);
-    assert_eq!(s.query(2, 5, 0, 1), 1);
+    assert_eq!(s.query(0, 3, 0, 1), 3);
+    assert_eq!(s.query(0, 4, 0, 1), 3);
+    assert_eq!(s.query(0, 5, 0, 1), 3);
+    assert_eq!(s.query(2, 5, 0, 1), 3);
     assert_eq!(s.query(3, 5, 0, 1), 2);
-    assert_eq!(s.query(4, 5, 0, 1), 3);
+    assert_eq!(s.query(4, 5, 0, 1), 1);
 }

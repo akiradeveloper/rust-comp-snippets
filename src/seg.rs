@@ -10,7 +10,7 @@ use cargo_snippet::snippet;
 #[snippet("SEG")]
 #[allow(dead_code)]
 pub trait Monoid {
-    type T: Clone;
+    type T: Clone + std::fmt::Debug;
     fn id() -> Self::T;
     fn op(a: &Self::T, b: &Self::T) -> Self::T;
 }
