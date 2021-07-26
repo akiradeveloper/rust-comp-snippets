@@ -50,8 +50,12 @@ impl<T: Ord> LowerBound<T> for [T] {
 }
 
 #[test]
-fn test() {
+fn test_lower_bound() {
     let vec = vec![1, 2, 4, 6, 7, 12, 54, 60];
+    assert_eq!(vec.lower_bound(&2), 1);
+    assert_eq!(vec.upper_bound(&2), 2);
+    assert_eq!(vec.lower_bound(&3), 2);
+    assert_eq!(vec.upper_bound(&3), 2);
     assert_eq!(vec.lower_bound(&4), 2);
     assert_eq!(vec.upper_bound(&4), 3);
 } 
@@ -59,7 +63,7 @@ fn test() {
 use std::collections::HashMap;
 
 #[snippet("RangeCompression")]
-struct RangeCompression {
+pub struct RangeCompression {
     inv: HashMap<i64, usize>,
     ranges: Vec<i64>,
 }
