@@ -18,8 +18,8 @@ pub trait Monoid {
 #[snippet("SEG")]
 #[allow(dead_code)]
 pub struct SEG<M: Monoid> {
-    n: usize,
-    buf: Vec<M::T>,
+    pub n: usize,
+    pub buf: Vec<M::T>,
 }
 
 #[snippet("SEG")]
