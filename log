@@ -1,0 +1,4705 @@
+snippet ArithSeq
+    struct ArithSeq {
+        a: i64,
+        b: i64,
+    }
+    impl ArithSeq {
+        #[doc = "a+bi >= x"]
+        pub fn next(&self, x: i64) -> i64 {
+            if x >= self.a {
+                let d = x - self.a;
+                let i = (d - 1 + self.b) / self.b;
+                self.a + self.b * i
+            } else {
+                let d = self.a - x;
+                let i = d / self.b;
+                self.a - self.b * i
+            }
+        }
+        #[doc = "a+bi <= x"]
+        pub fn prev(&self, x: i64) -> i64 {
+            let next = self.next(x);
+            if next == x {
+                x
+            } else {
+                next - self.b
+            }
+        }
+        #[doc = "[a+bi, n] <= [l, u]"]
+        pub fn range(&self, l: i64, u: i64) -> Option<(i64, i64)> {
+            if l > u {
+                return None;
+            }
+            let x = self.next(l);
+            let y = self.prev(u);
+            if x > y {
+                return None;
+            }
+            assert!(x <= y);
+            if l <= x && x <= u {
+                let cnt = (y - x) / self.b;
+                Some((x, cnt + 1))
+            } else {
+                None
+            }
+        }
+    }
+
+snippet BIT
+    #[allow(dead_code)]
+    #[doc = " Binary Indexed Tree of usize"]
+    pub struct BIT<T> {
+        buf: Vec<T>,
+    }
+    #[allow(dead_code)]
+    impl<T: Clone + Default + std::ops::AddAssign> BIT<T> {
+        pub fn new(n: usize) -> BIT<T> {
+            BIT {
+                buf: vec![T::default(); n + 1],
+            }
+        }
+        pub fn sum(&self, i: usize) -> T {
+            let mut i = i;
+            let mut s = T::default();
+            while i > 0 {
+                s += self.buf[i].clone();
+                i &= i - 1;
+            }
+            s
+        }
+        pub fn add(&mut self, i: usize, x: T) {
+            let mut i = i as i64;
+            while i < self.buf.len() as i64 {
+                self.buf[i as usize] += x.clone();
+                i += i & -i;
+            }
+        }
+    }
+
+snippet BITGeneric
+    #[doc = " https://github.com/hatoo/competitive-rust-snippets"]
+    #[allow(dead_code)]
+    #[doc = " Generic Binary Indexed Tree"]
+    pub struct BITGeneric<T: Clone, F: Fn(&mut T, &T) -> ()> {
+        buf: Vec<T>,
+        zero: T,
+        f: F,
+    }
+    impl<T: Clone, F: Fn(&mut T, &T) -> ()> BITGeneric<T, F> {
+        #[allow(dead_code)]
+        pub fn new(n: usize, zero: &T, f: F) -> BITGeneric<T, F> {
+            BITGeneric {
+                buf: vec![zero.clone(); n + 1],
+                zero: zero.clone(),
+                f: f,
+            }
+        }
+        #[allow(dead_code)]
+        #[doc = "O(log N)"]
+        pub fn sum(&self, i: usize) -> T {
+            let mut i = i;
+            let mut s = self.zero.clone();
+            while i > 0 {
+                (self.f)(&mut s, &self.buf[i]);
+                i &= i - 1;
+            }
+            s
+        }
+        #[allow(dead_code)]
+        #[doc = "O(log N)"]
+        pub fn add(&mut self, i: usize, x: &T) {
+            let mut i = i as i64;
+            while i < self.buf.len() as i64 {
+                let t = &mut self.buf[i as usize];
+                (self.f)(t, x);
+                i += i & -i;
+            }
+        }
+    }
+
+snippet BinarySearch
+    #[doc = "lower,upper are inclusive range"]
+    pub struct BinarySearch<F> {
+        pub p: F,
+        pub lower: i64,
+        pub upper: i64,
+    }
+    impl<F: Fn(i64) -> bool> BinarySearch<F> {
+        #[doc = "O(log(upper-lower))"]
+        pub fn lower_bound(&self) -> i64 {
+            let lower = self.lower;
+            let upper = self.upper;
+            assert!(lower <= upper);
+            let mut lb = lower - 1;
+            let mut ub = upper + 1;
+            while ub - lb > 1 {
+                let mid = (lb + ub) / 2;
+                if (self.p)(mid) {
+                    ub = mid;
+                } else {
+                    lb = mid;
+                }
+            }
+            let latter = ub;
+            latter
+        }
+    }
+
+snippet BitSet
+    const TRUE: &'static bool = &true;
+    const FALSE: &'static bool = &false;
+    #[derive(Clone, Debug)]
+    #[doc = " Efficient bool collection"]
+    pub struct BitSet {
+        buf: Vec<u64>,
+        size: usize,
+    }
+    impl BitSet {
+        #[allow(dead_code)]
+        pub fn new(size: usize) -> BitSet {
+            BitSet {
+                buf: vec![0; (size + 63) / 64],
+                size: size,
+            }
+        }
+        #[allow(dead_code)]
+        pub fn set(&mut self, i: usize, b: bool) {
+            assert!(i < self.size);
+            if b {
+                self.buf[i >> 6] |= 1 << (i & 63);
+            } else {
+                self.buf[i >> 6] &= !(1 << (i & 63));
+            }
+        }
+        #[allow(dead_code)]
+        pub fn count_ones(&self) -> usize {
+            let sum: u32 = self.buf.iter().map(|x| x.count_ones()).sum();
+            sum as usize
+        }
+        #[allow(dead_code)]
+        fn chomp(&mut self) {
+            let r = self.size & 63;
+            if r != 0 {
+                if let Some(x) = self.buf.last_mut() {
+                    let d = 64 - r;
+                    *x = (*x << d) >> d;
+                }
+            }
+        }
+    }
+    impl std::ops::Index<usize> for BitSet {
+        type Output = bool;
+        fn index(&self, index: usize) -> &bool {
+            [FALSE, TRUE][(self.buf[index >> 6] >> (index & 63)) as usize & 1]
+        }
+    }
+    impl std::ops::ShlAssign<usize> for BitSet {
+        fn shl_assign(&mut self, x: usize) {
+            let q = x >> 6;
+            let r = x & 63;
+            if q >= self.buf.len() {
+                for x in &mut self.buf {
+                    *x = 0;
+                }
+                return;
+            }
+            if r == 0 {
+                for i in (q..self.buf.len()).rev() {
+                    self.buf[i] = self.buf[i - q];
+                }
+            } else {
+                for i in (q + 1..self.buf.len()).rev() {
+                    self.buf[i] = (self.buf[i - q] << r) | (self.buf[i - q - 1] >> (64 - r));
+                }
+                self.buf[q] = self.buf[0] << r;
+            }
+            for x in &mut self.buf[..q] {
+                *x = 0;
+            }
+            self.chomp();
+        }
+    }
+    impl std::ops::Shl<usize> for BitSet {
+        type Output = Self;
+        fn shl(mut self, x: usize) -> Self {
+            self <<= x;
+            self
+        }
+    }
+    impl std::ops::ShrAssign<usize> for BitSet {
+        fn shr_assign(&mut self, x: usize) {
+            let q = x >> 6;
+            let r = x & 63;
+            if q >= self.buf.len() {
+                for x in &mut self.buf {
+                    *x = 0;
+                }
+                return;
+            }
+            if r == 0 {
+                for i in 0..self.buf.len() - q {
+                    self.buf[i] = self.buf[i + q];
+                }
+            } else {
+                for i in 0..self.buf.len() - q - 1 {
+                    self.buf[i] = (self.buf[i + q] >> r) | (self.buf[i + q + 1] << (64 - r));
+                }
+                let len = self.buf.len();
+                self.buf[len - q - 1] = self.buf[len - 1] >> r;
+            }
+            let len = self.buf.len();
+            for x in &mut self.buf[len - q..] {
+                *x = 0;
+            }
+        }
+    }
+    impl std::ops::Shr<usize> for BitSet {
+        type Output = Self;
+        fn shr(mut self, x: usize) -> Self {
+            self >>= x;
+            self
+        }
+    }
+    impl<'a> std::ops::BitAndAssign<&'a BitSet> for BitSet {
+        fn bitand_assign(&mut self, rhs: &'a Self) {
+            for (a, b) in self.buf.iter_mut().zip(rhs.buf.iter()) {
+                *a &= *b;
+            }
+        }
+    }
+    impl<'a> std::ops::BitAnd<&'a BitSet> for BitSet {
+        type Output = Self;
+        fn bitand(mut self, rhs: &'a Self) -> Self {
+            self &= rhs;
+            self
+        }
+    }
+    impl<'a> std::ops::BitOrAssign<&'a BitSet> for BitSet {
+        fn bitor_assign(&mut self, rhs: &'a Self) {
+            for (a, b) in self.buf.iter_mut().zip(rhs.buf.iter()) {
+                *a |= *b;
+            }
+            self.chomp();
+        }
+    }
+    impl<'a> std::ops::BitOr<&'a BitSet> for BitSet {
+        type Output = Self;
+        fn bitor(mut self, rhs: &'a Self) -> Self {
+            self |= rhs;
+            self
+        }
+    }
+    impl<'a> std::ops::BitXorAssign<&'a BitSet> for BitSet {
+        fn bitxor_assign(&mut self, rhs: &'a Self) {
+            for (a, b) in self.buf.iter_mut().zip(rhs.buf.iter()) {
+                *a ^= *b;
+            }
+            self.chomp();
+        }
+    }
+    impl<'a> std::ops::BitXor<&'a BitSet> for BitSet {
+        type Output = Self;
+        fn bitxor(mut self, rhs: &'a Self) -> Self {
+            self ^= rhs;
+            self
+        }
+    }
+
+snippet ConvexHullTrick
+    struct ConvexHullTrick {
+        lines: Vec<(i64, i64)>,
+    }
+    impl ConvexHullTrick {
+        pub fn new() -> ConvexHullTrick {
+            ConvexHullTrick { lines: vec![] }
+        }
+        fn check(l1: (i64, i64), l2: (i64, i64), l3: (i64, i64)) -> bool {
+            let mut l1 = l1;
+            let mut l3 = l3;
+            if l1 < l3 {
+                std::mem::swap(&mut l1, &mut l3);
+            }
+            (l3.1 - l2.1) * (l2.0 - l1.0) >= (l2.1 - l1.1) * (l3.0 - l2.0)
+        }
+        pub fn add(&mut self, a: i64, b: i64) {
+            let line = (a, b);
+            while self.lines.len() >= 2
+                && Self::check(
+                    self.lines[self.lines.len() - 2],
+                    self.lines[self.lines.len() - 1],
+                    line,
+                )
+            {
+                self.lines.pop();
+            }
+            self.lines.push(line);
+        }
+        fn f(&self, i: usize, x: i64) -> i64 {
+            let line = self.lines[i];
+            line.0 * x + line.1
+        }
+        #[doc = "min: l>=r, max: l<=r"]
+        pub fn get<F: Fn(i64, i64) -> bool>(&self, x: i64, comp: F) -> i64 {
+            let mut low: i64 = -1;
+            let mut high: i64 = (self.lines.len() - 1) as i64;
+            while high - low > 1 {
+                let mid = (high + low) / 2;
+                if comp(self.f(mid as usize, x), self.f((mid + 1) as usize, x)) {
+                    low = mid;
+                } else {
+                    high = mid;
+                }
+            }
+            self.f(high as usize, x)
+        }
+    }
+
+snippet CoordCompression
+    struct CoordCompression {
+        comp: std::collections::HashMap<i64, usize>,
+        dcmp: std::collections::HashMap<usize, i64>,
+    }
+    impl CoordCompression {
+        fn new(xs: &[i64], start: usize) -> CoordCompression {
+            let mut xs = xs.to_owned();
+            xs.sort();
+            let mut comp = std::collections::HashMap::new();
+            let mut dcmp = std::collections::HashMap::new();
+            let mut acc = start;
+            for x in xs {
+                if comp.contains_key(&x) {
+                    continue;
+                }
+                comp.insert(x, acc);
+                dcmp.insert(acc, x);
+                acc += 1;
+            }
+            CoordCompression { comp, dcmp }
+        }
+        fn compress(&self, x: i64) -> usize {
+            *self.comp.get(&x).unwrap()
+        }
+        fn decompress(&self, x: usize) -> i64 {
+            *self.dcmp.get(&x).unwrap()
+        }
+    }
+
+snippet Counter
+    struct Counter<T> {
+        h: std::collections::HashMap<T, usize>,
+    }
+    impl<T: Eq + std::hash::Hash> Counter<T> {
+        pub fn new() -> Counter<T> {
+            Counter {
+                h: std::collections::HashMap::new(),
+            }
+        }
+        pub fn add(&mut self, x: T) {
+            *self.h.entry(x).or_insert(0) += 1;
+        }
+        pub fn get(&self, x: &T) -> usize {
+            self.h.get(x).cloned().unwrap_or(0)
+        }
+        pub fn entries(&self) -> Vec<(&T, usize)> {
+            let mut r = vec![];
+            for (x, y) in &self.h {
+                r.push((x, *y));
+            }
+            r
+        }
+    }
+
+snippet FTSearch
+    struct FTSearch<F> {
+        f_search: Vec<Option<usize>>,
+        t_search: Vec<usize>,
+        p: F,
+        lower: usize,
+    }
+    impl<F: Fn(usize) -> bool> FTSearch<F> {
+        #[doc = "O(upper-lower)"]
+        fn new(p: F, lower: usize, upper: usize) -> FTSearch<F> {
+            let n = upper + 1 - lower;
+            let mut f_search = vec![None; n];
+            let mut f_i = None;
+            for i in 0..n {
+                if p(i + lower) == false {
+                    f_i = Some(i);
+                }
+                f_search[i] = f_i;
+            }
+            let mut t_search = vec![n; n];
+            let mut t_i = n;
+            for i in (0..n).rev() {
+                if p(i + lower) == true {
+                    t_i = i;
+                }
+                t_search[i] = t_i;
+            }
+            Self {
+                p: p,
+                f_search: f_search,
+                t_search: t_search,
+                lower: lower,
+            }
+        }
+        #[doc = "including i and find the closest false in the left"]
+        fn f_search(&self, i: usize) -> Option<usize> {
+            self.f_search[i - self.lower].map(|x| x + self.lower)
+        }
+        #[doc = "including i and find the closest true in the right"]
+        fn t_search(&self, i: usize) -> usize {
+            self.t_search[i - self.lower] + self.lower
+        }
+    }
+
+snippet HLDecomposition
+    struct HLDecomposition {
+        n: usize,
+        g: Vec<Vec<usize>>,
+        subcnt: Vec<usize>,
+        depth: Vec<usize>,
+        pub par: Vec<Option<usize>>,
+        heavy_next: Vec<Option<usize>>,
+        heavy_head: Vec<usize>,
+        real_to_virt: Vec<usize>,
+        pub virt_to_real: Vec<usize>,
+    }
+    impl HLDecomposition {
+        pub fn new(n: usize) -> Self {
+            HLDecomposition {
+                n: n,
+                g: vec![vec![]; n],
+                subcnt: vec![0; n],
+                depth: vec![0; n],
+                par: vec![None; n],
+                heavy_next: vec![None; n],
+                heavy_head: vec![n; n],
+                real_to_virt: vec![n; n],
+                virt_to_real: vec![n; n],
+            }
+        }
+        pub fn connect(&mut self, u: usize, v: usize) {
+            self.g[u].push(v);
+            self.g[v].push(u);
+        }
+        #[doc = "O(N)"]
+        pub fn build(&mut self, root: usize) {
+            self.dfs1(root);
+            self.dfs2(root);
+            self.bfs(root);
+        }
+        fn dfs1(&mut self, root: usize) {
+            self.depth[root] = 0;
+            self.par[root] = None;
+            self.dfs1_sub(root, None);
+        }
+        fn dfs1_sub(&mut self, u: usize, par: Option<usize>) -> usize {
+            let mut cnt = 1;
+            for v in self.g[u].clone() {
+                if Some(v) == par {
+                    continue;
+                }
+                self.depth[v] = self.depth[u] + 1;
+                self.par[v] = Some(u);
+                cnt += self.dfs1_sub(v, Some(u));
+            }
+            self.subcnt[u] = cnt;
+            cnt
+        }
+        fn dfs2(&mut self, root: usize) {
+            self.dfs2_sub(root, None);
+        }
+        fn dfs2_sub(&mut self, u: usize, par: Option<usize>) {
+            let mut maxv = 0;
+            let mut heavy_next = None;
+            let cld = self.g[u].clone();
+            for &v in &cld {
+                if Some(v) == par {
+                    continue;
+                }
+                if self.subcnt[v] > maxv {
+                    maxv = self.subcnt[v];
+                    heavy_next = Some(v);
+                }
+            }
+            if let Some(hn) = heavy_next {
+                self.heavy_next[u] = Some(hn);
+                self.dfs2_sub(hn, Some(u));
+            }
+            for &v in &cld {
+                if Some(v) == par || Some(v) == heavy_next {
+                    continue;
+                }
+                self.dfs2_sub(v, Some(u));
+            }
+        }
+        fn bfs(&mut self, root: usize) {
+            let mut cur_virt_id = 0;
+            let mut q = VecDeque::new();
+            q.push_back(root);
+            while let Some(h) = q.pop_front() {
+                let mut cur0 = Some(h);
+                while cur0.is_some() {
+                    let cur = cur0.unwrap();
+                    self.real_to_virt[cur] = cur_virt_id;
+                    self.virt_to_real[cur_virt_id] = cur;
+                    cur_virt_id += 1;
+                    self.heavy_head[cur] = h;
+                    for v in self.g[cur].clone() {
+                        if Some(v) == self.par[cur] || Some(v) == self.heavy_next[cur] {
+                            continue;
+                        }
+                        q.push_back(v);
+                    }
+                    cur0 = self.heavy_next[cur];
+                }
+            }
+        }
+        #[doc = "O(log N)"]
+        pub fn lca(&self, u: usize, v: usize) -> usize {
+            let mut l = u;
+            let mut r = v;
+            loop {
+                if self.real_to_virt[l] > self.real_to_virt[r] {
+                    std::mem::swap(&mut l, &mut r);
+                }
+                if self.heavy_head[l] == self.heavy_head[r] {
+                    return l;
+                }
+                r = self.par[self.heavy_head[r]].unwrap();
+            }
+        }
+        #[doc = "returns a list of [l,r]. O(N)"]
+        pub fn vertex_decomposition(&self) -> Vec<(usize, usize)> {
+            let mut vhead = vec![self.n; self.n];
+            for i in 0..self.n {
+                vhead[i] = self.real_to_virt[self.heavy_head[i]];
+            }
+            let mut hs = std::collections::HashMap::new();
+            for x in vhead {
+                *hs.entry(x).or_insert(0) += 1;
+            }
+            let mut res = vec![];
+            for (k, v) in hs {
+                res.push((k, k + v - 1));
+            }
+            res
+        }
+        #[doc = "return a list of [l,r]. edge is represented by the child with larger virtual id. O(N)"]
+        pub fn edge_decomposition(&self) -> Vec<(usize, usize)> {
+            let V = self.vertex_decomposition();
+            let mut res = vec![];
+            for (u, v) in V {
+                let u = if u == 0 { 1 } else { u };
+                res.push((u, v));
+            }
+            res
+        }
+        #[doc = "O(logN)"]
+        pub fn vertex_decomposition_between(&self, u: usize, v: usize) -> Vec<(usize, usize)> {
+            let mut res = vec![];
+            let mut l = u;
+            let mut r = v;
+            loop {
+                if self.real_to_virt[l] > self.real_to_virt[r] {
+                    std::mem::swap(&mut l, &mut r);
+                }
+                let p = (
+                    std::cmp::max(self.real_to_virt[self.heavy_head[r]], self.real_to_virt[l]),
+                    self.real_to_virt[r],
+                );
+                res.push(p);
+                if self.heavy_head[l] != self.heavy_head[r] {
+                    r = self.par[self.heavy_head[r]].unwrap();
+                } else {
+                    break;
+                }
+            }
+            res
+        }
+        #[doc = "O(logN)"]
+        pub fn edge_decomposition_between(&self, u: usize, v: usize) -> Vec<(usize, usize)> {
+            let mut res = vec![];
+            let mut l = u;
+            let mut r = v;
+            loop {
+                if self.real_to_virt[l] > self.real_to_virt[r] {
+                    std::mem::swap(&mut l, &mut r);
+                }
+                if self.heavy_head[l] != self.heavy_head[r] {
+                    let p = (self.real_to_virt[self.heavy_head[r]], self.real_to_virt[r]);
+                    res.push(p);
+                    r = self.par[self.heavy_head[r]].unwrap();
+                } else {
+                    if l != r {
+                        let p = (self.real_to_virt[l] + 1, self.real_to_virt[r]);
+                        res.push(p);
+                    }
+                    break;
+                }
+            }
+            res
+        }
+        pub fn distance(&self, u: usize, v: usize) -> usize {
+            self.depth[u] + self.depth[v] - 2 * self.depth[self.lca(u, v)]
+        }
+    }
+
+snippet Imosu
+    struct Imosu {
+        n: usize,
+        m: usize,
+        dp: Vec<Vec<i64>>,
+    }
+    impl Imosu {
+        pub fn new(n: usize, m: usize) -> Imosu {
+            Imosu {
+                n: n,
+                m: m,
+                dp: vec![vec![0; m + 1]; n + 1],
+            }
+        }
+        #[doc = "[i0,i1)~[j0,j1)"]
+        pub fn add(&mut self, i0: usize, i1: usize, j0: usize, j1: usize, x: i64) {
+            self.dp[i0][j0] = x;
+            self.dp[i0][j1] = -x;
+            self.dp[i1][j0] = -x;
+            self.dp[i1][j1] = x;
+        }
+        pub fn build(&mut self) {
+            for i in 0..self.n + 1 {
+                for j in 0..self.m {
+                    self.dp[i][j + 1] += self.dp[i][j];
+                }
+            }
+            for j in 0..self.m + 1 {
+                for i in 0..self.n {
+                    self.dp[i + 1][j] += self.dp[i][j];
+                }
+            }
+        }
+        pub fn get(&self, i: usize, j: usize) -> i64 {
+            self.dp[i][j]
+        }
+    }
+
+snippet KMP
+    struct KMP {
+        pat: Vec<u64>,
+        tbl: Vec<i64>,
+    }
+    impl KMP {
+        #[doc = "O(K)"]
+        fn new(pat: Vec<u64>) -> Self {
+            let n = pat.len();
+            let mut tbl = vec![0; n + 1];
+            tbl[0] = -1;
+            let mut j: i64 = -1;
+            for i in 0..n {
+                while j >= 0 && pat[i] != pat[j as usize] {
+                    j = tbl[j as usize];
+                }
+                j += 1;
+                if i + 1 < n && pat[i + 1] == pat[j as usize] {
+                    tbl[i + 1] = tbl[j as usize];
+                } else {
+                    tbl[i + 1] = j;
+                }
+            }
+            KMP { pat: pat, tbl: tbl }
+        }
+        #[doc = "Find all the appearance of the pattern string. O(N)"]
+        fn search(&self, s: &[u64]) -> Vec<usize> {
+            let mut res = vec![];
+            let mut head: i64 = 0;
+            let mut j: i64 = 0;
+            while head + j < s.len() as i64 {
+                if self.pat[j as usize] == s[(head + j) as usize] {
+                    j += 1;
+                    if j != self.pat.len() as i64 {
+                        continue;
+                    }
+                    res.push(head as usize);
+                }
+                head += j - self.tbl[j as usize];
+                j = std::cmp::max(self.tbl[j as usize], 0);
+            }
+            res
+        }
+    }
+
+snippet LCA
+    struct LCA<'a> {
+        root: usize,
+        tree: &'a [Vec<usize>],
+        parent: Vec<Vec<Option<usize>>>,
+        depth: Vec<usize>,
+    }
+    #[doc = "compute LCA in directed adjacency graph"]
+    impl<'a> LCA<'a> {
+        fn new(root: usize, tree: &'a [Vec<usize>]) -> Self {
+            let n = tree.len();
+            let mut log_n = (n as f64).log2().ceil() as usize;
+            if log_n == 0 {
+                log_n = 1;
+            }
+            assert!(log_n > 0);
+            LCA {
+                root: root,
+                tree: tree,
+                parent: vec![vec![None; n]; log_n],
+                depth: vec![0; n],
+            }
+        }
+        fn dfs(&mut self, u: usize, parent: Option<usize>, depth: usize) {
+            self.parent[0][u] = parent;
+            self.depth[u] = depth;
+            for i in 0..self.tree[u].len() {
+                let v = self.tree[u][i];
+                if Some(v) != parent {
+                    self.dfs(v, Some(u), depth + 1);
+                }
+            }
+        }
+        fn build(&mut self) {
+            let root = self.root;
+            self.dfs(root, None, 0);
+            let mut k = 0;
+            while k + 1 < self.parent.len() {
+                for u in 0..self.tree.len() {
+                    if self.parent[k][u].is_some() {
+                        self.parent[k + 1][u] = self.parent[k][self.parent[k][u].unwrap()]
+                    }
+                }
+                k += 1;
+            }
+        }
+        fn lca(&self, u: usize, v: usize) -> usize {
+            let (mut v0, mut v1) = if self.depth[u] <= self.depth[v] {
+                (u, v)
+            } else {
+                (v, u)
+            };
+            assert!(self.depth[v1] >= self.depth[v0]);
+            for k in 0..self.parent.len() {
+                if (((self.depth[v1] - self.depth[v0]) >> k) & 1) > 0 {
+                    assert!(self.parent[k][v1].is_some());
+                    v1 = self.parent[k][v1].unwrap();
+                }
+            }
+            assert!(self.depth[v1] >= self.depth[v0]);
+            assert!(self.depth[v1] == self.depth[v0]);
+            if (v0 == v1) {
+                return v0;
+            }
+            for k in (0..self.parent.len()).rev() {
+                if self.parent[k][v0] != self.parent[k][v1] {
+                    assert!(self.parent[k][v0].is_some());
+                    assert!(self.parent[k][v1].is_some());
+                    v0 = self.parent[k][v0].unwrap();
+                    v1 = self.parent[k][v1].unwrap();
+                }
+            }
+            return self.parent[0][v0].unwrap();
+        }
+    }
+
+snippet LexicalPermutation
+    #[doc = " [bluss/permutohedron](https://github.com/bluss/permutohedron)"]
+    pub trait LexicalPermutation {
+        #[doc = " Return \\`true\\` if the slice was permuted, \\`false\\` if it is already"]
+        #[doc = " at the last ordered permutation."]
+        fn next_permutation(&mut self) -> bool;
+        #[doc = " Return \\`true\\` if the slice was permuted, \\`false\\` if it is already"]
+        #[doc = " at the first ordered permutation."]
+        fn prev_permutation(&mut self) -> bool;
+    }
+    impl<T> LexicalPermutation for [T]
+    where
+        T: Ord,
+    {
+        #[doc = " Original author in Rust: Thomas Backman <serenity@exscape.org>"]
+        fn next_permutation(&mut self) -> bool {
+            if self.len() < 2 {
+                return false;
+            }
+            let mut i = self.len() - 1;
+            while i > 0 && self[i - 1] >= self[i] {
+                i -= 1;
+            }
+            if i == 0 {
+                return false;
+            }
+            let mut j = self.len() - 1;
+            while j >= i && self[j] <= self[i - 1] {
+                j -= 1;
+            }
+            self.swap(j, i - 1);
+            self[i..].reverse();
+            true
+        }
+        fn prev_permutation(&mut self) -> bool {
+            if self.len() < 2 {
+                return false;
+            }
+            let mut i = self.len() - 1;
+            while i > 0 && self[i - 1] <= self[i] {
+                i -= 1;
+            }
+            if i == 0 {
+                return false;
+            }
+            self[i..].reverse();
+            let mut j = self.len() - 1;
+            while j >= i && self[j - 1] < self[i - 1] {
+                j -= 1;
+            }
+            self.swap(i - 1, j);
+            true
+        }
+    }
+
+snippet LongestDistance
+    struct LongestDistance {
+        ing: Vec<Vec<usize>>,
+        dp: Vec<Option<usize>>,
+    }
+    impl LongestDistance {
+        fn new(ing: Vec<Vec<usize>>) -> LongestDistance {
+            let n = ing.len();
+            LongestDistance {
+                ing: ing,
+                dp: vec![None; n],
+            }
+        }
+        fn solve(&mut self, i: usize) -> usize {
+            if self.ing[i].len() == 0 {
+                return 0;
+            }
+            if let Some(x) = self.dp[i] {
+                return x;
+            }
+            let mut maxv = 0;
+            for j in 0..self.ing[i].len() {
+                let from = self.ing[i][j];
+                maxv = std::cmp::max(maxv, self.solve(from) + 1);
+            }
+            self.dp[i] = Some(maxv);
+            return maxv;
+        }
+    }
+
+snippet Lowlink
+    fn minmax(p: (usize, usize)) -> (usize, usize) {
+        if p.0 <= p.1 {
+            p
+        } else {
+            (p.1, p.0)
+        }
+    }
+    struct LowLink<'a> {
+        g: &'a [Vec<usize>],
+        used: Vec<bool>,
+        ord: Vec<usize>,
+        low: Vec<usize>,
+        pub articulation: Vec<usize>,
+        pub bridge: Vec<(usize, usize)>,
+    }
+    #[doc = "find articulation points and bridges at the same time"]
+    impl<'a> LowLink<'a> {
+        #[doc = "g: undirected adjacency graph"]
+        fn new(g: &'a [Vec<usize>]) -> LowLink {
+            let n = g.len();
+            let mut used = vec![false; n];
+            let mut ord = vec![0; n];
+            let mut low = vec![0; n];
+            let articulation = vec![];
+            let bridge = vec![];
+            LowLink {
+                g,
+                used,
+                ord,
+                low,
+                articulation,
+                bridge,
+            }
+        }
+        fn build(&mut self) {
+            self.do_build(0, 0, None);
+            self.articulation.sort();
+            self.bridge.sort();
+        }
+        fn do_build(&mut self, u: usize, k: usize, par: Option<usize>) -> usize {
+            let mut k = k;
+            self.used[u] = true;
+            self.ord[u] = k;
+            k += 1;
+            self.low[u] = self.ord[u];
+            let mut is_articulation = false;
+            let mut cnt = 0;
+            for &v in &self.g[u] {
+                if !self.used[v] {
+                    cnt += 1;
+                    k = self.do_build(v, k, Some(u));
+                    self.low[u] = std::cmp::min(self.low[u], self.low[v]);
+                    is_articulation |= par.is_some() && self.low[v] >= self.ord[u];
+                    if self.ord[u] < self.low[v] {
+                        self.bridge.push(minmax((u, v)));
+                    }
+                } else if Some(v) != par {
+                    self.low[u] = std::cmp::min(self.low[u], self.ord[v]);
+                } else {
+                }
+            }
+            is_articulation |= par.is_none() && cnt > 1;
+            if is_articulation {
+                self.articulation.push(u);
+            }
+            k
+        }
+    }
+
+snippet Matrix
+    #[derive(Clone)]
+    pub struct Matrix {
+        v: Vec<Vec<i64>>,
+    }
+    impl Matrix {
+        fn identity(n: usize) -> Self {
+            let mut v = vec![vec![0; n]; n];
+            for i in 0..n {
+                v[i][i] = 1;
+            }
+            Matrix { v: v }
+        }
+        fn m(&self) -> usize {
+            self.v.len()
+        }
+        fn n(&self) -> usize {
+            self.v[0].len()
+        }
+        fn mul_rem(&self, other: &Self, mo: i64) -> Self {
+            let mut r = vec![vec![0; other.n()]; self.m()];
+            for i in 0..self.m() {
+                for j in 0..self.n() {
+                    let mut v = 0;
+                    for k in 0..self.n() {
+                        v += (self.v[i][k] * other.v[k][j]) % mo;
+                        v %= mo;
+                    }
+                    r[i][j] = v;
+                }
+            }
+            Matrix { v: r }
+        }
+        fn pow(&self, k: u64, mo: i64) -> Self {
+            assert!(self.m() == self.n());
+            let mut k = k;
+            let mut x = Self::identity(self.m());
+            let mut y = self.clone();
+            while k > 0 {
+                if k & 1 > 0 {
+                    x = y.clone() * x;
+                    x %= mo;
+                }
+                y = y.mul_rem(&y, mo);
+                y %= mo;
+                k >>= 1;
+            }
+            x
+        }
+    }
+    impl std::ops::Add for Matrix {
+        type Output = Self;
+        fn add(self, other: Self) -> Self {
+            let mut r = self.v.clone();
+            for i in 0..self.m() {
+                for j in 0..self.n() {
+                    r[i][j] += other.v[i][j];
+                }
+            }
+            Matrix { v: r }
+        }
+    }
+    impl std::ops::Sub for Matrix {
+        type Output = Self;
+        fn sub(self, other: Self) -> Self {
+            let mut r = self.v.clone();
+            for i in 0..self.m() {
+                for j in 0..self.n() {
+                    r[i][j] -= other.v[i][j];
+                }
+            }
+            Matrix { v: r }
+        }
+    }
+    impl std::ops::Mul for Matrix {
+        type Output = Self;
+        fn mul(self, other: Self) -> Self {
+            let mut r = vec![vec![0; other.n()]; self.m()];
+            for i in 0..self.m() {
+                for j in 0..self.n() {
+                    let mut v = 0;
+                    for k in 0..self.n() {
+                        v += self.v[i][k] * other.v[k][j];
+                    }
+                    r[i][j] = v;
+                }
+            }
+            Matrix { v: r }
+        }
+    }
+    impl std::ops::Rem<i64> for Matrix {
+        type Output = Self;
+        fn rem(self, mo: i64) -> Self {
+            let mut r = self.v.clone();
+            for i in 0..self.m() {
+                for j in 0..self.n() {
+                    r[i][j] %= mo;
+                }
+            }
+            Matrix { v: r }
+        }
+    }
+    impl std::ops::RemAssign<i64> for Matrix {
+        fn rem_assign(&mut self, mo: i64) {
+            for i in 0..self.m() {
+                for j in 0..self.n() {
+                    self.v[i][j] %= mo;
+                }
+            }
+        }
+    }
+
+snippet ModComb
+    struct ModComb {
+        fact: Vec<i64>,
+        fact_inv: Vec<i64>,
+        n: usize,
+        p: i64,
+    }
+    impl ModComb {
+        fn initialize(ft: &mut Self) {
+            let n = ft.n;
+            ft.fact[0] = 1;
+            for i in 1..n {
+                ft.fact[i] = (ft.fact[i - 1] * i as i64) % ft.p;
+            }
+            ft.fact_inv[n - 1] = modpow(ft.fact[n - 1], ft.p - 2, ft.p);
+            for i in (0..n - 1).rev() {
+                ft.fact_inv[i] = (ft.fact_inv[i + 1] * (i + 1) as i64) % ft.p;
+            }
+        }
+        #[doc = "O(N)"]
+        fn new(max_n: usize, p: i64) -> ModComb {
+            let mut ft = ModComb {
+                fact: vec![0; max_n + 1],
+                fact_inv: vec![0; max_n + 1],
+                n: max_n + 1,
+                p: p,
+            };
+            Self::initialize(&mut ft);
+            ft
+        }
+        fn fact(&self, n: usize) -> i64 {
+            self.fact[n]
+        }
+        #[doc = "choose k numbers from 1..n"]
+        fn nCk(&self, n: i64, k: i64) -> i64 {
+            if n < k {
+                return 0;
+            }
+            (self.nPk(n, k) * self.fact_inv[k as usize]) % self.p
+        }
+        fn nPk(&self, n: i64, k: i64) -> i64 {
+            if n < k {
+                return 0;
+            }
+            self.fact[n as usize] * self.fact_inv[(n - k) as usize] % self.p
+        }
+        #[doc = "split k into n number as x1+x2+...xn=k"]
+        fn nHk(&self, n: i64, k: i64) -> i64 {
+            if n == 0 && k == 0 {
+                return 1;
+            }
+            self.nCk(n + k - 1, k)
+        }
+        #[doc = "put n balls into k different boxes. In case of n=3,k+2 [[1,2],[3]]==[[3],[1,2]]"]
+        fn nSk(&self, n: i64, k: i64) -> i64 {
+            if n < k {
+                return 0;
+            }
+            let mut res = 0;
+            for i in 0..k + 1 {
+                let v = self.nCk(k, i) * modpow(i, n, self.p) % self.p;
+                if (k - i) % 2 == 1 {
+                    res = (res + self.p - v) % self.p;
+                } else {
+                    res = (res + v) % self.p;
+                }
+            }
+            return res * self.fact_inv[k as usize] % self.p;
+        }
+        fn nBk(&self, n: i64, k: i64) -> i64 {
+            0
+        }
+    }
+    #[allow(dead_code)]
+    #[doc = " x ^ n % m"]
+    pub fn modpow(x: i64, n: i64, m: i64) -> i64 {
+        let mut res = 1;
+        let mut x = x % m;
+        let mut n = n;
+        while n > 0 {
+            if n & 1 == 1 {
+                res = (res * x) % m;
+            }
+            x = (x * x) % m;
+            n >>= 1;
+        }
+        res
+    }
+
+snippet RangeCompression
+    struct RangeCompression {
+        inv: HashMap<i64, usize>,
+        ranges: Vec<i64>,
+    }
+    impl RangeCompression {
+        pub fn new(ranges: Vec<i64>) -> RangeCompression {
+            let n = ranges.len();
+            let mut ranges = ranges;
+            ranges.sort();
+            let mut inv = HashMap::new();
+            for i in 0..n {
+                inv.insert(ranges[i], i);
+            }
+            RangeCompression {
+                ranges: ranges,
+                inv: inv,
+            }
+        }
+        pub fn index(&self, i: i64) -> usize {
+            let ri = self.ranges.lower_bound(&i);
+            let r = self.ranges[ri];
+            *self.inv.get(&r).unwrap()
+        }
+    }
+
+snippet ReRooting
+    trait Foldable {
+        type T: Clone + std::fmt::Debug;
+        fn identity() -> Self::T;
+        fn fold(acc: &Self::T, x: &Self::T) -> Self::T;
+    }
+    struct ReRooting<F: Foldable> {
+        g: Vec<Vec<usize>>,
+        dp: Vec<Vec<F::T>>,
+    }
+    impl<F: Foldable> ReRooting<F> {
+        fn merge(a: &F::T, b: &F::T) -> F::T {
+            let mut acc = F::identity();
+            acc = F::fold(&acc, a);
+            acc = F::fold(&acc, b);
+            acc
+        }
+        fn new(g: Vec<Vec<usize>>) -> Self {
+            let mut dp = vec![];
+            for u in 0..g.len() {
+                dp.push(vec![F::identity(); g[u].len()]);
+            }
+            ReRooting { g: g, dp: dp }
+        }
+        fn dfs1(&mut self, par: Option<usize>, u: usize) -> F::T {
+            let mut ret = F::identity();
+            for i in 0..self.g[u].len() {
+                let v = self.g[u][i];
+                if Some(v) == par {
+                    continue;
+                }
+                let r = self.dfs1(Some(u), v);
+                self.dp[u][i] = r.clone();
+                ret = F::fold(&ret, &r);
+            }
+            ret
+        }
+        fn dfs2(&mut self, par: Option<usize>, u: usize, u2par: F::T) {
+            let n = self.g[u].len();
+            let mut prefix = vec![F::identity(); n];
+            let mut suffix = vec![F::identity(); n];
+            for i in 0..n {
+                let v = self.g[u][i];
+                if Some(v) == par {
+                    self.dp[u][i] = u2par.clone();
+                }
+            }
+            for i in 0..n {
+                let l = if i > 0 {
+                    prefix[i - 1].clone()
+                } else {
+                    F::identity()
+                };
+                prefix[i] = F::fold(&l, &self.dp[u][i]);
+            }
+            for i in (0..n).rev() {
+                let r = if i < n - 1 {
+                    suffix[i + 1].clone()
+                } else {
+                    F::identity()
+                };
+                suffix[i] = F::fold(&r, &self.dp[u][i]);
+            }
+            for i in 0..n {
+                let v = self.g[u][i];
+                if Some(v) == par {
+                    continue;
+                }
+                let l = if i > 0 {
+                    prefix[i - 1].clone()
+                } else {
+                    F::identity()
+                };
+                let r = if i < n - 1 {
+                    suffix[i + 1].clone()
+                } else {
+                    F::identity()
+                };
+                self.dfs2(Some(u), v, Self::merge(&l, &r));
+            }
+        }
+        pub fn dfs(&mut self, u: usize) {
+            let p = self.dfs1(None, u);
+            self.dfs2(None, u, p);
+        }
+        pub fn solve(&self, u: usize) -> F::T {
+            let mut acc = F::identity();
+            for d in &self.dp[u] {
+                acc = F::fold(&acc, d);
+            }
+            acc
+        }
+    }
+
+snippet Rev
+    #[derive(Eq, PartialEq, Clone, Debug)]
+    #[doc = " Equivalent to std::cmp::Reverse"]
+    pub struct Rev<T>(pub T);
+    impl<T: PartialOrd> PartialOrd for Rev<T> {
+        fn partial_cmp(&self, other: &Rev<T>) -> Option<Ordering> {
+            other.0.partial_cmp(&self.0)
+        }
+    }
+    impl<T: Ord> Ord for Rev<T> {
+        fn cmp(&self, other: &Rev<T>) -> Ordering {
+            other.0.cmp(&self.0)
+        }
+    }
+
+snippet RoLiHa
+    struct RoLiHa {
+        powMemo: Vec<u64>,
+        hash: Vec<u64>,
+    }
+    const ROLIHA_MASK30: u64 = (1 << 30) - 1;
+    const ROLIHA_MASK31: u64 = (1 << 31) - 1;
+    const ROLIHA_MOD: u64 = (1 << 61) - 1;
+    const ROLIHA_P: u64 = ROLIHA_MOD * ((1 << 3) - 1);
+    impl RoLiHa {
+        fn new(s: &[u64]) -> Self {
+            let mut randgen = Xorshift::new();
+            let rand = randgen.rand(std::i64::MAX as u64);
+            let base = rand + 129;
+            let mut powMemo = vec![0; s.len() + 1];
+            powMemo[0] = 1;
+            for i in 1..powMemo.len() {
+                powMemo[i] = Self::calcmod(Self::mul(powMemo[i - 1], base));
+            }
+            let mut hash = vec![0; s.len() + 1];
+            for i in 0..s.len() {
+                hash[i + 1] = Self::calcmod(Self::mul(hash[i], base) + s[i]);
+            }
+            RoLiHa {
+                powMemo: powMemo,
+                hash: hash,
+            }
+        }
+        pub fn get(&self, l: usize, r: usize) -> u64 {
+            return Self::calcmod(
+                self.hash[r] + ROLIHA_P - Self::mul(self.hash[l], self.powMemo[r - l]),
+            );
+        }
+        fn mul(l: u64, r: u64) -> u64 {
+            let lu = l >> 31;
+            let ld = l & ROLIHA_MASK31;
+            let ru = r >> 31;
+            let rd = r & ROLIHA_MASK31;
+            let middle_bit = ld * ru + lu * rd;
+            ((lu * ru) << 1) + ld * rd + ((middle_bit & ROLIHA_MASK30) << 31) + (middle_bit >> 30)
+        }
+        fn calcmod(x: u64) -> u64 {
+            let mut x = (x & ROLIHA_MOD) + (x >> 61);
+            if x > ROLIHA_MOD {
+                x -= ROLIHA_MOD;
+            }
+            x
+        }
+    }
+
+snippet RollingHash
+    #[doc = " https://github.com/hatoo/competitive-rust-snippet"]
+    #[allow(dead_code)]
+    #[doc = " Rolling hash algorithm"]
+    pub struct RollingHash {
+        hash_pow_list: Vec<(u64, Vec<(u64, u64)>)>,
+    }
+    #[allow(dead_code)]
+    impl RollingHash {
+        pub fn new(s: &[u64]) -> RollingHash {
+            RollingHash::with_base_mod_pairs(s, &[(1009, 1_000_000_007), (9973, 999_999_937)])
+        }
+        pub fn with_base_mod_pairs(s: &[u64], base_mod_pairs: &[(u64, u64)]) -> RollingHash {
+            let hp_list = base_mod_pairs
+                .iter()
+                .map(|&(base, m)| {
+                    let mut hp = Vec::with_capacity(s.len() + 1);
+                    hp.push((0, 1));
+                    for (i, &x) in s.iter().enumerate() {
+                        let (h, p) = hp[i];
+                        hp.push(((h + x) * base % m, p * base % m));
+                    }
+                    (m, hp)
+                })
+                .collect();
+            RollingHash {
+                hash_pow_list: hp_list,
+            }
+        }
+        pub fn get(&self, l: usize, r: usize) -> u64 {
+            self.hash_pow_list
+                .iter()
+                .map(|&(m, ref hp)| (hp[r].0 + m - hp[l].0 * hp[r - l].1 % m) % m)
+                .fold(0, |a, b| a ^ b)
+        }
+        pub fn len(&self) -> usize {
+            self.hash_pow_list
+                .first()
+                .map(|v| v.1.len() - 1)
+                .unwrap_or(0)
+        }
+    }
+
+snippet SCC
+    pub struct SCC<'a> {
+        g: &'a [Vec<usize>],
+        r_g: Vec<Vec<usize>>,
+        post_order: VecDeque<usize>,
+        used: Vec<bool>,
+        pub order: Vec<usize>,
+    }
+    #[doc = "nodes that communicates each others are contracted into one node"]
+    impl<'a> SCC<'a> {
+        #[doc = "g: directed adjacency graph"]
+        pub fn new(g: &'a [Vec<usize>]) -> Self {
+            let n = g.len();
+            let mut r_g = vec![vec![]; n];
+            for u in 0..n {
+                let conn = &g[u];
+                for &v in conn {
+                    r_g[v].push(u);
+                }
+            }
+            Self {
+                g,
+                r_g,
+                post_order: VecDeque::new(),
+                used: vec![false; n],
+                order: vec![n; n],
+            }
+        }
+        fn dfs(&mut self, u: usize) {
+            self.used[u] = true;
+            for i in 0..self.g[u].len() {
+                let v = self.g[u][i];
+                if !self.used[v] {
+                    self.dfs(v);
+                }
+            }
+            self.post_order.push_front(u);
+        }
+        fn rdfs(&mut self, u: usize, k: usize) {
+            self.used[u] = true;
+            self.order[u] = k;
+            for i in 0..self.r_g[u].len() {
+                let v = self.r_g[u][i];
+                if !self.used[v] {
+                    self.rdfs(v, k);
+                }
+            }
+        }
+        pub fn build(&mut self) {
+            for v in 0..self.g.len() {
+                if !self.used[v] {
+                    self.dfs(v);
+                }
+            }
+            self.used = vec![false; self.g.len()];
+            let mut k = 0;
+            for i in 0..self.post_order.len() {
+                let v = self.post_order[i];
+                if !self.used[v] {
+                    self.rdfs(v, k);
+                    k += 1;
+                }
+            }
+        }
+    }
+
+snippet SEG
+    #[allow(dead_code)]
+    pub trait Monoid {
+        type T: Clone;
+        fn id() -> Self::T;
+        fn op(a: &Self::T, b: &Self::T) -> Self::T;
+    }
+    #[allow(dead_code)]
+    pub struct SEG<M: Monoid> {
+        n: usize,
+        buf: Vec<M::T>,
+    }
+    impl<M: Monoid> SEG<M> {
+        #[allow(dead_code)]
+        pub fn new(n: usize) -> SEG<M> {
+            let mut m = 1;
+            while m < n {
+                m *= 2;
+            }
+            SEG {
+                n: m,
+                buf: vec![M::id().clone(); 2 * m],
+            }
+        }
+        #[allow(dead_code)]
+        pub fn update(&mut self, k: usize, a: M::T) {
+            let mut k = k + self.n;
+            self.buf[k] = a;
+            while k > 1 {
+                k = k >> 1;
+                self.buf[k] = M::op(&self.buf[k * 2], &self.buf[k * 2 + 1]);
+            }
+        }
+        #[allow(dead_code)]
+        pub fn get(&self, k: usize) -> M::T {
+            self.buf[k + self.n].clone()
+        }
+        pub fn do_query(&self, a: usize, b: usize, k: usize, l: usize, r: usize) -> M::T {
+            if r <= a || b <= l {
+                return M::id();
+            }
+            if a <= l && r <= b {
+                return self.buf[k].clone();
+            } else {
+                let vl = self.do_query(a, b, k * 2, l, (l + r) / 2);
+                let vr = self.do_query(a, b, k * 2 + 1, (l + r) / 2, r);
+                return M::op(&vl, &vr);
+            }
+        }
+        #[allow(dead_code)]
+        pub fn query(&self, a: usize, b: usize) -> M::T {
+            self.do_query(a, b, 1, 0, self.n)
+        }
+    }
+
+snippet SEG_LAZY
+    #[doc = " https://ei1333.github.io/luzhiled/snippets/structure/segment-tree.html"]
+    trait SEGImpl {
+        type Monoid: Copy;
+        type OperatorMonoid: Copy + PartialEq;
+        fn m0() -> Self::Monoid;
+        fn om0() -> Self::OperatorMonoid;
+        fn f(x: Self::Monoid, y: Self::Monoid) -> Self::Monoid;
+        fn g(x: Self::Monoid, y: Self::OperatorMonoid, len: usize) -> Self::Monoid;
+        fn h(x: Self::OperatorMonoid, y: Self::OperatorMonoid) -> Self::OperatorMonoid;
+    }
+    struct SEG<T: SEGImpl> {
+        n: usize,
+        data: Vec<T::Monoid>,
+        lazy: Vec<T::OperatorMonoid>,
+        weight: Vec<usize>,
+    }
+    impl<T: SEGImpl> SEG<T> {
+        fn new(init: T::Monoid, n: usize) -> SEG<T> {
+            let mut m = 1;
+            while m < n {
+                m *= 2;
+            }
+            SEG {
+                n: m,
+                data: vec![init; m * 2],
+                lazy: vec![T::om0(); m * 2],
+                weight: Self::mk_weight(&vec![1; n]),
+            }
+        }
+        fn mk_weight(xs: &[usize]) -> Vec<usize> {
+            let n = xs.len();
+            let mut m = 1;
+            while m < n {
+                m *= 2;
+            }
+            let mut res = vec![0; 2 * m];
+            for i in 0..n {
+                res[m + i] = xs[i];
+            }
+            for k in (1..m).rev() {
+                let l = 2 * k;
+                let r = 2 * k + 1;
+                res[k] = res[l] + res[r];
+            }
+            res
+        }
+        fn set_weight(&mut self, weight: &[usize]) {
+            self.weight = Self::mk_weight(weight);
+        }
+        fn propagate(&mut self, k: usize, len: usize) {
+            let len = self.weight[k];
+            if self.lazy[k] != T::om0() {
+                if k < self.n {
+                    self.lazy[2 * k + 0] = T::h(self.lazy[2 * k + 0], self.lazy[k]);
+                    self.lazy[2 * k + 1] = T::h(self.lazy[2 * k + 1], self.lazy[k]);
+                }
+                self.data[k] = T::g(self.data[k], self.lazy[k], len);
+                self.lazy[k] = T::om0();
+            }
+        }
+        fn do_update(
+            &mut self,
+            a: usize,
+            b: usize,
+            x: T::OperatorMonoid,
+            k: usize,
+            l: usize,
+            r: usize,
+        ) -> T::Monoid {
+            self.propagate(k, r - l);
+            if r <= a || b <= l {
+                self.data[k]
+            } else if a <= l && r <= b {
+                self.lazy[k] = T::h(self.lazy[k], x);
+                self.propagate(k, r - l);
+                self.data[k]
+            } else {
+                self.data[k] = T::f(
+                    self.do_update(a, b, x, 2 * k + 0, l, (l + r) >> 1),
+                    self.do_update(a, b, x, 2 * k + 1, (l + r) >> 1, r),
+                );
+                self.data[k]
+            }
+        }
+        fn update(&mut self, a: usize, b: usize, x: T::OperatorMonoid) -> T::Monoid {
+            let n = self.n;
+            self.do_update(a, b, x, 1, 0, n)
+        }
+        fn do_query(&mut self, a: usize, b: usize, k: usize, l: usize, r: usize) -> T::Monoid {
+            self.propagate(k, r - l);
+            if r <= a || b <= l {
+                T::m0()
+            } else if a <= l && r <= b {
+                self.data[k]
+            } else {
+                T::f(
+                    self.do_query(a, b, 2 * k + 0, l, (l + r) >> 1),
+                    self.do_query(a, b, 2 * k + 1, (l + r) >> 1, r),
+                )
+            }
+        }
+        fn query(&mut self, a: usize, b: usize) -> T::Monoid {
+            let n = self.n;
+            self.do_query(a, b, 1, 0, n)
+        }
+    }
+
+snippet SEG_LAZY_MAX_RAQ
+    struct MAX_RAQ;
+    impl SEGImpl for MAX_RAQ {
+        type Monoid = i64;
+        type OperatorMonoid = i64;
+        fn m0() -> Self::Monoid {
+            std::i64::MIN
+        }
+        fn om0() -> Self::OperatorMonoid {
+            0
+        }
+        fn f(x: Self::Monoid, y: Self::Monoid) -> Self::Monoid {
+            std::cmp::max(x, y)
+        }
+        fn g(x: Self::Monoid, y: Self::OperatorMonoid, len: usize) -> Self::Monoid {
+            x + y
+        }
+        fn h(x: Self::OperatorMonoid, y: Self::OperatorMonoid) -> Self::OperatorMonoid {
+            x + y
+        }
+    }
+
+snippet SEG_LAZY_MAX_RUQ
+    struct MAX_RUQ;
+    impl SEGImpl for MAX_RUQ {
+        type Monoid = i64;
+        type OperatorMonoid = i64;
+        fn m0() -> Self::Monoid {
+            0
+        }
+        fn om0() -> Self::OperatorMonoid {
+            0
+        }
+        fn f(x: Self::Monoid, y: Self::Monoid) -> Self::Monoid {
+            std::cmp::max(x, y)
+        }
+        fn g(x: Self::Monoid, y: Self::OperatorMonoid, len: usize) -> Self::Monoid {
+            y
+        }
+        fn h(x: Self::OperatorMonoid, y: Self::OperatorMonoid) -> Self::OperatorMonoid {
+            y
+        }
+    }
+
+snippet SEG_LAZY_MIN_RAQ
+    struct MIN_RAQ;
+    impl SEGImpl for MIN_RAQ {
+        type Monoid = i64;
+        type OperatorMonoid = i64;
+        fn m0() -> Self::Monoid {
+            std::i64::MAX
+        }
+        fn om0() -> Self::OperatorMonoid {
+            0
+        }
+        fn f(x: Self::Monoid, y: Self::Monoid) -> Self::Monoid {
+            std::cmp::min(x, y)
+        }
+        fn g(x: Self::Monoid, y: Self::OperatorMonoid, len: usize) -> Self::Monoid {
+            x + y
+        }
+        fn h(x: Self::OperatorMonoid, y: Self::OperatorMonoid) -> Self::OperatorMonoid {
+            x + y
+        }
+    }
+
+snippet SEG_LAZY_MIN_RUQ
+    struct MIN_RUQ;
+    impl SEGImpl for MIN_RUQ {
+        type Monoid = i64;
+        type OperatorMonoid = i64;
+        fn m0() -> Self::Monoid {
+            std::i64::MAX
+        }
+        fn om0() -> Self::OperatorMonoid {
+            std::i64::MAX
+        }
+        fn f(x: Self::Monoid, y: Self::Monoid) -> Self::Monoid {
+            std::cmp::min(x, y)
+        }
+        fn g(x: Self::Monoid, y: Self::OperatorMonoid, len: usize) -> Self::Monoid {
+            y
+        }
+        fn h(x: Self::OperatorMonoid, y: Self::OperatorMonoid) -> Self::OperatorMonoid {
+            y
+        }
+    }
+
+snippet SEG_LAZY_SUM_RAQ
+    struct SUM_RAQ;
+    impl SEGImpl for SUM_RAQ {
+        type Monoid = i64;
+        type OperatorMonoid = i64;
+        fn m0() -> Self::Monoid {
+            0
+        }
+        fn om0() -> Self::OperatorMonoid {
+            0
+        }
+        fn f(x: Self::Monoid, y: Self::Monoid) -> Self::Monoid {
+            x + y
+        }
+        fn g(x: Self::Monoid, y: Self::OperatorMonoid, len: usize) -> Self::Monoid {
+            x + (len as i64) * y
+        }
+        fn h(x: Self::OperatorMonoid, y: Self::OperatorMonoid) -> Self::OperatorMonoid {
+            x + y
+        }
+    }
+
+snippet SEG_LAZY_SUM_RUQ
+    struct SUM_RUQ;
+    impl SEGImpl for SUM_RUQ {
+        type Monoid = i64;
+        type OperatorMonoid = i64;
+        fn m0() -> Self::Monoid {
+            0
+        }
+        fn om0() -> Self::OperatorMonoid {
+            std::i64::MAX
+        }
+        fn f(x: Self::Monoid, y: Self::Monoid) -> Self::Monoid {
+            x + y
+        }
+        fn g(x: Self::Monoid, y: Self::OperatorMonoid, len: usize) -> Self::Monoid {
+            len as i64 * y
+        }
+        fn h(x: Self::OperatorMonoid, y: Self::OperatorMonoid) -> Self::OperatorMonoid {
+            y
+        }
+    }
+
+snippet SEG_MAX
+    struct MAX;
+    impl Monoid for MAX {
+        type T = i64;
+        fn id() -> Self::T {
+            std::i64::MIN
+        }
+        fn op(a: &Self::T, b: &Self::T) -> Self::T {
+            std::cmp::max(*a, *b)
+        }
+    }
+
+snippet SEG_MIN
+    #[allow(dead_code)]
+    struct MIN;
+    impl Monoid for MIN {
+        type T = i64;
+        fn id() -> Self::T {
+            std::i64::MAX
+        }
+        fn op(a: &Self::T, b: &Self::T) -> Self::T {
+            std::cmp::min(*a, *b)
+        }
+    }
+
+snippet SEG_SUM
+    #[allow(dead_code)]
+    struct SUM;
+    impl Monoid for SUM {
+        type T = i64;
+        fn id() -> Self::T {
+            0
+        }
+        fn op(a: &Self::T, b: &Self::T) -> Self::T {
+            *a + *b
+        }
+    }
+
+snippet SparseTable
+    struct SparseTable {
+        data: Vec<i64>,
+        log_table: Vec<usize>,
+        table: Vec<Vec<usize>>,
+    }
+    #[doc = "find the index of the RMQ. build O(nlogn). query O(1)"]
+    impl SparseTable {
+        fn new(data: Vec<i64>) -> Self {
+            let n = data.len();
+            let mut log_table = vec![0; n + 1];
+            for i in 2..n + 1 {
+                log_table[i] = log_table[i >> 1] + 1;
+            }
+            let mut table = vec![vec![n; n]; log_table[n] + 1];
+            for i in 0..n {
+                table[0][i] = i;
+            }
+            for k in 1..table.len() {
+                let half_jmp = 1 << (k - 1);
+                for i in 0..n {
+                    let first = table[k - 1][i];
+                    table[k][i] = first;
+                    if i + half_jmp < n {
+                        let second = table[k - 1][i + half_jmp];
+                        assert!(first < n);
+                        assert!(second < n);
+                        if data[first] <= data[second] {
+                            table[k][i] = first;
+                        } else {
+                            table[k][i] = second;
+                        }
+                    }
+                }
+            }
+            Self {
+                data,
+                log_table,
+                table,
+            }
+        }
+        fn query(&self, a: usize, b: usize) -> usize {
+            let d = b - a;
+            let k = self.log_table[d];
+            let first = self.table[k][a];
+            let second = self.table[k][b - (1 << k)];
+            if self.data[first] <= self.data[second] {
+                first
+            } else {
+                second
+            }
+        }
+    }
+
+snippet SqrtDecomposition
+    #[derive(Debug, Copy, Clone)]
+    enum Bucket {
+        #[doc = "b-idx"]
+        Filled(usize),
+        #[doc = "b-idx, [to, from)"]
+        Partial(usize, usize, usize),
+    }
+    struct Buckets {
+        n: usize,
+        d: usize,
+    }
+    impl Buckets {
+        pub fn bucket(&self, i: usize) -> usize {
+            i / self.d
+        }
+        #[doc = "[from, to)"]
+        pub fn buckets(&self, from: usize, to: usize) -> Vec<Bucket> {
+            let mut res = vec![];
+            let mut i = 0;
+            while to - i > 0 {
+                let b = i / self.d;
+                let next_boundary = (b + 1) * self.d;
+                if i % self.d == 0 {
+                    if next_boundary <= to {
+                        res.push(Bucket::Filled(b));
+                        i = next_boundary;
+                    } else {
+                        res.push(Bucket::Partial(b, i, to));
+                        i = to;
+                    }
+                } else {
+                    if next_boundary <= to {
+                        res.push(Bucket::Partial(b, i, next_boundary));
+                        i = next_boundary;
+                    } else {
+                        res.push(Bucket::Partial(b, i, to));
+                        i = to
+                    }
+                }
+            }
+            res
+        }
+    }
+
+snippet SuffixArray
+    struct SuffixArray {
+        sa: Vec<usize>,
+        s: Vec<u64>,
+    }
+    impl SuffixArray {
+        #[doc = "O(nlogn)"]
+        pub fn new(s: Vec<u64>) -> Self {
+            let mut s = s;
+            s.push('$' as u64);
+            let mut sa = Self::sort_cyclic_shifts(&s);
+            sa.remove(0);
+            s.remove(s.len() - 1);
+            SuffixArray { sa: sa, s: s }
+        }
+        fn sort_cyclic_shifts(s: &[u64]) -> Vec<usize> {
+            let n = s.len();
+            const alphabet: usize = 256;
+            let mut p = vec![0; n];
+            let mut c = vec![0; n];
+            let mut cnt = vec![0; std::cmp::max(alphabet, n)];
+            for i in 0..n {
+                cnt[s[i] as usize] += 1;
+            }
+            for i in 1..alphabet {
+                cnt[i] += cnt[i - 1];
+            }
+            for i in 0..n {
+                cnt[s[i] as usize] -= 1;
+                p[cnt[s[i] as usize]] = i;
+            }
+            c[p[0]] = 0;
+            let mut classes = 1;
+            for i in 1..n {
+                if s[p[i]] != s[p[i - 1]] {
+                    classes += 1;
+                }
+                c[p[i]] = classes - 1;
+            }
+            let mut pn = vec![0; n];
+            let mut cn = vec![0; n];
+            for k in 0.. {
+                if (1 << k) >= n {
+                    break;
+                }
+                for i in 0..n {
+                    if p[i] >= (1 << k) {
+                        pn[i] = p[i] - (1 << k);
+                    } else {
+                        pn[i] = p[i] + n - (1 << k);
+                    }
+                }
+                for i in 0..classes {
+                    cnt[i] = 0;
+                }
+                for i in 0..n {
+                    cnt[c[pn[i]]] += 1;
+                }
+                for i in 1..classes {
+                    cnt[i] += cnt[i - 1];
+                }
+                for i in (0..n).rev() {
+                    cnt[c[pn[i]]] -= 1;
+                    p[cnt[c[pn[i]]]] = pn[i];
+                }
+                cn[p[0]] = 0;
+                classes = 1;
+                for i in 1..n {
+                    let cur = (c[p[i]], c[(p[i] + (1 << k)) % n]);
+                    let prev = (c[p[i - 1]], c[(p[i - 1] + (1 << k)) % n]);
+                    if cur != prev {
+                        classes += 1;
+                    }
+                    cn[p[i]] = classes - 1;
+                }
+                let tmp = c;
+                c = cn;
+                cn = tmp
+            }
+            p
+        }
+        fn lt_substr(s: &[u64], t: &[u64], si: usize, ti: usize) -> bool {
+            let mut si = si;
+            let mut ti = ti;
+            let sn = s.len();
+            let tn = t.len();
+            while si < sn && ti < tn {
+                if s[si] < t[ti] {
+                    return true;
+                }
+                if s[si] > t[ti] {
+                    return false;
+                }
+                si += 1;
+                ti += 1;
+            }
+            si >= sn && ti < tn
+        }
+        #[doc = "find the rightmost match of the string t to s. O(mlogn) where n=|s|,m=|t|"]
+        pub fn lower_bound(&self, t: &[u64]) -> usize {
+            let mut low: i64 = -1;
+            let mut high: i64 = self.sa.len() as i64;
+            while high - low > 1 {
+                let mid = (low + high) / 2;
+                if Self::lt_substr(&self.s, t, self.sa[mid as usize], 0) {
+                    low = mid;
+                } else {
+                    high = mid;
+                }
+            }
+            return high as usize;
+        }
+    }
+
+snippet TopologicalSort
+    struct TopologicalSort<'a> {
+        g: &'a [Vec<usize>],
+        colors: Vec<bool>,
+        indeg: Vec<u32>,
+        Q: VecDeque<usize>,
+        out: Vec<usize>,
+    }
+    impl<'a> TopologicalSort<'a> {
+        #[doc = "directed graph. O(V+E)"]
+        fn new(g: &'a [Vec<usize>]) -> Self {
+            let n = g.len();
+            let mut colors = vec![false; n];
+            let mut indeg = vec![0; n];
+            for u in 0..n {
+                let conn = &g[u];
+                for &next in conn {
+                    indeg[next] += 1;
+                }
+            }
+            TopologicalSort {
+                g: g,
+                Q: VecDeque::new(),
+                colors: colors,
+                indeg: indeg,
+                out: Vec::new(),
+            }
+        }
+        fn bfs(&mut self, s: usize) {
+            self.Q.push_back(s);
+            self.colors[s] = true;
+            while !self.Q.is_empty() {
+                let u = self.Q.pop_front().unwrap();
+                self.out.push(u);
+                for &v in &self.g[u] {
+                    self.indeg[v] -= 1;
+                    if self.indeg[v] == 0 && self.colors[v] == false {
+                        self.colors[v] = true;
+                        self.Q.push_back(v);
+                    }
+                }
+            }
+        }
+        fn tsort(&mut self) {
+            let n = self.g.len();
+            for u in 0..n {
+                if self.indeg[u] == 0 && self.colors[u] == false {
+                    self.bfs(u)
+                }
+            }
+        }
+    }
+
+snippet Total
+    #[derive(PartialEq, PartialOrd)]
+    #[doc = " Implement Eq and Ord for a type which has only PartialEq and PartialOrd."]
+    #[doc = " It is useful when sorting a Vec of f64"]
+    pub struct Total<T>(pub T);
+    impl<T: PartialEq> Eq for Total<T> {}
+    impl<T: PartialOrd> Ord for Total<T> {
+        fn cmp(&self, other: &Total<T>) -> Ordering {
+            self.0.partial_cmp(&other.0).unwrap()
+        }
+    }
+
+snippet Treap
+    #[doc = " https://www.slideshare.net/iwiwi/2-12188757"]
+    mod treap {
+        #[derive(Clone, Debug)]
+        pub struct Node {
+            pub v: i64,
+            pri: u64,
+            lch: Option<Box<Node>>,
+            rch: Option<Box<Node>>,
+            cnt: usize,
+            sum: i64,
+        }
+        pub fn new_node(v: i64, rand: u64) -> Node {
+            Node {
+                v: v,
+                pri: rand,
+                lch: None.into(),
+                rch: None.into(),
+                cnt: 1,
+                sum: v,
+            }
+        }
+        pub fn count(t: &Option<Box<Node>>) -> usize {
+            match *t {
+                Some(ref x) => x.cnt,
+                None => 0,
+            }
+        }
+        pub fn sum(t: &Option<Box<Node>>) -> i64 {
+            match *t {
+                Some(ref x) => x.sum,
+                None => 0,
+            }
+        }
+        fn update(t: Box<Node>) -> Box<Node> {
+            let mut t = t;
+            t.cnt = count(&t.lch) + count(&t.rch) + 1;
+            t.sum = sum(&t.lch) + sum(&t.rch) + t.v;
+            t
+        }
+        pub fn merge(l: Option<Box<Node>>, r: Option<Box<Node>>) -> Option<Box<Node>> {
+            if l.is_none() && r.is_none() {
+                return None;
+            }
+            if l.is_none() {
+                return r;
+            }
+            if r.is_none() {
+                return l;
+            }
+            assert!(l.is_some() && r.is_some());
+            let mut l = l.unwrap();
+            let mut r = r.unwrap();
+            if l.pri > r.pri {
+                let old_rch = l.rch.take();
+                l.rch = merge(old_rch, Some(r).into());
+                update(l).into()
+            } else {
+                let old_lch = r.lch.take();
+                r.lch = merge(Some(l).into(), old_lch);
+                update(r).into()
+            }
+        }
+        pub fn split(t: Option<Box<Node>>, k: usize) -> (Option<Box<Node>>, Option<Box<Node>>) {
+            if t.is_none() {
+                return (None.into(), None.into());
+            }
+            let mut t = t.unwrap();
+            let lcnt = count(&t.lch);
+            if k <= lcnt {
+                let old_lch = t.lch.take();
+                let s = split(old_lch, k);
+                t.lch = s.1;
+                (s.0, Some(update(t)).into())
+            } else {
+                let old_rch = t.rch.take();
+                let s = split(old_rch, k - lcnt - 1);
+                t.rch = s.0;
+                (Some(update(t)).into(), s.1)
+            }
+        }
+        pub fn insert(t: Box<Node>, k: usize, v: i64, rand: u64) -> Option<Box<Node>> {
+            let (l, r) = split(Some(t).into(), k);
+            let newt = merge(l, Some(new_node(v, rand).into()));
+            let newt = merge(newt, r);
+            newt
+        }
+        pub fn erase(t: Box<Node>, k: usize) -> Option<Box<Node>> {
+            let (t1, rest) = split(Some(t).into(), k);
+            let (t2, t3) = split(rest, 1);
+            merge(t1, t3)
+        }
+        pub fn bisect(t: &Option<Box<Node>>, v: i64) -> usize {
+            match *t {
+                None => 0,
+                Some(ref n) => {
+                    if v <= n.v {
+                        bisect(&n.lch, v)
+                    } else {
+                        count(&n.lch) + 1 + bisect(&n.rch, v)
+                    }
+                }
+            }
+        }
+    }
+    struct Treap {
+        rng: Xorshift,
+        t: Option<Box<treap::Node>>,
+    }
+    impl Treap {
+        pub fn new() -> Treap {
+            Treap {
+                rng: Xorshift::new(),
+                t: None,
+            }
+        }
+        #[doc = "[l,r)"]
+        pub fn lower_bound(&mut self, l: usize, r: usize, v: i64) -> usize {
+            let t = self.t.take();
+            let (lt, t) = treap::split(t, l);
+            let (t, rt) = treap::split(t, r - l);
+            let idx = treap::count(&lt) + treap::bisect(&t, v);
+            self.t = treap::merge(lt, treap::merge(t, rt));
+            idx
+        }
+        pub fn orderd_insert(&mut self, v: i64) {
+            if self.t.is_none() {
+                self.insert(0, v);
+            } else {
+                let n = self.len();
+                let ins_pos = self.lower_bound(0, n, v);
+                self.insert(ins_pos, v);
+            }
+        }
+        pub fn insert(&mut self, k: usize, v: i64) {
+            if self.t.is_none() {
+                self.t = Some(treap::new_node(v, self.rng.next()).into());
+            } else {
+                let t = self.t.take().unwrap();
+                self.t = treap::insert(t, k, v, self.rng.next());
+            }
+        }
+        pub fn erase(&mut self, k: usize) {
+            if self.t.is_some() {
+                let t = self.t.take().unwrap();
+                self.t = treap::erase(t, k).into();
+            }
+        }
+        #[doc = "split into [l,r)+[r,n)"]
+        pub fn split(self, k: usize) -> (Treap, Treap) {
+            let (a, b) = treap::split(self.t, k);
+            (
+                Treap {
+                    rng: self.rng.clone(),
+                    t: a,
+                },
+                Treap {
+                    rng: self.rng.clone(),
+                    t: b,
+                },
+            )
+        }
+        pub fn len(&self) -> usize {
+            treap::count(&self.t)
+        }
+        #[doc = "[l,r)"]
+        pub fn sum(&mut self, l: usize, r: usize) -> i64 {
+            if self.t.is_none() {
+                return 0;
+            } else {
+                let t = self.t.take();
+                let (a1, a2) = treap::split(t, l);
+                let (b1, b2) = treap::split(a2, r - l);
+                let res = treap::sum(&b1);
+                self.t = treap::merge(treap::merge(a1, b1), b2);
+                res
+            }
+        }
+        pub fn get(&mut self, k: usize) -> i64 {
+            self.sum(k, k + 1)
+        }
+    }
+
+snippet UnionFind
+    pub struct UnionFind {
+        par: Vec<usize>,
+        rank: Vec<usize>,
+    }
+    impl UnionFind {
+        pub fn new(n: usize) -> UnionFind {
+            UnionFind {
+                par: (0..n).collect::<Vec<usize>>(),
+                rank: vec![0; n],
+            }
+        }
+        pub fn same(&mut self, x: usize, y: usize) -> bool {
+            self.root(x) == self.root(y)
+        }
+        pub fn root(&mut self, x: usize) -> usize {
+            if self.par[x] == x {
+                return x;
+            } else {
+                let y = self.par[x];
+                let z = self.root(y);
+                self.par[x] = z;
+                return z;
+            }
+        }
+        pub fn merge(&mut self, x: usize, y: usize) -> bool {
+            let mut a = self.root(x);
+            let mut b = self.root(y);
+            if a == b {
+                return false;
+            }
+            if self.rank[a] < self.rank[b] {
+                std::mem::swap(&mut a, &mut b);
+            }
+            assert!(self.rank[a] >= self.rank[b]);
+            if self.rank[a] == self.rank[b] {
+                self.rank[a] += 1;
+            }
+            self.par[b] = a;
+            return true;
+        }
+    }
+
+snippet Vector2D
+    #[derive(Debug, Clone, Copy, PartialEq)]
+    #[allow(dead_code)]
+    pub struct Vector2D(f64, f64);
+    impl Vector2D {
+        pub fn add(a: f64, b: f64) -> f64 {
+            let c = a + b;
+            if c.abs() < 1e-10 {
+                0.0
+            } else {
+                c
+            }
+        }
+        pub fn dot(self, other: Vector2D) -> f64 {
+            Self::add(self.0 * other.0, self.1 * other.1)
+        }
+        pub fn det(self, other: Vector2D) -> f64 {
+            Self::add(self.0 * other.1, -self.1 * other.0)
+        }
+        pub fn len(&self) -> f64 {
+            f64::sqrt((self.0).powi(2) + (self.1).powi(2))
+        }
+        pub fn unit(self) -> Vector2D {
+            let l = self.len();
+            Vector2D(self.0 / l, self.1 / l)
+        }
+        pub fn normal(self) -> Vector2D {
+            Vector2D(self.1, -self.0)
+        }
+    }
+    impl std::ops::Add for Vector2D {
+        type Output = Vector2D;
+        fn add(self, rhs: Vector2D) -> Self::Output {
+            Vector2D(Vector2D::add(self.0, rhs.0), Vector2D::add(self.1, rhs.1))
+        }
+    }
+    impl std::ops::Sub for Vector2D {
+        type Output = Vector2D;
+        fn sub(self, rhs: Vector2D) -> Self::Output {
+            Vector2D(Vector2D::add(self.0, -rhs.0), Vector2D::add(self.1, -rhs.1))
+        }
+    }
+    impl std::ops::Mul<f64> for Vector2D {
+        type Output = Vector2D;
+        fn mul(self, rhs: f64) -> Self::Output {
+            Vector2D(rhs * self.0, rhs * self.1)
+        }
+    }
+    impl std::ops::Div<f64> for Vector2D {
+        type Output = Vector2D;
+        fn div(self, rhs: f64) -> Self::Output {
+            Vector2D(self.0 / rhs, self.1 / rhs)
+        }
+    }
+
+snippet WaveletMatrix
+    #[derive(Clone)]
+    struct FID {
+        n: usize,
+        n_blocks: usize,
+        blocks: Vec<u64>,
+        block_rank1: Vec<usize>,
+    }
+    impl FID {
+        fn popcount(x: u64) -> usize {
+            u64::count_ones(x) as usize
+        }
+        fn kpopi(x: u64, k: usize) -> usize {
+            let mut x = x;
+            let mut k = k;
+            let mut ans = 64;
+            for i in 0..64 {
+                if x & (1 << i) > 0 {
+                    k -= 1;
+                }
+                if k == 0 {
+                    ans = i;
+                    break;
+                }
+            }
+            ans
+        }
+        pub fn new(n: usize) -> FID {
+            let n_blocks = (n >> 6) + 1;
+            FID {
+                n: n,
+                n_blocks: (n >> 6) + 1,
+                blocks: vec![0; n_blocks],
+                block_rank1: vec![0; n_blocks],
+            }
+        }
+        pub fn set(&mut self, k: usize) {
+            self.blocks[k >> 6] |= 1 << (k & 0b111111);
+        }
+        pub fn build(&mut self) {
+            self.block_rank1[0] = 0;
+            for i in 1..self.n_blocks {
+                self.block_rank1[i] = self.block_rank1[i - 1] + Self::popcount(self.blocks[i - 1]);
+            }
+        }
+        pub fn access(&self, k: usize) -> bool {
+            let x = self.blocks[k >> 6] & 1 << (k & 0b111111);
+            if x > 0 {
+                true
+            } else {
+                false
+            }
+        }
+        #[doc = "count 1s in [0,k)"]
+        pub fn rank1(&self, k: usize) -> usize {
+            let mask = (1 << (k & 0b111111)) - 1;
+            let rest = self.blocks[k >> 6] & mask;
+            self.block_rank1[k >> 6] + Self::popcount(rest)
+        }
+        #[doc = "count 0s in [0,k). O(1)"]
+        pub fn rank0(&self, k: usize) -> usize {
+            k - self.rank1(k)
+        }
+        pub fn rank(&self, b: bool, k: usize) -> usize {
+            if b {
+                self.rank1(k)
+            } else {
+                self.rank0(k)
+            }
+        }
+        #[doc = "query the index of k-th 0 (0-indexed)"]
+        pub fn select0(&self, k: usize) -> usize {
+            let bs = BinarySearch {
+                lower: 0,
+                upper: (self.n - 1) as i64,
+                p: |i: i64| {
+                    let r = self.rank0(i as usize);
+                    r >= k + 1
+                },
+            };
+            bs.lower_bound() as usize - 1
+        }
+        #[doc = "query the index of k-th 1 (0-indexed)"]
+        pub fn select1(&self, k: usize) -> usize {
+            let bs = BinarySearch {
+                lower: 0,
+                upper: (self.n - 1) as i64,
+                p: |i: i64| {
+                    let r = self.rank1(i as usize);
+                    r >= k + 1
+                },
+            };
+            bs.lower_bound() as usize - 1
+        }
+        pub fn select(&self, b: bool, k: usize) -> usize {
+            if b {
+                self.select1(k)
+            } else {
+                self.select0(k)
+            }
+        }
+    }
+    struct WM {
+        mat: Vec<FID>,
+        nzeros: Vec<usize>,
+    }
+    impl WM {
+        pub fn new(xs: Vec<u64>) -> WM {
+            let n = xs.len();
+            let mut mat = vec![];
+            let mut nzeros = vec![];
+            let mut cur = xs;
+            for i in 0..64 {
+                let mid = 1 << (63 - i);
+                let mask = mid - 1;
+                let mut b = vec![];
+                let mut left = vec![];
+                let mut right = vec![];
+                for i in 0..n {
+                    let x = cur[i];
+                    if x >= mid {
+                        right.push(x & mask);
+                        b.push(true);
+                    } else {
+                        left.push(x & mask);
+                        b.push(false);
+                    }
+                }
+                nzeros.push(left.len());
+                left.append(&mut right);
+                cur = left;
+                let mut fid = FID::new(n);
+                for i in 0..n {
+                    if b[i] {
+                        fid.set(i);
+                    }
+                }
+                fid.build();
+                mat.push(fid);
+            }
+            WM {
+                mat: mat,
+                nzeros: nzeros,
+            }
+        }
+        #[doc = "counting x in v[0,i) O(1)"]
+        pub fn rank(&self, x: u64, i: usize) -> usize {
+            let mut s = 0;
+            let mut e = i;
+            for d in 0..64 {
+                let fid = &self.mat[d];
+                let b = x & (1 << (63 - d)) > 0;
+                s = fid.rank(b, s);
+                e = fid.rank(b, e);
+                if b {
+                    s += self.nzeros[d];
+                    e += self.nzeros[d];
+                }
+            }
+            e - s
+        }
+        #[doc = "the position of k-th x (0-indexed). O(logn)"]
+        pub fn select(&self, x: u64, k: usize) -> usize {
+            let bs = BinarySearch {
+                lower: 0,
+                upper: (self.mat[0].n - 1) as i64,
+                p: |i: i64| {
+                    let cnt = self.rank(x, i as usize);
+                    cnt >= k + 1
+                },
+            };
+            bs.lower_bound() as usize - 1
+        }
+        #[doc = "k-th largest number in [l,r)"]
+        pub fn quantile(&self, l: usize, r: usize, k: usize) -> u64 {
+            let mut res = 0;
+            let mut k = k;
+            let mut s = l;
+            let mut e = r;
+            for d in 0..64 {
+                let msb = 1 << (63 - d);
+                let fid = &self.mat[d];
+                let ns = fid.rank1(s);
+                let ne = fid.rank1(e);
+                let n1 = ne - ns;
+                if n1 >= k {
+                    res |= msb;
+                    s = ns;
+                    e = ne;
+                    s += self.nzeros[d];
+                    e += self.nzeros[d];
+                } else {
+                    s = s - ns;
+                    e = e - ne;
+                    k -= n1;
+                }
+            }
+            res
+        }
+        pub fn rank_all(&self, l: usize, r: usize, x: u64) -> (usize, usize, usize) {
+            let mut cnt_lt = 0;
+            let mut cnt_gt = 0;
+            let mut s = l;
+            let mut e = r;
+            for d in 0..64 {
+                let b = x & (1 << (63 - d)) > 0;
+                let lcnt = self.mat[d].rank(b, s);
+                let rcnt = self.mat[d].rank(b, e);
+                let add = (e - s) - (rcnt - lcnt);
+                if b {
+                    cnt_lt += add;
+                } else {
+                    cnt_gt += add;
+                }
+                s = lcnt;
+                e = rcnt;
+                if b {
+                    s += self.nzeros[d];
+                    e += self.nzeros[d];
+                }
+            }
+            (cnt_lt, e - s, cnt_gt)
+        }
+        #[doc = "counting numbers in range [min,max) in v[l,r). O(1)"]
+        pub fn rangefreq(&self, l: usize, r: usize, min: u64, max: u64) -> usize {
+            let (cntlt_max, _, _) = self.rank_all(l, r, max);
+            let (cntlt_min, _, _) = self.rank_all(l, r, min);
+            cntlt_max - cntlt_min
+        }
+    }
+    struct WMI {
+        offset: i64,
+        wm: WM,
+    }
+    impl WMI {
+        pub fn new(xs: Vec<i64>) -> WMI {
+            let offset = 1 << 62;
+            let mut ys = vec![];
+            for x in xs {
+                ys.push((x + offset) as u64)
+            }
+            let wm = WM::new(ys);
+            WMI {
+                offset: offset,
+                wm: wm,
+            }
+        }
+        pub fn rangefreq(&self, l: usize, r: usize, min: i64, max: i64) -> usize {
+            self.wm
+                .rangefreq(l, r, (min + self.offset) as u64, (max + self.offset) as u64)
+        }
+        pub fn quantile(&self, l: usize, r: usize, k: usize) -> i64 {
+            self.wm.quantile(l, r, k) as i64 - self.offset
+        }
+        pub fn rank(&self, x: i64, i: usize) -> usize {
+            self.wm.rank((x + self.offset) as u64, i)
+        }
+        pub fn select(&self, x: i64, k: usize) -> usize {
+            self.wm.select((x + self.offset) as u64, k)
+        }
+    }
+
+snippet WeighedUnionFind
+    struct WeightedUnionFind {
+        par: Vec<usize>,
+        rank: Vec<usize>,
+        diff_weight: Vec<i32>,
+    }
+    impl WeightedUnionFind {
+        fn new(n: usize) -> WeightedUnionFind {
+            WeightedUnionFind {
+                par: (0..n).collect::<Vec<usize>>(),
+                rank: vec![0; n],
+                diff_weight: vec![0; n],
+            }
+        }
+        fn root(&mut self, x: usize) -> usize {
+            if self.par[x] == x {
+                return x;
+            } else {
+                let y = self.par[x];
+                let z = self.root(y);
+                self.diff_weight[x] += self.diff_weight[y];
+                self.par[x] = z;
+                return z;
+            }
+        }
+        fn weight(&mut self, x: usize) -> i32 {
+            self.root(x);
+            self.diff_weight[x]
+        }
+        fn same(&mut self, x: usize, y: usize) -> bool {
+            self.root(x) == self.root(y)
+        }
+        fn merge(&mut self, x: usize, y: usize, w: i32) -> bool {
+            let mut w = w;
+            w += self.weight(x);
+            w -= self.weight(y);
+            let mut a = self.root(x);
+            let mut b = self.root(y);
+            if a == b {
+                return false;
+            }
+            if self.rank[a] < self.rank[b] {
+                std::mem::swap(&mut a, &mut b);
+                w = -w;
+            }
+            assert!(self.rank[a] >= self.rank[b]);
+            if self.rank[a] == self.rank[b] {
+                self.rank[a] += 1;
+            }
+            self.par[b] = a;
+            self.diff_weight[b] = w;
+            return true;
+        }
+    }
+
+snippet XorShift
+    #[derive(Debug, Clone)]
+    #[allow(dead_code)]
+    pub struct Xorshift {
+        seed: u64,
+    }
+    impl Xorshift {
+        #[allow(dead_code)]
+        pub fn new() -> Xorshift {
+            Xorshift {
+                seed: 0xf0fb588ca2196dac,
+            }
+        }
+        #[allow(dead_code)]
+        pub fn with_seed(seed: u64) -> Xorshift {
+            Xorshift { seed: seed }
+        }
+        #[inline(always)]
+        #[allow(dead_code)]
+        pub fn next(&mut self) -> u64 {
+            self.seed = self.seed ^ (self.seed << 13);
+            self.seed = self.seed ^ (self.seed >> 7);
+            self.seed = self.seed ^ (self.seed << 17);
+            self.seed
+        }
+        #[inline(always)]
+        #[allow(dead_code)]
+        pub fn rand(&mut self, m: u64) -> u64 {
+            self.next() % m
+        }
+        #[inline(always)]
+        #[allow(dead_code)]
+        pub fn randf(&mut self) -> f64 {
+            use std::mem;
+            const UPPER_MASK: u64 = 0x3FF0000000000000;
+            const LOWER_MASK: u64 = 0xFFFFFFFFFFFFF;
+            let tmp = UPPER_MASK | (self.next() & LOWER_MASK);
+            let result: f64 = unsafe { mem::transmute(tmp) };
+            result - 1.0
+        }
+    }
+
+snippet bellman_ford
+    #[derive(Clone, Copy, Debug)]
+    struct Edge {
+        from: usize,
+        to: usize,
+        cost: i64,
+    }
+    #[doc = "es: directed edges. negative costs allowed. O(V^2)"]
+    fn bellman_ford(n: usize, es: &[Edge], source: usize) -> Vec<i64> {
+        const INF: i64 = 1 << 60;
+        let mut d = vec![INF; n];
+        d[source] = 0;
+        loop {
+            let mut update = false;
+            for e in es {
+                if d[e.from] != INF && d[e.to] > d[e.from] + e.cost {
+                    d[e.to] = d[e.from] + e.cost;
+                    update = true;
+                }
+            }
+            if !update {
+                break;
+            }
+        }
+        d
+    }
+    fn find_negative_loop(n: usize, es: &[Edge]) -> bool {
+        let mut d = vec![0; n];
+        for i in 0..n {
+            for e in es {
+                if d[e.to] > d[e.from] + e.cost {
+                    d[e.to] = d[e.from] + e.cost;
+                    if i == n - 1 {
+                        return true;
+                    }
+                }
+            }
+        }
+        false
+    }
+
+snippet bfs01
+    #[doc = "shortest path from directed matrix graph with 0/1 cost. O(V)"]
+    fn bfs01(g: &[Vec<i64>], s: usize, inf: i64) -> Vec<i64> {
+        use std::collections::VecDeque;
+        let n = g.len();
+        let mut dp = vec![inf; n];
+        let mut deque = VecDeque::new();
+        dp[s] = 0;
+        deque.push_back(s);
+        while !deque.is_empty() {
+            let i = deque.pop_front().unwrap();
+            let cur_min_cost = dp[i];
+            for j in 0..n {
+                if g[i][j] < inf {
+                    if g[i][j] == 1 {
+                        let new_cost = cur_min_cost + 1;
+                        if new_cost < dp[j] {
+                            dp[j] = new_cost;
+                            deque.push_back(j);
+                        }
+                    } else {
+                        let new_cost = cur_min_cost;
+                        if new_cost < dp[j] {
+                            dp[j] = new_cost;
+                            deque.push_front(j);
+                        }
+                    }
+                }
+            }
+        }
+        dp
+    }
+
+snippet bin_digits
+    #[doc = "O(|A|)"]
+    fn bin_digits(n: i64) -> Vec<bool> {
+        if n == 0 {
+            return vec![];
+        }
+        let logN = (n as f64).log2().floor() as usize;
+        let mut res = vec![false; logN + 1];
+        let mut n = n;
+        for k in (0..logN + 1).rev() {
+            if n >= 1 << k {
+                res[k] = true;
+                n -= (1 << k);
+            }
+        }
+        res
+    }
+
+snippet bipartite_matching
+    #[doc = "O(V(V+E))"]
+    fn bipartite_matching(g_list: &[HashSet<usize>]) -> Vec<(usize, usize)> {
+        fn dfs(
+            v: usize,
+            g_list: &[HashSet<usize>],
+            used: &mut [bool],
+            matching: &mut [Option<usize>],
+        ) -> bool {
+            used[v] = true;
+            for &u in &g_list[v] {
+                let w = matching[u];
+                if w.is_none() || (!used[w.unwrap()] && dfs(w.unwrap(), g_list, used, matching)) {
+                    matching[v] = Some(u);
+                    matching[u] = Some(v);
+                    return true;
+                }
+            }
+            false
+        }
+        let n = g_list.len();
+        let mut matching = vec![None; n];
+        for v in 0..n {
+            if matching[v].is_none() {
+                let mut used = vec![false; n];
+                dfs(v, g_list, &mut used, &mut matching);
+            }
+        }
+        let mut res = vec![];
+        for u in 0..matching.len() {
+            let v0 = matching[u];
+            if v0.is_some() {
+                let v = v0.unwrap();
+                assert!(u != v);
+                if u < v {
+                    res.push((u, v));
+                }
+            }
+        }
+        res
+    }
+    struct BipartiteMatching {
+        g: Vec<HashSet<usize>>,
+    }
+    impl BipartiteMatching {
+        fn new(n: usize) -> BipartiteMatching {
+            BipartiteMatching {
+                g: vec![HashSet::new(); n],
+            }
+        }
+        fn connect(&mut self, u: usize, v: usize) {
+            assert!(u != v);
+            self.g[u].insert(v);
+            self.g[v].insert(u);
+        }
+        fn run(&self) -> Vec<(usize, usize)> {
+            bipartite_matching(&self.g)
+        }
+    }
+
+snippet bitpos
+    struct BitPos {
+        curpos: usize,
+        x: i64,
+    }
+    impl Iterator for BitPos {
+        type Item = usize;
+        fn next(&mut self) -> Option<Self::Item> {
+            if self.x == 0 {
+                return None;
+            }
+            if self.x & 1 > 0 {
+                let old = self.curpos;
+                self.curpos += 1;
+                self.x >>= 1;
+                return Some(old);
+            }
+            let n = i64::trailing_zeros(self.x) as usize;
+            self.curpos += n;
+            self.x >>= n;
+            let old = self.curpos;
+            self.curpos += 1;
+            self.x >>= 1;
+            return Some(old);
+        }
+    }
+    #[doc = "iterate the bit positions in an integer. O(K) where K is the number of bit positions."]
+    fn bitpos(x: i64) -> BitPos {
+        BitPos { curpos: 0, x: x }
+    }
+
+snippet bree_pop_max
+    pub fn btree_pop_max<T: Ord + Clone>(set: &mut BTreeSet<T>) -> Option<T> {
+        let ret: Option<T> = set.iter().rev().next().map(|k| k.clone());
+        if let Some(x) = &ret {
+            set.remove(x);
+        }
+        ret
+    }
+
+snippet btree_pop_min
+    pub fn btree_pop_min<T: Ord + Clone>(set: &mut BTreeSet<T>) -> Option<T> {
+        let ret: Option<T> = set.iter().next().map(|k| k.clone());
+        if let Some(x) = &ret {
+            set.remove(x);
+        }
+        ret
+    }
+
+snippet ceil
+    #[doc = " https://github.com/hatoo/competitive-rust-snippets"]
+    fn ceil(x: i64, a: i64) -> i64 {
+        let y = x / a;
+        if x % a == 0 {
+            a * y
+        } else {
+            a * (y + 1)
+        }
+    }
+
+snippet closest_pair
+    pub fn closest_pair(ps: &[(f64, f64)]) -> ((f64, f64), (f64, f64)) {
+        fn d(p1: (f64, f64), p2: (f64, f64)) -> f64 {
+            ((p1.0 - p2.0).powi(2) + (p1.1 - p2.1).powi(2)).sqrt()
+        }
+        fn rec(x_sort: &[(f64, f64)], y_sort: &[(f64, f64)]) -> ((f64, f64), (f64, f64)) {
+            if x_sort.len() <= 3 {
+                let mut min_d = std::f64::MAX;
+                let mut pair = ((0.0, 0.0), (0.0, 0.0));
+                for (i, &p1) in x_sort.iter().enumerate() {
+                    for (j, &p2) in x_sort.iter().enumerate() {
+                        if i != j {
+                            let dist = d(p1, p2);
+                            if dist < min_d {
+                                min_d = dist;
+                                pair = (p1, p2);
+                            }
+                        }
+                    }
+                }
+                return pair;
+            }
+            let mid = x_sort.len() / 2;
+            let pivot = x_sort[mid].0;
+            let q_x = &x_sort[..mid];
+            let r_x = &x_sort[mid..];
+            let mut q_y = Vec::with_capacity(mid);
+            let mut r_y = Vec::with_capacity(x_sort.len() - mid);
+            for &(x, y) in y_sort {
+                if x < pivot {
+                    q_y.push((x, y));
+                } else {
+                    r_y.push((x, y));
+                }
+            }
+            let pair1 = rec(q_x, &q_y);
+            let pair2 = rec(r_x, &r_y);
+            let w = d(pair1.0, pair1.1).min(d(pair2.0, pair2.1));
+            let s: Vec<(f64, f64)> = y_sort
+                .iter()
+                .filter(|&&(x, _)| (pivot - x).abs() <= w)
+                .cloned()
+                .collect();
+            let mut min_d = w;
+            let mut pair = if d(pair1.0, pair1.1) < d(pair2.0, pair2.1) {
+                pair1
+            } else {
+                pair2
+            };
+            for (i, &p1) in s.iter().enumerate() {
+                for &p2 in s[i + 1..].iter().take(15) {
+                    let dist = d(p1, p2);
+                    if dist < min_d {
+                        min_d = dist;
+                        pair = (p1, p2);
+                    }
+                }
+            }
+            pair
+        }
+        let mut x_sort = ps.to_vec();
+        let mut y_sort = ps.to_vec();
+        x_sort.sort_by_key(|p| Total(p.0));
+        y_sort.sort_by_key(|p| Total(p.1));
+        rec(&x_sort, &y_sort)
+    }
+
+snippet comb_table
+    #[doc = "Pascal's triangle. O(N^2)"]
+    fn comb_table(n_max: usize) -> Vec<Vec<i64>> {
+        let mut dp = vec![vec![0; n_max + 1]; n_max + 1];
+        for i in 0..n_max {
+            for j in 0..i + 1 {
+                if j == 0 || j == i {
+                    dp[i][j] = 1;
+                } else {
+                    dp[i][j] = dp[i - 1][j - 1] + dp[i - 1][j];
+                }
+            }
+        }
+        dp
+    }
+
+snippet compare_str
+    #[doc = "-1: s<t, 0: s=t, 1: s>t"]
+    pub fn compare_str(s: &[char], t: &[char]) -> i8 {
+        let n = std::cmp::min(s.len(), t.len());
+        for i in 0..n {
+            if s[i] < t[i] {
+                return -1;
+            } else if s[i] > t[i] {
+                return 1;
+            } else {
+            }
+        }
+        if s.len() < t.len() {
+            return -1;
+        } else if s.len() > t.len() {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
+snippet convex_hull
+    #[allow(dead_code)]
+    fn convex_hull(vs: &[Vector2D]) -> Vec<usize> {
+        let mut idx: Vec<usize> = (0..vs.len()).collect();
+        idx.sort_by_key(|&i| Total((vs[i].0, vs[i].1)));
+        let mut res = Vec::new();
+        for &i in &idx {
+            while res.len() > 1
+                && Vector2D::det(
+                    vs[res[res.len() - 1]] - vs[res[res.len() - 2]],
+                    vs[i] - vs[res[res.len() - 1]],
+                ) <= 0.0
+            {
+                res.pop();
+            }
+            res.push(i);
+        }
+        let t = res.len();
+        for &i in idx.iter().rev().skip(1) {
+            while res.len() > t
+                && (vs[res[res.len() - 1]] - vs[res[res.len() - 2]]).det(vs[i] - vs[res[res.len() - 1]])
+                    <= 0.0
+            {
+                res.pop();
+            }
+            res.push(i);
+        }
+        res.pop();
+        res
+    }
+
+snippet ctoi
+    fn ctoi(c: char) -> i64 {
+        if 'A' <= c && c <= 'Z' {
+            c as i64 - 'A' as i64
+        } else if 'a' <= c && c <= 'z' {
+            c as i64 - 'a' as i64 + 26
+        } else {
+            unreachable!("wrong character");
+        }
+    }
+
+snippet cumsum1
+    struct CumSum1 {
+        base: Vec<i64>,
+        dp: Vec<i64>,
+    }
+    impl CumSum1 {
+        fn new(n: usize) -> CumSum1 {
+            CumSum1 {
+                base: vec![0; n],
+                dp: vec![],
+            }
+        }
+        fn add(&mut self, i: usize, x: i64) {
+            self.base[i] += x;
+        }
+        fn set(&mut self, i: usize, x: i64) {
+            self.base[i] = x;
+        }
+        fn build(&mut self) {
+            let n = self.base.len();
+            let mut dp = vec![0; n + 1];
+            let mut acc = 0;
+            for i in 0..n {
+                acc += self.base[i];
+                dp[i + 1] = acc;
+            }
+            self.dp = dp;
+        }
+        #[doc = "[i,j)"]
+        fn query(&self, i: usize, j: usize) -> i64 {
+            self.dp[j] - self.dp[i]
+        }
+    }
+
+snippet cumsum2
+    struct CumSum2 {
+        base: Vec<Vec<i64>>,
+        dp: Vec<Vec<i64>>,
+    }
+    impl CumSum2 {
+        fn new(n: usize, m: usize) -> CumSum2 {
+            CumSum2 {
+                base: vec![vec![0; m]; n],
+                dp: vec![],
+            }
+        }
+        #[doc = "i~j"]
+        fn add(&mut self, i: usize, j: usize, x: i64) {
+            self.base[i][j] += x;
+        }
+        #[doc = "i~j"]
+        fn set(&mut self, i: usize, j: usize, x: i64) {
+            self.base[i][j] = x;
+        }
+        fn build(&mut self) {
+            let n = self.base.len();
+            let m = self.base[0].len();
+            let mut dp = vec![vec![0; m + 1]; n + 1];
+            for i in 0..n {
+                for j in 0..m {
+                    dp[i + 1][j + 1] = self.base[i][j];
+                }
+            }
+            for i in 1..n + 1 {
+                for j in 1..m + 1 {
+                    dp[i][j] += dp[i - 1][j] + dp[i][j - 1] - dp[i - 1][j - 1];
+                }
+            }
+            self.dp = dp;
+        }
+        #[doc = "[i0,i1)~[j0,j1)"]
+        fn query(&self, i0: usize, i1_: usize, j0: usize, j1_: usize) -> i64 {
+            self.dp[i1_][j1_] - (self.dp[i0][j1_] + self.dp[i1_][j0] - self.dp[i0][j0])
+        }
+    }
+
+snippet cycle_detection_directed
+    #[doc = "detect cycle detection. O(E)"]
+    pub fn cycle_detection_directed(g: &[Vec<usize>]) -> bool {
+        let n = g.len();
+        let mut in_g = vec![HashSet::new(); n];
+        for v in 0..n {
+            for &u in &g[v] {
+                in_g[u].insert(v);
+            }
+        }
+        let mut v_indegree0 = vec![];
+        for v in 0..n {
+            if in_g[v].len() == 0 {
+                v_indegree0.push(v);
+            }
+        }
+        let mut m = 0;
+        while let Some(v) = v_indegree0.pop() {
+            m += 1;
+            for &to in &g[v] {
+                if in_g[to].remove(&v) && in_g[to].is_empty() {
+                    v_indegree0.push(to);
+                }
+            }
+        }
+        m != n
+    }
+
+snippet cyclic_permutation
+    #[doc = "allows both 0/1-indexd. O(nlogn)"]
+    pub fn cyclic_permutation(a: &[usize], b: &[usize]) -> Vec<Vec<usize>> {
+        let mut ab = vec![];
+        let mut next = std::collections::HashMap::new();
+        let n = a.len();
+        for i in 0..n {
+            next.insert(a[i], b[i]);
+            ab.push((a[i], b[i]));
+        }
+        ab.sort();
+        ab.reverse();
+        let mut res = vec![];
+        let mut visited = vec![false; n + 1];
+        loop {
+            if ab.is_empty() {
+                break;
+            }
+            let (head, _) = ab.pop().unwrap();
+            if visited[head] {
+                continue;
+            }
+            let mut chain = vec![];
+            let mut a = head;
+            loop {
+                chain.push(a);
+                visited[a] = true;
+                let b = next.get(&a).cloned().unwrap();
+                if b == head {
+                    break;
+                }
+                a = b;
+            }
+            res.push(chain)
+        }
+        res
+    }
+
+snippet dijkstra
+    #[derive(Clone, Copy, Debug)]
+    struct Edge {
+        to: usize,
+        cost: i64,
+    }
+    #[doc = "g: directed adjacent graph with non-negative costs. O(ElogV)"]
+    fn dijkstra_heap(g: &[Vec<Edge>], s: usize, inf: i64) -> Vec<i64> {
+        let n = g.len();
+        let mut queue = std::collections::BinaryHeap::new();
+        let mut d = vec![inf; n];
+        d[s] = 0;
+        queue.push((0, s));
+        while let Some((cost, v)) = queue.pop() {
+            let cost = -cost;
+            if d[v] < cost {
+                continue;
+            }
+            for e in &g[v] {
+                let new_cost = cost + e.cost;
+                if d[e.to] > new_cost {
+                    d[e.to] = new_cost;
+                    queue.push((-new_cost, e.to));
+                }
+            }
+        }
+        d
+    }
+
+snippet dinic
+    #[derive(Clone, Copy, Debug)]
+    struct Edge {
+        to: usize,
+        cap: i64,
+        rev: usize,
+    }
+    struct Network {
+        g: Vec<Vec<Edge>>,
+        level: Vec<Option<usize>>,
+        iter: Vec<usize>,
+    }
+    #[doc = "direct flow graph. O(EV^2)"]
+    impl Network {
+        fn new(n: usize) -> Network {
+            Network {
+                g: vec![vec![]; n],
+                level: vec![None; n],
+                iter: vec![0; n],
+            }
+        }
+        fn add_edge(&mut self, from: usize, to: usize, cap: i64) {
+            assert!(cap >= 0);
+            let from_rev = self.g[to].len();
+            let to_rev = self.g[from].len();
+            self.g[from].push(Edge {
+                to: to,
+                cap: cap,
+                rev: from_rev,
+            });
+            self.g[to].push(Edge {
+                to: from,
+                cap: 0,
+                rev: to_rev,
+            });
+        }
+        fn n(&self) -> usize {
+            self.g.len()
+        }
+        fn bfs(&mut self, s: usize) {
+            self.level = vec![None; self.n()];
+            let mut q = std::collections::VecDeque::new();
+            q.push_back(s);
+            self.level[s] = Some(0);
+            while let Some(v) = q.pop_front() {
+                for e in &self.g[v] {
+                    if e.cap > 0 && self.level[e.to].is_none() {
+                        self.level[e.to] = self.level[v].map(|x| x + 1);
+                        q.push_back(e.to);
+                    }
+                }
+            }
+        }
+        fn dfs(&mut self, v: usize, t: usize, f: i64) -> i64 {
+            if v == t {
+                return f;
+            }
+            let iter_v_cur = self.iter[v];
+            for i in iter_v_cur..self.g[v].len() {
+                let e = self.g[v][i].clone();
+                if e.cap > 0 && self.level[v] < self.level[e.to] {
+                    let d = self.dfs(e.to, t, std::cmp::min(f, e.cap));
+                    if d > 0 {
+                        self.g[v][i].cap -= d;
+                        self.g[e.to][e.rev].cap += d;
+                        return d;
+                    }
+                }
+                self.iter[v] += 1;
+            }
+            return 0;
+        }
+        pub fn max_flow(&mut self, s: usize, t: usize) -> i64 {
+            let mut flow = 0;
+            loop {
+                self.bfs(s);
+                if self.level[t].is_none() {
+                    return flow;
+                }
+                let INF = 2_000_000_001;
+                self.iter = vec![0; self.n()];
+                let mut f = self.dfs(s, t, INF);
+                while f > 0 {
+                    flow += f;
+                    f = self.dfs(s, t, INF);
+                }
+            }
+        }
+    }
+
+snippet divisors
+    #[doc = "O(root N)"]
+    fn divisors(n: i64) -> Vec<i64> {
+        let mut res = vec![];
+        let mut d = 1;
+        while d * d <= n {
+            if n % d == 0 {
+                res.push(d);
+                if d * d != n {
+                    res.push(n / d);
+                }
+            }
+            d += 1;
+        }
+        res
+    }
+
+snippet eratosthenes
+    #[doc = "O(N log log N)"]
+    fn eratosthenes(n_max: usize) -> Vec<usize> {
+        let mut res = vec![];
+        let mut v = vec![0; n_max + 1];
+        for i in 2..n_max + 1 {
+            if v[i] == 0 {
+                res.push(i);
+                let mut j = i;
+                while j <= n_max {
+                    v[j] = i;
+                    j += i;
+                }
+            }
+        }
+        res
+    }
+
+snippet extgcd
+    #[doc = "ax+by=gcd(a,b) returns (gcd, x, y)"]
+    #[allow(dead_code)]
+    pub fn extgcd(a: i64, b: i64) -> (i64, i64, i64) {
+        if b == 0 {
+            (a, 1, 0)
+        } else {
+            let (gcd, x, y) = extgcd(b, a % b);
+            (gcd, y, x - (a / b) * y)
+        }
+    }
+
+snippet factor_table
+    #[doc = "compute the maximum factor for each number. O(N log log N)"]
+    #[allow(dead_code)]
+    pub fn factor_table(max_n: usize) -> Vec<usize> {
+        let mut res = vec![0; max_n + 1];
+        for i in 2..max_n + 1 {
+            if res[i] == 0 {
+                let mut j = i;
+                while j <= max_n {
+                    res[j] = i;
+                    j += i;
+                }
+            }
+        }
+        res
+    }
+
+snippet factorial
+    fn factorial(a: i64, p: i64) -> i64 {
+        if a == 0 {
+            return 1;
+        }
+        let mut n = 1;
+        let mut a = a;
+        while a > 1 {
+            n *= a;
+            n %= p;
+            a -= 1;
+        }
+        n
+    }
+
+snippet floor
+    fn floor(x: i64, a: i64) -> i64 {
+        let y = x / a;
+        a * y
+    }
+
+snippet ford_fulkerson
+    #[derive(Clone, Copy, Debug)]
+    struct Edge {
+        to: usize,
+        cap: i64,
+        rev: usize,
+    }
+    struct Network {
+        g: Vec<Vec<Edge>>,
+        used: Vec<bool>,
+    }
+    #[doc = "directed flow graph. O(FE)"]
+    impl Network {
+        pub fn new(n: usize) -> Network {
+            Network {
+                g: vec![vec![]; n],
+                used: vec![false; n],
+            }
+        }
+        fn n(&self) -> usize {
+            self.g.len()
+        }
+        pub fn add_edge(&mut self, from: usize, to: usize, cap: i64) {
+            assert!(cap >= 0);
+            let from_rev = self.g[to].len();
+            let to_rev = self.g[from].len();
+            self.g[from].push(Edge {
+                to: to,
+                cap: cap,
+                rev: from_rev,
+            });
+            self.g[to].push(Edge {
+                to: from,
+                cap: 0,
+                rev: to_rev,
+            });
+        }
+        fn dfs(&mut self, v: usize, t: usize, f: i64) -> i64 {
+            if v == t {
+                return f;
+            }
+            self.used[v] = true;
+            for i in 0..self.g[v].len() {
+                let e = self.g[v][i].clone();
+                if !self.used[e.to] && e.cap > 0 {
+                    let d = self.dfs(e.to, t, std::cmp::min(f, e.cap));
+                    if d > 0 {
+                        self.g[v][i].cap -= d;
+                        self.g[e.to][e.rev].cap += d;
+                        return d;
+                    }
+                }
+            }
+            return 0;
+        }
+        pub fn max_flow(&mut self, s: usize, t: usize) -> i64 {
+            let mut flow = 0;
+            loop {
+                self.used = vec![false; self.n()];
+                let f = self.dfs(s, t, 2_000_000_001);
+                if f == 0 {
+                    return flow;
+                }
+                flow += f;
+            }
+        }
+    }
+
+snippet gcd
+    #[allow(dead_code)]
+    pub fn gcd(a: i64, b: i64) -> i64 {
+        if b == 0 {
+            a
+        } else {
+            gcd(b, a % b)
+        }
+    }
+
+snippet group_by_relevance
+    pub fn group_by_relevance<T, F: Fn(&T, &T) -> bool>(xs: Vec<T>, f: F) -> Vec<Vec<T>> {
+        let mut res = vec![];
+        if xs.len() == 1 {
+            res.push(xs);
+            return res;
+        }
+        let mut xs = xs;
+        let n = xs.len();
+        let mut l = 0;
+        let mut sep = vec![];
+        for i in 0..n - 1 {
+            if !f(&xs[i], &xs[i + 1]) {
+                sep.push(i + 1 - l);
+                l = i + 1;
+            }
+        }
+        sep.push(n - l);
+        xs.reverse();
+        for len in sep {
+            let mut cur = vec![];
+            for _ in 0..len {
+                cur.push(xs.pop().unwrap());
+            }
+            res.push(cur);
+        }
+        res
+    }
+
+snippet group_fold
+    #[doc = "fold elems in to groups by f"]
+    pub fn group_fold<T, F: Fn(&T) -> G, G: Eq + Clone>(xs: Vec<T>, f: F) -> Vec<Vec<T>> {
+        let mut res = vec![];
+        let mut cur_g = None;
+        let mut tmp = vec![];
+        for x in xs {
+            let g = Some(f(&x));
+            if g != cur_g {
+                if !tmp.is_empty() {
+                    res.push(tmp);
+                }
+                tmp = vec![x];
+                cur_g = g;
+            } else {
+                tmp.push(x);
+            }
+        }
+        if !tmp.is_empty() {
+            res.push(tmp);
+        }
+        res
+    }
+
+snippet into_digits
+    fn into_digits(b: i64, n: i64) -> Vec<i64> {
+        let mut r = vec![];
+        let mut n = n;
+        while n > 0 {
+            let v = n % b;
+            r.push(v);
+            n -= v;
+            n /= b;
+        }
+        r
+    }
+
+snippet is_bigraph
+    pub fn is_bigraph(g: &[Vec<usize>]) -> Option<Vec<bool>> {
+        struct Rec<'a> {
+            g: &'a [Vec<usize>],
+            color: Vec<i8>,
+        }
+        impl<'a> Rec<'a> {
+            fn solve(&mut self, u: usize, color: i8) -> bool {
+                self.color[u] = color;
+                let mut ok = true;
+                for i in 0..self.g[u].len() {
+                    let v = self.g[u][i];
+                    if self.color[v] == 0 {
+                        if !self.solve(v, -1 * color) {
+                            ok = false
+                        }
+                    } else {
+                        if self.color[v] == color {
+                            ok = false
+                        }
+                    }
+                }
+                ok
+            }
+        }
+        let n = g.len();
+        let mut rec = Rec {
+            g: g,
+            color: vec![0; n],
+        };
+        let ok = rec.solve(0, 1);
+        if !ok {
+            return None;
+        }
+        let mut res = vec![];
+        for i in 0..n {
+            if rec.color[i] == 1 {
+                res.push(true)
+            } else {
+                res.push(false)
+            }
+        }
+        Some(res)
+    }
+
+snippet is_intersected
+    #[doc = " Is line a-b and line c-d intersected ?"]
+    pub fn is_intersected(a: Vector2D, b: Vector2D, c: Vector2D, d: Vector2D) -> bool {
+        let ta = (c.0 - d.0) * (a.1 - c.1) + (c.1 - d.1) * (c.0 - a.0);
+        let tb = (c.0 - d.0) * (b.1 - c.1) + (c.1 - d.1) * (c.0 - b.0);
+        let tc = (a.0 - b.0) * (c.1 - a.1) + (a.1 - b.1) * (a.0 - c.0);
+        let td = (a.0 - b.0) * (d.1 - a.1) + (a.1 - b.1) * (a.0 - d.0);
+        tc * td <= 0.0 && ta * tb <= 0.0
+    }
+
+snippet is_prime
+    #[doc = "O(root N)"]
+    fn is_prime(n: i64) -> bool {
+        let mut d = 1;
+        while d * d <= n {
+            d += 1;
+        }
+        let mut res = true;
+        for i in 2..d {
+            if n % i == 0 {
+                res = false;
+                break;
+            }
+        }
+        res
+    }
+
+snippet itoc
+    fn itoc(c: i64) -> char {
+        if 0 <= c && c < 26 {
+            (c as u8 + 'A' as u8) as char
+        } else if c < 52 {
+            (c as u8 - 26 + 'a' as u8) as char
+        } else {
+            unreachable!("wrong character");
+        }
+    }
+
+snippet kadane
+    #[doc = "return the sum of the maximum subarray. (Kadane's algorithm). O(N)"]
+    fn kadane(xs: &[i64]) -> i64 {
+        let mut max_ending_here = xs[0];
+        let mut max_so_far = xs[0];
+        for i in 1..xs.len() {
+            let x = xs[i];
+            max_ending_here = max(x, max_ending_here + x);
+            max_so_far = max(max_so_far, max_ending_here);
+        }
+        max_so_far
+    }
+
+snippet kraskal
+    struct Edge {
+        u: usize,
+        v: usize,
+        cost: u64,
+    }
+    #[doc = "es: undirected edges. O(ElogV)"]
+    fn kraskal(n: usize, es: &mut [Edge]) -> u64 {
+        es.sort_by(|a, b| a.cost.cmp(&b.cost));
+        let mut uf = crate::union_find::UnionFind::new(n);
+        let mut total_cost = 0;
+        for e in es {
+            if !uf.same(e.u, e.v) {
+                uf.merge(e.u, e.v);
+                total_cost += e.cost;
+            }
+        }
+        total_cost
+    }
+
+snippet lcm
+    #[allow(dead_code)]
+    pub fn lcm(a: i64, b: i64) -> i64 {
+        a / gcd(a, b) * b
+    }
+
+snippet lower_bound
+    #[doc = " Equivalent to std::lowerbound and std::upperbound in c++"]
+    pub trait LowerBound<T> {
+        fn lower_bound(&self, x: &T) -> usize;
+        fn upper_bound(&self, x: &T) -> usize;
+    }
+    impl<T: Ord> LowerBound<T> for [T] {
+        fn lower_bound(&self, x: &T) -> usize {
+            let mut low = 0;
+            let mut high = self.len();
+            while low != high {
+                let mid = (low + high) / 2;
+                match self[mid].cmp(x) {
+                    Ordering::Less => {
+                        low = mid + 1;
+                    }
+                    Ordering::Equal | Ordering::Greater => {
+                        high = mid;
+                    }
+                }
+            }
+            low
+        }
+        fn upper_bound(&self, x: &T) -> usize {
+            let mut low = 0;
+            let mut high = self.len();
+            while low != high {
+                let mid = (low + high) / 2;
+                match self[mid].cmp(x) {
+                    Ordering::Less | Ordering::Equal => {
+                        low = mid + 1;
+                    }
+                    Ordering::Greater => {
+                        high = mid;
+                    }
+                }
+            }
+            low
+        }
+    }
+
+snippet lsb
+    fn lsb(x: i64) -> i64 {
+        x & (-x)
+    }
+
+snippet manacher
+    #[doc = "manacher[i] is the palindrome radius at i"]
+    pub fn manacher(s: &[u64]) -> Vec<usize> {
+        let mut r = vec![0; s.len()];
+        let mut i = 0;
+        let mut j = 0;
+        while i < s.len() {
+            while i >= j && i + j < s.len() && s[i - j] == s[i + j] {
+                j += 1;
+            }
+            r[i] = j;
+            let mut k = 1;
+            while i >= k && i + k < s.len() && k + r[i - k] < j {
+                r[i + k] = r[i - k];
+                k += 1;
+            }
+            i += k;
+            j -= k;
+        }
+        r
+    }
+
+snippet mod_inverse
+    #[doc = " ax=b(mod m)"]
+    #[doc = " ay=1 (mod m) -> y=a^{-1}"]
+    #[doc = " x=yb (mod m)"]
+    pub fn mod_inverse(a: i64, m: i64) -> i64 {
+        let (_, x, _) = extgcd(a, m);
+        (m + x % m) % m
+    }
+
+snippet modint
+    pub mod modular {
+        const M: i64 = 1_000_000_007;
+        #[derive(Debug, Clone, Copy, Default, PartialOrd, Ord, PartialEq, Eq)]
+        pub struct Mod(i64);
+        impl ::std::fmt::Display for Mod {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+                write!(f, "{}", self.0)
+            }
+        }
+        impl Mod {
+            pub fn new(v: i64) -> Mod {
+                Mod(v % M)
+            }
+            pub fn pow(self, mut r: i64) -> Mod {
+                let mut k = self;
+                let mut ret = 1.into();
+                while r > 0 {
+                    if r % 2 != 0 {
+                        ret = ret * k;
+                    }
+                    r /= 2;
+                    k = k * k;
+                }
+                ret
+            }
+            pub fn recip(self) -> Mod {
+                self.pow(M - 2)
+            }
+        }
+        use std::ops::*;
+        impl<T: Into<Mod>> Add<T> for Mod {
+            type Output = Mod;
+            fn add(self, rhs: T) -> Self::Output {
+                Mod::new(self.0 + rhs.into().0)
+            }
+        }
+        impl<T: Into<Mod>> AddAssign<T> for Mod {
+            fn add_assign(&mut self, rhs: T) {
+                *self = *self + rhs;
+            }
+        }
+        impl<T: Into<Mod>> Sub<T> for Mod {
+            type Output = Mod;
+            fn sub(self, rhs: T) -> Self::Output {
+                Mod::new(self.0 - rhs.into().0 + M)
+            }
+        }
+        impl<T: Into<Mod>> SubAssign<T> for Mod {
+            fn sub_assign(&mut self, rhs: T) {
+                *self = *self - rhs;
+            }
+        }
+        impl<T: Into<Mod>> Mul<T> for Mod {
+            type Output = Mod;
+            fn mul(self, rhs: T) -> Self::Output {
+                Mod::new(self.0 * rhs.into().0)
+            }
+        }
+        impl<T: Into<Mod>> MulAssign<T> for Mod {
+            fn mul_assign(&mut self, rhs: T) {
+                *self = *self * rhs;
+            }
+        }
+        impl<T: Into<Mod>> Div<T> for Mod {
+            type Output = Mod;
+            fn div(self, rhs: T) -> Self::Output {
+                self * rhs.into().recip()
+            }
+        }
+        impl<T: Into<Mod>> DivAssign<T> for Mod {
+            fn div_assign(&mut self, rhs: T) {
+                *self = *self / rhs;
+            }
+        }
+        impl Neg for Mod {
+            type Output = Mod;
+            fn neg(self) -> Self::Output {
+                Mod(0) - self
+            }
+        }
+        impl<T: ::std::convert::Into<i64>> ::std::convert::From<T> for Mod {
+            fn from(v: T) -> Self {
+                Mod::new(v.into())
+            }
+        }
+    }
+    pub type Mod = modular::Mod;
+
+snippet modpow
+    #[allow(dead_code)]
+    #[doc = " x ^ n % m"]
+    pub fn modpow(x: i64, n: i64, m: i64) -> i64 {
+        let mut res = 1;
+        let mut x = x % m;
+        let mut n = n;
+        while n > 0 {
+            if n & 1 == 1 {
+                res = (res * x) % m;
+            }
+            x = (x * x) % m;
+            n >>= 1;
+        }
+        res
+    }
+
+snippet nCk
+    #[doc = "O(b)"]
+    fn nCk(a: i64, b: i64) -> Mod {
+        if a < b {
+            return 0.into();
+        }
+        let mut a: Mod = a.into();
+        let mut r: Mod = 1.into();
+        for d in 1..(b + 1) {
+            r *= a;
+            a -= 1;
+            r /= d;
+        }
+        r
+    }
+
+snippet neighbour_table
+    pub fn neighbour_table(xs: &[usize]) -> (Vec<Option<usize>>, Vec<Option<usize>>) {
+        let n = xs.len();
+        let mut m = 0;
+        for i in 0..n {
+            m = max(m, xs[i]);
+        }
+        m += 1;
+        let mut next = vec![None; m];
+        let mut cur = 0;
+        for i in 0..n {
+            let x = xs[i];
+            next[cur] = Some(x);
+            cur = x;
+        }
+        let mut prev = vec![None; m];
+        let mut cur = m - 1;
+        for i in (0..n).rev() {
+            let x = xs[i];
+            prev[cur] = Some(x);
+            cur = x;
+        }
+        (prev, next)
+    }
+
+snippet partition_dp
+    #[doc = "O(nm)"]
+    #[allow(dead_code)]
+    #[doc = " dp[i][j] = j th partition number of i"]
+    pub fn partition_dp(n: usize, m: usize, p: i64) -> Vec<Vec<i64>> {
+        let mut dp = vec![vec![0; m + 1]; n + 1];
+        for i in 0..m + 1 {
+            dp[0][i] = 1;
+        }
+        for i in 1..n + 1 {
+            for j in 1..m + 1 {
+                if i >= j {
+                    dp[i][j] = (dp[i - j][j] + dp[i][j - 1]) % p;
+                } else {
+                    dp[i][j] = dp[i][j - 1];
+                }
+            }
+        }
+        dp
+    }
+
+snippet prime_factors
+    fn prime_factors(n: i64) -> std::collections::HashMap<i64, i64> {
+        fn root_int(n: i64) -> i64 {
+            let mut d = 1;
+            while d * d <= n {
+                d += 1;
+            }
+            d - 1
+        }
+        let mut n = n;
+        let mut m = std::collections::HashMap::new();
+        for i in 2..root_int(n) + 1 {
+            while n % i == 0 {
+                if !m.contains_key(&i) {
+                    m.insert(i, 0);
+                }
+                *m.get_mut(&i).unwrap() += 1;
+                n /= i;
+            }
+        }
+        if n != 1 {
+            m.insert(n, 1);
+        }
+        m
+    }
+
+snippet range_decomposition
+    #[doc = "decompose a number into range of form [X000...,X111...]"]
+    fn range_decomposition(x: i64) -> Vec<(i64, i64)> {
+        let mut res = vec![(x, x)];
+        let mut cur = x;
+        let bd = bin_digits(x);
+        for i in 0..bd.len() {
+            if bd[i] {
+                let last = cur - 1;
+                cur -= (1 << i);
+                res.push((cur, last));
+            }
+        }
+        res.sort();
+        res
+    }
+
+snippet run_length_compression
+    #[doc = "O(N)"]
+    fn run_length_compression<T: Eq + Clone>(xs: &[T]) -> Vec<(T, usize)> {
+        if xs.is_empty() {
+            return vec![];
+        }
+        let mut cur = &xs[0];
+        let mut rep = 1;
+        let mut res = vec![];
+        for i in 1..xs.len() {
+            if &xs[i] == cur {
+                rep += 1;
+            } else {
+                res.push((cur.clone(), rep));
+                cur = &xs[i];
+                rep = 1
+            }
+        }
+        res.push((cur.clone(), rep));
+        res
+    }
+
+snippet skiplist
+    mod skiplist {
+        use std;
+        use std::cell::{Cell, RefCell};
+        use std::collections::{BTreeMap, BTreeSet};
+        use std::fmt;
+        use std::rc::Rc;
+        struct RandGen {
+            x: u64,
+        }
+        impl RandGen {
+            fn new(seed: u64) -> RandGen {
+                RandGen { x: seed }
+            }
+            fn next(&mut self) -> u64 {
+                const a: u64 = 1103515245;
+                const b: u64 = 12345;
+                const m: u64 = 1 << 32;
+                self.x = (a * self.x + b) % m;
+                self.x
+            }
+        }
+        pub struct Skiplist<T> {
+            max_height: Option<usize>,
+            left_sentinel: Rc<RefCell<SkipNode<T>>>,
+            right_sentinel: Rc<RefCell<SkipNode<T>>>,
+            rand_gen: RandGen,
+            traverse_stat: Cell<usize>,
+            connect_stat: Cell<usize>,
+        }
+        impl Skiplist<usize> {
+            pub fn print_graph(&self) {
+                for level in (0..self.height()).rev() {
+                    let mut line = vec![];
+                    let mut cur = self.left_sentinel.clone();
+                    loop {
+                        let next0 = cur.borrow().next[level].clone();
+                        let next = next0.unwrap().clone();
+                        if next.borrow().value.is_none() {
+                            break;
+                        } else {
+                            cur = next.clone();
+                            let v = cur.borrow().value.clone().unwrap();
+                            line.push(v);
+                        }
+                    }
+                    let mut ss = vec![];
+                    for x in line {
+                        while ss.len() < x {
+                            ss.push("--".to_string());
+                        }
+                        ss.push(format!("{:>02}", x));
+                    }
+                    println!("{}", ss.connect(","));
+                }
+                println!("");
+            }
+        }
+        impl<T> Skiplist<T>
+        where
+            T: std::cmp::Ord + fmt::Debug + Clone,
+        {
+            pub fn new() -> Skiplist<T> {
+                let left_sentinel = Rc::new(RefCell::new(SkipNode::sentinel()));
+                let right_sentinel = Rc::new(RefCell::new(SkipNode::sentinel()));
+                let sentinel_height = left_sentinel.borrow().height();
+                for level in 0..sentinel_height {
+                    left_sentinel.borrow_mut().next[level] = Some(right_sentinel.clone());
+                    right_sentinel.borrow_mut().prev[level] = Some(left_sentinel.clone());
+                }
+                Skiplist {
+                    max_height: None,
+                    left_sentinel: left_sentinel,
+                    right_sentinel: right_sentinel,
+                    rand_gen: RandGen::new(0),
+                    traverse_stat: Cell::new(0),
+                    connect_stat: Cell::new(0),
+                }
+            }
+            fn height(&self) -> usize {
+                self.max_height.unwrap_or(33)
+            }
+            fn pick_height(&mut self) -> usize {
+                let z = self.rand_gen.next();
+                let mut k = 0;
+                let mut m = 1;
+                while z & m != 0 {
+                    k += 1;
+                    m <<= 1;
+                }
+                k + 1
+            }
+            pub fn insert(&mut self, x: T) -> bool {
+                let mut paths = self.traverse(&x);
+                if !paths.is_empty() {
+                    let next0 = paths[0].borrow().next[0].clone();
+                    let next = next0.unwrap();
+                    let found = next.borrow().value.as_ref() == Some(&x);
+                    if found {
+                        return false;
+                    }
+                }
+                let new_height = self.pick_height();
+                self.max_height = Some(std::cmp::max(self.max_height.unwrap_or(0), new_height));
+                while paths.len() < new_height {
+                    paths.push(self.left_sentinel.clone());
+                }
+                let new_node = Rc::new(RefCell::new(SkipNode::new(x, new_height)));
+                for level in 0..new_height {
+                    let prev = &paths[level];
+                    self.connect_stat.set(self.connect_stat.get() + 1);
+                    SkipNode::connect(prev, &new_node, level);
+                }
+                true
+            }
+            fn find_node(&self, x: &T) -> Option<Rc<RefCell<SkipNode<T>>>> {
+                let paths = self.traverse(x);
+                if paths.is_empty() {
+                    return None;
+                }
+                let next0 = paths[0].borrow().next[0].clone();
+                let next = next0.unwrap();
+                if next.borrow().value.as_ref() == Some(x) {
+                    Some(next)
+                } else {
+                    None
+                }
+            }
+            pub fn find(&self, x: &T) -> bool {
+                self.find_node(x).is_some()
+            }
+            pub fn reset_stat(&self) {
+                self.traverse_stat.set(0);
+                self.connect_stat.set(0);
+            }
+            pub fn show_stat(&self) {
+                println!("traverse: {}", self.traverse_stat.get());
+                println!("connect: {}", self.connect_stat.get());
+            }
+            fn traverse(&self, x: &T) -> Vec<Rc<RefCell<SkipNode<T>>>> {
+                if self.height() == 0 {
+                    return vec![];
+                }
+                let mut cur = self.left_sentinel.clone();
+                let mut acc = vec![self.left_sentinel.clone(); self.height()];
+                let mut level = self.height() - 1;
+                loop {
+                    if level == 0 {
+                        loop {
+                            acc[level] = cur.clone();
+                            let next0 = cur.borrow().next[level].clone();
+                            let next = next0.unwrap();
+                            if next.borrow().value.is_none()
+                                || next.borrow().value.as_ref().unwrap() >= x
+                            {
+                                break;
+                            } else {
+                                cur = next.clone();
+                                self.traverse_stat.set(self.traverse_stat.get() + 1);
+                            }
+                        }
+                        break;
+                    }
+                    let next0 = cur.borrow().next[level].clone();
+                    let next = next0.unwrap();
+                    if next.borrow().value.is_none() || next.borrow().value.as_ref().unwrap() >= x {
+                        acc[level] = cur.clone();
+                        level -= 1;
+                        continue;
+                    } else {
+                        cur = next;
+                        self.traverse_stat.set(self.traverse_stat.get() + 1);
+                    }
+                }
+                acc
+            }
+            fn traverse_rev(&self, x: &T) -> Vec<Rc<RefCell<SkipNode<T>>>> {
+                if self.height() == 0 {
+                    return vec![];
+                }
+                let mut cur = self.right_sentinel.clone();
+                let mut acc = vec![self.right_sentinel.clone(); self.height()];
+                let mut level = self.height() - 1;
+                loop {
+                    if level == 0 {
+                        loop {
+                            acc[level] = cur.clone();
+                            let next = cur.borrow().prev[level].clone().unwrap();
+                            if next.borrow().value.is_none()
+                                || next.borrow().value.as_ref().unwrap() <= x
+                            {
+                                break;
+                            } else {
+                                cur = next.clone();
+                            }
+                        }
+                        break;
+                    }
+                    let next = cur.borrow().prev[level].clone().unwrap();
+                    if next.borrow().value.is_none() || next.borrow().value.as_ref().unwrap() <= x {
+                        acc[level] = cur.clone();
+                        level -= 1;
+                        continue;
+                    } else {
+                        cur = next;
+                    }
+                }
+                acc
+            }
+            pub fn remove(&mut self, x: &T) -> bool {
+                let node = self.find_node(x);
+                if node.is_none() {
+                    return false;
+                }
+                let node = node.unwrap();
+                node.borrow_mut().remove();
+                true
+            }
+            #[doc = "iterator in range [x,]"]
+            pub fn ge_iter(&self, x: &T) -> Range<T> {
+                let f = self.traverse(x)[0].clone();
+                Range {
+                    forward: true,
+                    f: f,
+                    b: self.right_sentinel.clone(),
+                }
+            }
+            #[doc = "iterator in range [,x]"]
+            pub fn le_iter(&self, x: &T) -> Range<T> {
+                let b = self.traverse_rev(x)[0].clone();
+                Range {
+                    forward: false,
+                    f: self.left_sentinel.clone(),
+                    b: b,
+                }
+            }
+            #[doc = "iterator in range [..]"]
+            pub fn iter(&self) -> Range<T> {
+                Range {
+                    forward: true,
+                    f: self.left_sentinel.clone(),
+                    b: self.right_sentinel.clone(),
+                }
+            }
+            pub fn is_empty(&self) -> bool {
+                let mut it = self.iter();
+                let mut l = 0;
+                for _ in it {
+                    l += 1;
+                }
+                l == 0
+            }
+            #[doc = "O(n)"]
+            pub fn pop(&mut self) -> Option<T> {
+                if self.is_empty() {
+                    None
+                } else {
+                    let mut it = self.iter();
+                    let x = it.next().unwrap();
+                    self.remove(&x);
+                    Some(x)
+                }
+            }
+            #[doc = "O(n)"]
+            pub fn pop_back(&mut self) -> Option<T> {
+                if self.is_empty() {
+                    None
+                } else {
+                    let mut it = self.iter().rev();
+                    let x = it.next().unwrap();
+                    self.remove(&x);
+                    Some(x)
+                }
+            }
+        }
+        pub struct Range<T> {
+            forward: bool,
+            f: Rc<RefCell<SkipNode<T>>>,
+            b: Rc<RefCell<SkipNode<T>>>,
+        }
+        impl<T: Clone> Iterator for Range<T> {
+            type Item = T;
+            fn next(&mut self) -> Option<Self::Item> {
+                let next0 = if self.forward {
+                    self.f.borrow().next[0].clone()
+                } else {
+                    self.b.borrow().prev[0].clone()
+                };
+                if next0.is_none() {
+                    return None;
+                }
+                let next = next0.unwrap();
+                if self.forward {
+                    self.f = next;
+                    self.f.borrow().value.clone()
+                } else {
+                    self.b = next;
+                    self.b.borrow().value.clone()
+                }
+            }
+        }
+        impl<T: Clone> DoubleEndedIterator for Range<T> {
+            fn next_back(&mut self) -> Option<Self::Item> {
+                let next0 = if self.forward {
+                    self.b.borrow().prev[0].clone()
+                } else {
+                    self.f.borrow().next[0].clone()
+                };
+                if next0.is_none() {
+                    return None;
+                }
+                let next = next0.unwrap();
+                if self.forward {
+                    self.b = next;
+                    self.b.borrow().value.clone()
+                } else {
+                    self.f = next;
+                    self.f.borrow().value.clone()
+                }
+            }
+        }
+        impl<T> fmt::Debug for Skiplist<T>
+        where
+            T: fmt::Debug + Clone + std::cmp::Ord,
+        {
+            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+                let v: Vec<T> = self.iter().collect();
+                writeln!(f, "{:?}", v);
+                Ok(())
+            }
+        }
+        struct SkipNode<T> {
+            value: Option<T>,
+            prev: Vec<Option<Rc<RefCell<SkipNode<T>>>>>,
+            next: Vec<Option<Rc<RefCell<SkipNode<T>>>>>,
+        }
+        impl<T> fmt::Debug for SkipNode<T>
+        where
+            T: fmt::Debug + std::cmp::Ord,
+        {
+            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+                writeln!(f, "{:?}, {:?}", self.value, self.height());
+                Ok(())
+            }
+        }
+        impl<T> SkipNode<T>
+        where
+            T: std::cmp::Ord + fmt::Debug,
+        {
+            fn sentinel() -> SkipNode<T> {
+                SkipNode {
+                    value: None,
+                    prev: vec![None; 33],
+                    next: vec![None; 33],
+                }
+            }
+            fn new(value: T, height: usize) -> SkipNode<T> {
+                SkipNode {
+                    value: Some(value),
+                    prev: vec![None; height],
+                    next: vec![None; height],
+                }
+            }
+            fn height(&self) -> usize {
+                self.next.len()
+            }
+            fn remove(&mut self) {
+                for level in 0..self.height() {
+                    let prev_node = self.prev[level].clone().unwrap();
+                    let next_node = self.next[level].clone().unwrap();
+                    next_node.borrow_mut().prev[level] = Some(prev_node.clone());
+                    prev_node.borrow_mut().next[level] = Some(next_node.clone());
+                }
+            }
+            fn connect(x: &Rc<RefCell<Self>>, y: &Rc<RefCell<Self>>, level: usize) {
+                let x_next = x.borrow().next[level].clone().unwrap();
+                x.borrow_mut().next[level] = Some(y.clone());
+                y.borrow_mut().prev[level] = Some(x.clone());
+                y.borrow_mut().next[level] = Some(x_next.clone());
+                x_next.borrow_mut().prev[level] = Some(y.clone());
+            }
+        }
+        use std::collections::HashMap;
+        pub struct Multiset<T> {
+            sl: Skiplist<T>,
+            counting: HashMap<T, usize>,
+        }
+        impl<T> Multiset<T>
+        where
+            T: Ord + fmt::Debug + Clone + std::hash::Hash,
+        {
+            pub fn new() -> Multiset<T> {
+                Multiset {
+                    sl: Skiplist::new(),
+                    counting: HashMap::new(),
+                }
+            }
+            pub fn insert(&mut self, x: T) {
+                self.sl.insert(x.clone());
+                *self.counting.entry(x).or_insert(0) += 1;
+            }
+            pub fn counting(&self, x: &T) -> usize {
+                self.counting.get(x).cloned().unwrap_or(0)
+            }
+            pub fn remove(&mut self, x: &T) -> bool {
+                let cnt = self.counting(x);
+                if cnt == 0 {
+                    return false;
+                }
+                if cnt >= 2 {
+                    *self.counting.get_mut(x).unwrap() -= 1;
+                } else if cnt == 1 {
+                    self.counting.remove(x);
+                    self.sl.remove(x);
+                }
+                return true;
+            }
+            pub fn unwrap(&self) -> &Skiplist<T> {
+                &self.sl
+            }
+        }
+    }
+
+snippet split_sequence
+    #[derive(Debug)]
+    pub enum SplitComp<T> {
+        Seq(Vec<T>),
+        Splitter(T),
+    }
+    pub fn split_sequence<T, F: Fn(&T) -> bool>(xs: Vec<T>, splitter: F) -> Vec<SplitComp<T>> {
+        let mut res = vec![];
+        let mut xs = xs;
+        xs.reverse();
+        let mut cur = vec![];
+        while !xs.is_empty() {
+            let x = xs.pop().unwrap();
+            let b = splitter(&x);
+            if b {
+                if cur.len() > 0 {
+                    res.push(SplitComp::Seq(cur));
+                }
+                res.push(SplitComp::Splitter(x));
+                cur = vec![];
+            } else {
+                cur.push(x);
+            }
+        }
+        if cur.len() > 0 {
+            res.push(SplitComp::Seq(cur));
+        }
+        res
+    }
+
+snippet submasks
+    struct SubMasks {
+        mask: i64,
+        smask: i64,
+    }
+    impl Iterator for SubMasks {
+        type Item = i64;
+        fn next(&mut self) -> Option<Self::Item> {
+            let old = self.smask;
+            if old == 0 {
+                return None;
+            }
+            self.smask = (self.smask - 1) & self.mask;
+            return Some(old);
+        }
+    }
+    #[doc = "iterate all sub masks except 0. O(2^K) where K is the number of bit positions."]
+    fn submasks(mask: i64) -> SubMasks {
+        SubMasks {
+            mask: mask,
+            smask: mask,
+        }
+    }
+
+snippet template
+    #[doc = " https://github.com/hatoo/competitive-rust-snippets"]
+    #[allow(unused_imports)]
+    use std::cmp::{max, min, Ordering};
+    #[allow(unused_imports)]
+    use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
+    #[allow(unused_imports)]
+    use std::io::{stdin, stdout, BufWriter, Write};
+    #[allow(unused_imports)]
+    use std::iter::FromIterator;
+    #[macro_export]
+    macro_rules ! chmax { ( $ x : expr , $ ( $ v : expr ) ,+ ) => { $ ( $ x = std :: cmp :: max ( $ x ,$ v ) ; ) + } ; }
+    #[macro_export]
+    macro_rules ! chmin { ( $ x : expr , $ ( $ v : expr ) ,+ ) => { $ ( $ x = std :: cmp :: min ( $ x ,$ v ) ; ) + } ; }
+    #[macro_export]
+    macro_rules ! max { ( $ x : expr ) => ( $ x ) ; ( $ x : expr , $ ( $ xs : expr ) ,+ ) => { std :: cmp :: max ( $ x , max ! ( $ ( $ xs ) ,+ ) ) } ; }
+    #[macro_export]
+    macro_rules ! min { ( $ x : expr ) => ( $ x ) ; ( $ x : expr , $ ( $ xs : expr ) ,+ ) => { std :: cmp :: min ( $ x , min ! ( $ ( $ xs ) ,+ ) ) } ; }
+    #[macro_export]
+    macro_rules ! dvec { ( $ t : expr ; $ len : expr ) => { vec ! [ $ t ; $ len ] } ; ( $ t : expr ; $ len : expr , $ ( $ rest : expr ) ,* ) => { vec ! [ dvec ! ( $ t ; $ ( $ rest ) ,* ) ; $ len ] } ; }
+    #[allow(unused_macros)]
+    macro_rules ! debug { ( $ ( $ a : expr ) ,* ) => { eprintln ! ( concat ! ( $ ( stringify ! ( $ a ) , " = {:?}, " ) ,* ) , $ ( $ a ) ,* ) ; } }
+    #[macro_export]
+    macro_rules ! input { ( source = $ s : expr , $ ( $ r : tt ) * ) => { let mut parser = Parser :: from_str ( $ s ) ; input_inner ! { parser , $ ( $ r ) * } } ; ( parser = $ parser : ident , $ ( $ r : tt ) * ) => { input_inner ! { $ parser , $ ( $ r ) * } } ; ( new_stdin_parser = $ parser : ident , $ ( $ r : tt ) * ) => { let stdin = std :: io :: stdin ( ) ; let reader = std :: io :: BufReader :: new ( stdin . lock ( ) ) ; let mut $ parser = Parser :: new ( reader ) ; input_inner ! { $ parser , $ ( $ r ) * } } ; ( $ ( $ r : tt ) * ) => { input ! { new_stdin_parser = parser , $ ( $ r ) * } } ; }
+    #[macro_export]
+    macro_rules ! input_inner { ( $ parser : ident ) => { } ; ( $ parser : ident , ) => { } ; ( $ parser : ident , $ var : ident : $ t : tt $ ( $ r : tt ) * ) => { let $ var = read_value ! ( $ parser , $ t ) ; input_inner ! { $ parser $ ( $ r ) * } } ; }
+    #[macro_export]
+    macro_rules ! read_value { ( $ parser : ident , ( $ ( $ t : tt ) ,* ) ) => { ( $ ( read_value ! ( $ parser , $ t ) ) ,* ) } ; ( $ parser : ident , [ $ t : tt ; $ len : expr ] ) => { ( 0 ..$ len ) . map ( | _ | read_value ! ( $ parser , $ t ) ) . collect ::< Vec < _ >> ( ) } ; ( $ parser : ident , chars ) => { read_value ! ( $ parser , String ) . chars ( ) . collect ::< Vec < char >> ( ) } ; ( $ parser : ident , usize1 ) => { read_value ! ( $ parser , usize ) - 1 } ; ( $ parser : ident , $ t : ty ) => { $ parser . next ::<$ t > ( ) . expect ( "Parse error" ) } ; }
+    use std::io;
+    use std::io::BufRead;
+    use std::str;
+    pub struct Parser<R> {
+        reader: R,
+        buf: Vec<u8>,
+        pos: usize,
+    }
+    impl Parser<io::Empty> {
+        pub fn from_str(s: &str) -> Parser<io::Empty> {
+            Parser {
+                reader: io::empty(),
+                buf: s.as_bytes().to_vec(),
+                pos: 0,
+            }
+        }
+    }
+    impl<R: BufRead> Parser<R> {
+        pub fn new(reader: R) -> Parser<R> {
+            Parser {
+                reader: reader,
+                buf: vec![],
+                pos: 0,
+            }
+        }
+        pub fn update_buf(&mut self) {
+            self.buf.clear();
+            self.pos = 0;
+            loop {
+                let (len, complete) = {
+                    let buf2 = self.reader.fill_buf().unwrap();
+                    self.buf.extend_from_slice(buf2);
+                    let len = buf2.len();
+                    if len == 0 {
+                        break;
+                    }
+                    (len, buf2[len - 1] <= 0x20)
+                };
+                self.reader.consume(len);
+                if complete {
+                    break;
+                }
+            }
+        }
+        pub fn next<T: str::FromStr>(&mut self) -> Result<T, T::Err> {
+            loop {
+                let mut begin = self.pos;
+                while begin < self.buf.len() && (self.buf[begin] <= 0x20) {
+                    begin += 1;
+                }
+                let mut end = begin;
+                while end < self.buf.len() && (self.buf[end] > 0x20) {
+                    end += 1;
+                }
+                if begin != self.buf.len() {
+                    self.pos = end;
+                    return str::from_utf8(&self.buf[begin..end]).unwrap().parse::<T>();
+                } else {
+                    self.update_buf();
+                }
+            }
+        }
+    }
+    #[allow(unused_macros)]
+    macro_rules ! debug { ( $ ( $ a : expr ) ,* ) => { eprintln ! ( concat ! ( $ ( stringify ! ( $ a ) , " = {:?}, " ) ,* ) , $ ( $ a ) ,* ) ; } }
+    #[doc = " https://github.com/hatoo/competitive-rust-snippets"]
+    const BIG_STACK_SIZE: bool = true;
+    #[allow(dead_code)]
+    fn main() {
+        use std::thread;
+        if BIG_STACK_SIZE {
+            thread::Builder::new()
+                .stack_size(32 * 1024 * 1024)
+                .name("solve".into())
+                .spawn(solve)
+                .unwrap()
+                .join()
+                .unwrap();
+        } else {
+            solve();
+        }
+    }
+    fn solve() {
+        let out = stdout();
+        let mut out = BufWriter::new(out.lock());
+    }
+
+snippet ternary_search
+    #[doc = "f(x) should be upper convex function in [l,r]. find x where f(x) is the max in the range."]
+    fn ternary_search<F: Fn(f64) -> f64>(f: F, l: f64, r: f64) -> f64 {
+        let mut l = l;
+        let mut r = r;
+        let eps = 0.00000000001;
+        while r - l > eps {
+            let m1 = (2.0 * l + r) / 3.0;
+            let m2 = (l + 2.0 * r) / 3.0;
+            let f1 = f(m1);
+            let f2 = f(m2);
+            if f1 < f2 {
+                l = m1;
+            } else {
+                r = m2;
+            }
+        }
+        l
+    }
+
+snippet tree_diameter
+    #[derive(Clone, Copy)]
+    pub struct Edge {
+        dst: usize,
+        weight: i64,
+    }
+    pub struct FindFurthestPair<'a> {
+        g: &'a [Vec<Edge>],
+    }
+    impl<'a> FindFurthestPair<'a> {
+        pub fn find(&self, v: usize) -> (usize, i64) {
+            self.find_rec(None, v)
+        }
+        fn find_rec(&self, par: Option<usize>, v: usize) -> (usize, i64) {
+            let mut r = (v, 0);
+            for &e in &self.g[v] {
+                if Some(e.dst) != par {
+                    let mut t = self.find_rec(Some(v), e.dst);
+                    t.1 += e.weight;
+                    if r.1 < t.1 {
+                        r = t;
+                    }
+                }
+            }
+            r
+        }
+    }
+    pub fn tree_diameter(g: &[Vec<Edge>]) -> i64 {
+        let ffp = FindFurthestPair { g: g };
+        let (v, _) = ffp.find(0);
+        let (_, d) = ffp.find(v);
+        d
+    }
+
+snippet vec_max
+    fn vec_max<T: Ord + Clone>(xs: &[T]) -> T {
+        let mut v = &xs[0];
+        for x in xs {
+            if x > v {
+                v = x;
+            }
+        }
+        v.clone()
+    }
+
+snippet vec_min
+    fn vec_min<T: Ord + Clone>(xs: &[T]) -> T {
+        let mut v = &xs[0];
+        for x in xs {
+            if x < v {
+                v = x;
+            }
+        }
+        v.clone()
+    }
+
+snippet vec_to_string
+    pub fn vec_to_string<T: ToString>(xs: &[T]) -> Vec<String> {
+        let mut res = vec![];
+        for x in xs {
+            res.push(x.to_string());
+        }
+        res
+    }
+
+snippet warshal_floyd
+    #[doc = "directed matrix graph. O(V^3)"]
+    fn warshal_floyd(d: &mut [Vec<i64>]) {
+        let n = d.len();
+        for k in 0..n {
+            for i in 0..n {
+                for j in 0..n {
+                    d[i][j] = std::cmp::min(d[i][j], d[i][k] + d[k][j]);
+                }
+            }
+        }
+    }
+
+snippet z_algorithm
+    #[doc = "z[i] is the common prefix length between s[0..] and s[i..]. O(N)"]
+    pub fn z_algorithm(s: &[u64]) -> Vec<usize> {
+        let mut z = vec![0; s.len()];
+        z[0] = s.len();
+        let mut i = 1;
+        let mut j = 0;
+        while i < s.len() {
+            while i + j < s.len() && s[j] == s[i + j] {
+                j += 1;
+            }
+            z[i] = j;
+            if j == 0 {
+                i += 1;
+                continue;
+            }
+            let mut k = 1;
+            while i + k < s.len() && k + z[k] < j {
+                z[i + k] = z[k];
+                k += 1;
+            }
+            i += k;
+            j -= k;
+        }
+        z
+    }
+

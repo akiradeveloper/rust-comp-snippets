@@ -36,6 +36,7 @@ pub mod permutation;
 pub mod polynomial;
 pub mod prime;
 pub mod rev;
+pub mod seg_node;
 pub mod seg;
 pub mod seg2d;
 pub mod seg_beats;
