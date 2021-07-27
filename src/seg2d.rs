@@ -4,85 +4,76 @@ use crate::seg::{SEG, Monoid};
 use crate::seg_node::{SEGTree, SEGNode};
 use crate::lower_bound::LowerBound;
 
+#[snippet("SEG2d")]
 pub struct SEG2d<M: Monoid> {
     tree: SEGTree,
     segs: Vec<SEG<M>>,
     index: Vec<Vec<usize>>,
 }
-impl <M: Monoid> SEG2d<M> {
-    pub fn new(xy: Vec<Vec<usize>>) -> Self {
-        struct SetAdd {}
-        impl Monoid for SetAdd {
-            type T = Vec<usize>; // Set
-            fn id() -> Self::T {
-                vec![]
-            }
-            fn op(a: &Self::T, b: &Self::T) -> Self::T {
-                let mut c = vec![];
-                for &x in a {
-                    c.push(x);
-                }
-                for &x in b {
-                    c.push(x);
-                }
-                c.sort(); c.dedup();
-                c
-            }
+#[snippet("SEG2d")]
+impl<M: Monoid> SEG2d<M> {
+    pub fn new(i2j: Vec<Vec<usize>>) -> Self {
+        let tree = SEGTree::new(i2j.len());
+        let n = i2j.len().next_power_of_two();
+        let mut index = vec![vec![];2*n];
+        for i in 0..i2j.len() {
+            let mut v = i2j[i].clone();
+            v.sort(); v.dedup();
+            index[i+n] = v;
         }
-        let n = xy.len();
-        let tree = SEGTree::new(n);
-        let mut s: SEG<SetAdd> = SEG::new(n);
-        for i in 0..n {
-            let y = xy[i].clone();
-            s.update(i, y);
+        let mut k = n-1;
+        while k>=1 {
+            let l = 2*k;
+            let r = 2*k+1;
+            let mut v = vec![];
+            v.extend_from_slice(&index[l]);
+            v.extend_from_slice(&index[r]);
+            v.sort(); v.dedup();
+            index[k] = v;
+            k-=1;
         }
-        let index: Vec<Vec<usize>> = s.buf;
         let mut segs = vec![];
         for ii in &index {
             let s: SEG<M> = SEG::new(ii.len());
             segs.push(s);
         }
-        Self {
-            tree,
-            index,
-            segs,
-        }
+        Self { tree, index, segs }
     }
     /// 計算量
     /// O(logH logW)
-    pub fn update(&mut self, x: usize, y: usize, v: M::T) {
-        let nodes = self.tree.update_nodes(x);
+    pub fn update(&mut self, i: usize, j: usize, v: M::T) {
+        let nodes = self.tree.update_nodes(i);
         for node in nodes {
             match node {
                 SEGNode::Leaf { k } => {
-                    let i = self.index[k].binary_search(&y).unwrap();
+                    let i = self.index[k].binary_search(&j).unwrap();
                     self.segs[k].update(i, v.clone());
-                },
+                }
                 SEGNode::Branch { k, l, r } => {
                     let mut v = M::id();
-                    if let Ok(il) = self.index[l].binary_search(&y) {
+                    if let Ok(il) = self.index[l].binary_search(&j) {
                         let vl = self.segs[l].get(il);
                         v = M::op(&v, &vl);
                     }
-                    if let Ok(ir) = self.index[r].binary_search(&y) {
+                    if let Ok(ir) = self.index[r].binary_search(&j) {
                         let vr = self.segs[r].get(ir);
                         v = M::op(&v, &vr);
                     }
-                    let i = self.index[k].binary_search(&y).unwrap();
+                    let i = self.index[k].binary_search(&j).unwrap();
                     self.segs[k].update(i, v);
-                },
+                }
             }
         }
     }
     /// [x0,x1) x [y0,y1)
     /// 計算量
     /// O(logH logW)
-    pub fn query(&self, x0: usize, x1: usize, y0: usize, y1: usize) -> M::T {
-        let nodes = self.tree.query_nodes(x0, x1);
+    pub fn query(&self, i0: usize, i1: usize, j0: usize, j1: usize) -> M::T {
+        let nodes = self.tree.query_nodes(i0, i1);
         let mut ans = M::id();
         for k in nodes {
-            let l = self.index[k].lower_bound(&y0);
-            let r = self.index[k].lower_bound(&y1);
+            let l = self.index[k].lower_bound(&j0);
+            let r = self.index[k].lower_bound(&j1);
             let v = self.segs[k].query(l, r);
             ans = M::op(&ans, &v);
         }

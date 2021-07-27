@@ -46,7 +46,6 @@ impl SEGTree {
             l >>= 1;
             r >>= 1;
         }
-        ret.sort();
         ret
     }
 }
@@ -65,6 +64,6 @@ fn test_query_nodes() {
     assert_eq!(t.query_nodes(1,2), vec![5]);
     assert_eq!(t.query_nodes(0,2), vec![2]);
     assert_eq!(t.query_nodes(1,3), vec![5,6]);
-    assert_eq!(t.query_nodes(1,4), vec![3,5]);
+    assert_eq!(t.query_nodes(1,4), vec![5,3]);
     assert_eq!(t.query_nodes(0,4), vec![1]);
 }
