@@ -7,6 +7,7 @@
 extern crate rand;
 extern crate test;
 
+pub mod baby_step_giant_step;
 pub mod arith_seq;
 pub mod binary_search;
 pub mod bitop;
