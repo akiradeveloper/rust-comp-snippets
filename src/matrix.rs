@@ -7,6 +7,37 @@ pub mod matrix {
         pub v: Vec<Vec<i64>>,
     }
     impl Matrix {
+        pub fn new(v: Vec<Vec<i64>>) -> Self {
+            Self { v }
+        }
+        /// (a|b)
+        pub fn combine(a: Self, b: Self) -> Self {
+            assert_eq!(a.m(), b.m());
+            let m = a.m();
+            let mut ret = Self::zeros(m, a.n()+b.n());
+            for i in 0..m {
+                for j in 0..a.n() {
+                    ret[i][j] = a[i][j];
+                }
+                for j in 0..b.n() {
+                    ret[i][a.n()+j] = b[i][j];
+                }
+            }
+            ret
+        }
+        pub fn transpose(self) -> Self {
+            let mut ret = Self::zeros(self.n(), self.m());
+            for i in 0..self.n() {
+                for j in 0..self.m() {
+                    ret[j][i] = self[i][j];
+                }
+            }
+            ret
+        }
+        pub fn zeros(m: usize, n: usize) -> Self {
+            let v = vec![vec![0;n];m];
+            Self { v }
+        }
         pub fn identity(n: usize) -> Self {
             let mut v = vec![vec![0;n];n];
             for i in 0..n {
@@ -121,6 +152,17 @@ pub mod matrix {
                     self.v[i][j] %= mo;
                 }
             }
+        }
+    }
+    impl std::ops::Index<usize> for Matrix {
+        type Output = [i64];
+        fn index(&self, i: usize) -> &Self::Output {
+            &self.v[i]
+        }
+    }
+    impl std::ops::IndexMut<usize> for Matrix {
+        fn index_mut(&mut self, i: usize) -> &mut Self::Output {
+            &mut self.v[i]
         }
     }
 }

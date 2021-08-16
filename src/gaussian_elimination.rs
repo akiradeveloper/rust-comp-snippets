@@ -1,9 +1,9 @@
 use cargo_snippet::snippet;
 use crate::number::modinv;
+use crate::matrix::Matrix;
 
 /// ガウスの掃き出し法
-/// Ax = y
-/// の解xをmod Mの下で計算する。
+
 /// 
 /// Rankというのはざっくりいうと、
 /// 実質的に何次元の一次変換かということ。
@@ -95,6 +95,34 @@ impl GaussianElimination {
             res[i] = self.A[i][w];
         }
         Some(res)
+    }
+}
+enum LinSolveResult {
+    Infinite,
+    None,
+    One(i64),
+}
+struct LinSolve {
+    pub M1: GaussianElimination,
+    pub M2: GaussianElimination,
+}
+impl LinSolve {
+    /// Ax = y
+    /// の解xをmod Mの下で計算する。
+    pub fn solve(A: Vec<Vec<i64>>, y: Vec<i64>, mo: i64) -> LinSolveResult {
+        unimplemented!()
+    }
+}
+struct InvMatrix {
+    pub M: GaussianElimination,
+}
+impl InvMatrix {
+    /// ガウスの掃き出し法を使って逆行列を求める
+    pub fn solve(A: Vec<Vec<i64>>, mo: i64) -> Option<Vec<Vec<i64>>> {
+        let n = A.len();
+        let e = Matrix::identity(n);
+        let m = vec![vec![0;2*n];n];
+        unimplemented!()
     }
 }
 #[test]
