@@ -3,20 +3,16 @@ use crate::number::modinv;
 use crate::matrix::Matrix;
 
 /// ガウスの掃き出し法
-
-/// 
 /// Rankというのはざっくりいうと、
 /// 実質的に何次元の一次変換かということ。
-
 #[snippet("GaussianElimination")]
 pub struct GaussianElimination {
-    pub mat: Vec<Vec<i64>>,
+    pub mat: Matrix,
     pub rank: usize,
 }
 #[snippet("GaussianElimination")]
 impl GaussianElimination {
-    /// 行列を標準化する
-    pub fn sweep(mat: Vec<Vec<i64>>, mo: i64) -> GaussianElimination {
+    pub fn sweep(mat: Matrix, mo: i64) -> GaussianElimination {
         let mut mat = mat;
         let rank = Self::do_sweep(&mut mat, mo);
         GaussianElimination {
@@ -24,9 +20,9 @@ impl GaussianElimination {
             rank: rank,
         }
     }
-    fn do_sweep(mat: &mut [Vec<i64>], mo: i64) -> usize {
-        let h = mat.len();
-        let w = mat[0].len();
+    fn do_sweep(mat: &mut Matrix, mo: i64) -> usize {
+        let h = mat.m();
+        let w = mat.n();
         let mut rank = 0;
         for j in 0..w {
             let mut pivot = h;
@@ -63,22 +59,25 @@ impl GaussianElimination {
         rank
     }
 }
+#[snippet("LinSolve")]
 #[derive(PartialEq, Debug)]
 pub enum LinSolveResult {
     Infinite,
     None,
     One(Matrix),
 }
+#[snippet("LinSolve")]
 pub struct LinSolve;
+#[snippet("LinSolve")]
 impl LinSolve {
     /// Ax = y
     /// の解xをmod Mの下で計算する。
     pub fn solve(a: Matrix, y: Matrix, mo: i64) -> LinSolveResult {
         assert_eq!(a.m(), a.n());
         let n = a.m();
-        let elim1 = GaussianElimination::sweep(a.clone().into_inner(), mo);
+        let elim1 = GaussianElimination::sweep(a.clone(), mo);
         dbg!(&elim1.mat);
-        let elim2 = GaussianElimination::sweep(Matrix::combine(a, y).into_inner(), mo);
+        let elim2 = GaussianElimination::sweep(Matrix::combine(a, y), mo);
         dbg!(&elim2.mat);
         if elim1.rank == n {
             let mut ret = Matrix::zeros(n, 1);
@@ -95,16 +94,18 @@ impl LinSolve {
         }
     }
 }
+#[snippet("InvMatrix")]
 struct InvMatrix;
+#[snippet("InvMatrix")]
 impl InvMatrix {
     /// ガウスの掃き出し法を使って逆行列を求める
     pub fn solve(a: Matrix, mo: i64) -> Option<Matrix> {
         assert_eq!(a.m(), a.n());
         let n = a.m();
         let e = Matrix::identity(n);
-        let elim1 = GaussianElimination::sweep(a.clone().into_inner(), mo);
+        let elim1 = GaussianElimination::sweep(a.clone(), mo);
         dbg!(&elim1.mat);
-        let elim2 = GaussianElimination::sweep(Matrix::combine(a, e).into_inner(), mo);
+        let elim2 = GaussianElimination::sweep(Matrix::combine(a, e), mo);
         dbg!(&elim2.mat);
 
         if elim1.rank == n {
@@ -122,14 +123,13 @@ impl InvMatrix {
 }
 #[test]
 fn test_sweep() {
-    let a = vec![
+    let a = Matrix::new(vec![
         vec![0,2,3],
         vec![3,1,1],
         vec![1,2,3],
-    ];
-    let r = GaussianElimination::sweep(a.clone(), 1_000_000_009);
-    let b = Matrix::new(r.mat);
-    assert_eq!(b, Matrix::identity(3));
+    ]);
+    let b = GaussianElimination::sweep(a.clone(), 1_000_000_009);
+    assert_eq!(b.mat, Matrix::identity(3));
 }
 #[test]
 fn test_linsolve_1() {
