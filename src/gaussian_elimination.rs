@@ -63,15 +63,13 @@ impl GaussianElimination {
         rank
     }
 }
-enum LinSolveResult {
+#[derive(PartialEq, Debug)]
+pub enum LinSolveResult {
     Infinite,
     None,
     One(Matrix),
 }
-struct LinSolve {
-    pub elim1: GaussianElimination,
-    pub elim2: GaussianElimination,
-}
+pub struct LinSolve;
 impl LinSolve {
     /// Ax = y
     /// の解xをmod Mの下で計算する。
@@ -95,9 +93,7 @@ impl LinSolve {
         }
     }
 }
-struct InvMatrix {
-    pub elim: GaussianElimination,
-}
+struct InvMatrix;
 impl InvMatrix {
     /// ガウスの掃き出し法を使って逆行列を求める
     pub fn solve(a: Matrix, mo: i64) -> Option<Matrix> {
@@ -127,28 +123,34 @@ fn test_linsolve_1() {
         vec![1,-1,3],
         vec![2,3,-5],
     ]);
-    let y = Matrix::new(vec![3,4,1]).transpose();
-    let ge = LinSolve::solve(
+    let y = Matrix::new(vec![vec![3,4,1]]).transpose();
+    let x = LinSolve::solve(
         A, y, 1_000_000_009,
     );
-    let x = ge.x();
-    assert!(x.is_some());
-    let x = x.unwrap();
-    assert_eq!(x, vec![1,3,2]);
+    assert_eq!(x, LinSolveResult::One(Matrix::new(vec![vec![1,3,2]]).transpose()));
+}
+#[test]
+fn test_linsolve_1_by_invmat() {
+    let mut a = Matrix::new(vec![
+        vec![1,2,-2],
+        vec![1,-1,3],
+        vec![2,3,-5],
+    ]);
+    let a_inv = InvMatrix::solve(a, 1_000_000_009).unwrap();
+    let y = Matrix::new(vec![vec![3,4,1]]).transpose();
+    let x = a_inv * y;
+    assert_eq!(x, Matrix::new(vec![vec![1,3,2]]).transpose());
 }
 #[test]
 fn test_linsolve_2() {
-    let mut A = vec![
+    let mut a = Matrix::new(vec![
         vec![8,6,4],
         vec![6,4,2],
         vec![4,2,1],
-    ];
-    let y = vec![36,22,12];
-    let ge = LinSolve::solve(
-        A, y, 1_000_000_009,
+    ]);
+    let y = Matrix::new(vec![vec![36,22,12]]).transpose();
+    let x = LinSolve::solve(
+        a, y, 1_000_000_009,
     );
-    let x = ge.x();
-    assert!(x.is_some());
-    let x = x.unwrap();
-    assert_eq!(x, vec![1,2,4]);
+    assert_eq!(x, LinSolveResult::One(Matrix::new(vec![vec![1,2,4]]).transpose()));
 }

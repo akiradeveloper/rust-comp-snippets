@@ -2,7 +2,7 @@ use cargo_snippet::snippet;
 
 #[snippet("Matrix")]
 pub mod matrix {
-    #[derive(Clone)]
+    #[derive(Clone, PartialEq, Debug)]
     pub struct Matrix {
         pub v: Vec<Vec<i64>>,
     }
@@ -32,7 +32,7 @@ pub mod matrix {
             let mut ret = Self::zeros(self.n(), self.m());
             for i in 0..self.n() {
                 for j in 0..self.m() {
-                    ret[j][i] = self[i][j];
+                    ret[i][j] = self[j][i];
                 }
             }
             ret
