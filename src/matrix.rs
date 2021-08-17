@@ -10,6 +10,9 @@ pub mod matrix {
         pub fn new(v: Vec<Vec<i64>>) -> Self {
             Self { v }
         }
+        pub fn into_inner(self) -> Vec<Vec<i64>> {
+            self.v
+        }
         /// (a|b)
         pub fn combine(a: Self, b: Self) -> Self {
             assert_eq!(a.m(), b.m());
