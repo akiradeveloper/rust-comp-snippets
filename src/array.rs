@@ -1,5 +1,9 @@
 use cargo_snippet::snippet;
 
+/// i64でアクセス出来るテーブル
+/// 迷路問題など、境界処理をしなければいけない場合、インデックスにi64を使える方が便利である。
+/// 単に上下左右に足し引きして、境界内かどうかチェックすればいいだけになるため。
+
 #[snippet("Array")]
 #[derive(Debug, Clone, PartialEq)]
 pub struct Array1d<T> {
