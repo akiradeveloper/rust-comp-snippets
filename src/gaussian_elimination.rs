@@ -158,6 +158,30 @@ fn test_linsolve_2() {
     assert_eq!(x, LinSolveResult::One(Matrix::new(vec![vec![1,2,4]]).transpose()));
 }
 #[test]
+fn test_linsolve_3() {
+    let a = Matrix::new(vec![
+        vec![2,3,-2,-3],
+        vec![-1,-2,1,2],
+        vec![1,3,-2,-2],
+        vec![2,1,0,-3],
+    ]);
+    let y = Matrix::new(vec![vec![1,0,1,1]]).transpose();
+    let x = LinSolve::solve(a, y, 1_000_000_009);
+    assert_eq!(x, LinSolveResult::None);
+}
+#[test]
+fn test_linsolve_4() {
+    let a = Matrix::new(vec![
+        vec![1,3,-1,-2],
+        vec![-1,-2,1,1],
+        vec![1,1,-1,0],
+        vec![2,1,-2,1],
+    ]);
+    let y = Matrix::new(vec![vec![-1,0,1,3]]).transpose();
+    let x = LinSolve::solve(a, y, 1_000_000_009);
+    assert_eq!(x, LinSolveResult::Infinite);
+}
+#[test]
 fn test_invmat_1() {
     let a = Matrix::new(vec![
         vec![1,2,-2],
